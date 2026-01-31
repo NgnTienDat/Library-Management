@@ -23,7 +23,6 @@ Hệ thống quản lý thư viện số được xây dựng nhằm hỗ trợ 
 ## Kiến trúc 
 - Kiến trúc hệ thống: Mô hình Client-Server
 - Kiến trúc phần mềm: Kiên trúc phân tầng (Layered Architecture)
-
 ![Architecture](docs/architecture/c4-container.png) 
 
 
