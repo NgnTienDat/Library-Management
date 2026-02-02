@@ -15,7 +15,7 @@ Hệ thống quản lý thư viện số được xây dựng nhằm hỗ trợ 
 ## Công nghệ sử dụng
 - Backend: Spring Boot 
 - Frontend: ReactJS 
-- Database: MySQL 
+- Database: MySQL, Redis
 - Message Queue: RabbitMQ 
 - Container: Docker + Docker Compose 
 
