@@ -27,9 +27,9 @@
 ## 3. Kế hoạch tuần tới
 | Thành viên | Công việc dự kiến | 
 |------------|-------------------| 
-| Nguyễn Tiến Đạt | Hoàn thành Order Service | 
-| Phạm Minh Hạnh | API Product Service | 
-| Phạm Tấn Thành | Frontend Dashboard | 
+| Nguyễn Tiến Đạt | Xác định kiến trúc tổng thể | 
+| Phạm Minh Hạnh | Phân tích yêu cầu chức năng | 
+| Phạm Tấn Thành | Phân tích & vẽ use cases | 
 
 
 
