@@ -10,7 +10,7 @@
 | Thành viên | MSSV | Công việc | Link Commit/PR | 
 |------------|------|-----------|----------------| 
 | Nguyễn Tiến Đạt | 2251012034 | Phân tích & vẽ use cases | [abc123](link) | 
-| Phạm Minh Hạnh | 2151053015 | Phân tích yêu cầu chức năng, phi chức năng | [d4799c3](link) | 
+| Phạm Minh Hạnh | 2151053015 | Phân tích yêu cầu chức năng, phi chức năng | [d4799c3](https://github.com/NgnTienDat/Library-Management/commit/d4799c3b616f29df4e0d148a7a11609f7e07d128) | 
 | Phạm Tấn Thành | 2351050163 | Xác định kiến trúc tổng thể | [ghi789](link) | 
 --- 
 ## 2. Tiến độ tổng thể 
