@@ -9,7 +9,7 @@
 ## 1. Công việc đã hoàn thành 
 | Thành viên | MSSV | Công việc | Link Commit/PR | 
 |------------|------|-----------|----------------| 
-| Nguyễn Tiến Đạt | 2251012034 | Xác định kiến trúc tổng thể | [6ad3f47]([link](https://github.com/NgnTienDat/Library-Management/commit/6ad3f47acec81c39236d249b3c82c731ea0f0ef4)) | 
+| Nguyễn Tiến Đạt | 2251012034 | Xác định kiến trúc tổng thể | [6ad3f47] (https://github.com/NgnTienDat/Library-Management/commit/6ad3f47acec81c39236d249b3c82c731ea0f0ef4) | 
 | Phạm Minh Hạnh | 2151053015 | Phân tích yêu cầu chức năng, phi chức năng | [d4799c3](https://github.com/NgnTienDat/Library-Management/commit/d4799c3b616f29df4e0d148a7a11609f7e07d128) | 
 | Phạm Tấn Thành | 2351050163 | Phân tích & vẽ use cases | [ghi789](75a3e37124254bd020bbcb6dc33544f0e4dada55) | 
 --- 
