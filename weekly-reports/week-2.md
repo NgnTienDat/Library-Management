@@ -1,6 +1,6 @@
 # Báo cáo Tuần 2
 
-**Tuần:** 1 (02/02/2026 - 08/02/2026)   
+**Tuần:** 2 (02/02/2026 - 08/02/2026)   
 **Nhóm:** Library Management / 5   
 **Đề tài:** C1 - Hệ thống quản lý thư viện số (Library Management)  
 **Nhóm trưởng:** Nguyễn Tiến Đạt - 2251012034
@@ -29,7 +29,7 @@
 |------------|-------------------| 
 | Nguyễn Tiến Đạt | Thiết kế database | 
 | Phạm Minh Hạnh | Thiết kế sơ đồ kiến trúc C4 model | 
-| Phạm Tấn Thành | Thiết kế database | 
+| Phạm Tấn Thành | Viết ADR | 
 
 
 
