@@ -1,3 +1,27 @@
 spring:
   application:
     name: oulib-backend
+
+  datasource:
+    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/oulib}
+    username: ${DBMS_USERNAME:oulib}
+    password: ${DBMS_PASSWORD:oulib123}
+    driver-class-name: "com.mysql.cj.jdbc.Driver"
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      #      password: ${REDIS_PASSWORD}
+      database: 0
+      timeout: 1000 # milliseconds
+
+auth:
+  signer-key: ${SIGNER_KEY}
+  valid-duration: 86400 # in second : 1 day
+  refreshable-duration: 259200 # in second
