@@ -1,0 +1,94 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: oulib-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./volumes/mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oulib-network
+
+  backend:
+    build: .
+    image: oulib-backend:latest
+    container_name: oulib-api
+    restart: unless-stopped
+    env_file:
+      - .env
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=api
+    depends_on:
+      mysql:
+        condition: service_healthy
+#      rabbitmq:
+#        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - oulib-network
+
+#  worker:
+#    image: oulib-backend:latest
+#    container_name: oulib-worker
+#    restart: unless-stopped
+#    env_file:
+#      - .env
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=worker
+#      - SERVER_PORT=0
+#    depends_on:
+#      backend:
+#        condition: service_started
+#      mysql:
+#        condition: service_healthy
+#      rabbitmq:
+#        condition: service_healthy
+#      redis:
+#        condition: service_started
+#    networks:
+#      - oulib-network
+
+  redis:
+    image: redis:alpine
+    container_name: unsaid-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    volumes:
+      - ./volumes/redis/data:/data
+    networks:
+      - oulib-network
+
+#  rabbitmq:
+#    image: rabbitmq:management-alpine
+#    container_name: unsaid-rabbitmq
+#    ports:
+#      - "5672:5672"
+#      - "15672:15672"
+#    environment:
+#      RABBITMQ_DEFAULT_USER: oulib
+#      RABBITMQ_DEFAULT_PASS: oulib
+#    volumes:
+#      - ./rabbitmq_data:/var/lib/rabbitmq
+#      - ./rabbitmq_log:/var/log/rabbitmq
+#    restart: always
+#    healthcheck:
+#      test: [ "CMD", "rabbitmq-diagnostics", "check_running" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#    networks:
+#      - oulib-network
+
+networks:
+  oulib-network:
+    driver: bridge
