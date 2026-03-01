@@ -31,9 +31,12 @@ public enum ErrorCode {
     VIDEO_DURATION_EXCEEDED(1021, "Video duration exceeded", HttpStatus.BAD_REQUEST),
     MEDIA_UPLOAD_FAILED(1022, "Media upload failed", HttpStatus.INTERNAL_SERVER_ERROR),
     POST_CONTENT_OR_MEDIA_REQUIRED(1023, "Post content or media is required", HttpStatus.BAD_REQUEST),
-    FILE_TOO_LARGE(1024, "File size is too large", HttpStatus.BAD_REQUEST),
+    FILE_TOO_LARGE(1024, "File size is too large!", HttpStatus.BAD_REQUEST),
     INVALID_FOLLOW_TYPE(1025, "Invalid follow type", HttpStatus.BAD_REQUEST),
     REDIS_OPERATION_FAILED(1026, "Redis operation failed", HttpStatus.INTERNAL_SERVER_ERROR),
+    BOOK_ALREADY_EXISTS(1027, "Book with this ISBN already exists", HttpStatus.CONFLICT),
+    CATEGORY_NOT_FOUND(1028, "Category not found", HttpStatus.NOT_FOUND),
+    AUTHOR_NOT_FOUND(1029, "Author not found", HttpStatus.NOT_FOUND),
 
     // Validation: 2XXX
     INVALID_MESSAGE_KEY(2001, "Invalid Message Key", HttpStatus.BAD_REQUEST),
@@ -41,6 +44,10 @@ public enum ErrorCode {
     INVALID_EMAIL(2003, "Invalid email address" , HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(2004, "Invalid password", HttpStatus.BAD_REQUEST),
     INVALID_NAME(2005, "Invalid name account", HttpStatus.BAD_REQUEST),
+    INVALID_IMAGE_TYPE(2006, "Invalid image type", HttpStatus.BAD_REQUEST),
+    INVALID_FILE_TYPE(2007, "Invalid file type", HttpStatus.BAD_REQUEST),
+    INVALID_TOTAL_COPIES(2008, "Total copies must be greater than 0", HttpStatus.BAD_REQUEST),
+    INVALID_AUTHOR_NAME(2009, "Invalid author name", HttpStatus.BAD_REQUEST),
     ;
 
     private int code;
