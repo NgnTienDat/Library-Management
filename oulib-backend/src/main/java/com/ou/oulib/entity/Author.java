@@ -32,6 +32,8 @@ public class Author {
     @Column(nullable = false)
     String name;
 
+    String note;
+
     @ManyToMany(mappedBy = "authors")
     List<Book> books = new ArrayList<>();
 }
