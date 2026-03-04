@@ -19,6 +19,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,8 +43,8 @@ public class BookService {
     S3Service s3Service;
 
 
-    //    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public BookResponse addNewBook(BookCreationRequest request,
                                    MultipartFile file,
                                    MultipartFile thumbnail) throws IOException {
@@ -72,25 +73,22 @@ public class BookService {
         String thumbnailKey = null;
 
         try {
-            // Upload PDF
             if (file != null && !file.isEmpty()) {
                 Helper.validatePdf(file);
                 contentKey = s3Service.uploadFile(file, book.getId());
                 book.setContentKey(contentKey);
             }
-            // Upload thumbnail
             if (thumbnail != null && !thumbnail.isEmpty()) {
                 Helper.validateImage(thumbnail);
                 thumbnailKey = cloudinaryUploadService.uploadThumbnail(thumbnail);
                 book.setThumbnailKey(thumbnailKey);
             }
-            // It's not necessary to explicitly save the book (file, thumbnail)
-            // again because it's still in the persistence context.
+            // It's not necessary to save the book (file, thumbnail) again
+            // because it's still in the persistence context.
             return bookMapper.toBookResponse(book);
 
         } catch (Exception ex) {
-
-            // If upload fails → delete the newly created DB record
+            // If upload fails -> delete the newly created DB record
             bookRepository.delete(book);
             cleanupUploadedFiles(contentKey, thumbnailKey);
             throw ex;

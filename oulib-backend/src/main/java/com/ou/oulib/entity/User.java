@@ -53,6 +53,10 @@ public class User {
     @ColumnDefault("true")
     boolean active;
 
+    @Column(nullable = false)
+    @ColumnDefault("5")
+    int borrowQuota;
+
     @Enumerated(EnumType.STRING)
     UserRole role;
 
@@ -67,6 +71,7 @@ public class User {
     protected void onCreate() {
         createdAt = Instant.now();
         active = true;
+        if (borrowQuota == 0) borrowQuota = 5;
     }
 
     @PreUpdate
