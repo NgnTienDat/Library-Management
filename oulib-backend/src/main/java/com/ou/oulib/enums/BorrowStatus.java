@@ -1,7 +1,7 @@
 package com.ou.oulib.enums;
 
 public enum BorrowStatus {
-    BORROWED,
+    BORROWING,
     RETURNED,
     LATE
 }

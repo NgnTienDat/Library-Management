@@ -29,6 +29,12 @@ public class Book {
     @Column(nullable = false)
     String title;
 
+    @Column(columnDefinition = "TEXT")
+    String contentKey;
+
+    @Column(columnDefinition = "TEXT")
+    String thumbnailKey;
+
     String publisher;
 
     Integer numberOfPages;
@@ -40,19 +46,9 @@ public class Book {
 
     Integer availableCopies;
 
-    // ================= RELATIONSHIPS =================
-
     @ManyToOne
     @JoinColumn(name = "category_id")
     Category category;
-
-    @ManyToOne
-    @JoinColumn(name = "created_by")
-    User createdBy;
-
-    @ManyToOne
-    @JoinColumn(name = "updated_by")
-    User updatedBy;
 
     @ManyToMany
     @JoinTable(
@@ -76,5 +72,10 @@ public class Book {
     @PreUpdate
     void onUpdate() {
         updatedAt = Instant.now();
+    }
+
+    public void initializeCopies(int total) {
+        this.totalCopies = total;
+        this.availableCopies = total;
     }
 }
