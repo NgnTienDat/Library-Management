@@ -21,6 +21,7 @@ import java.time.Duration;
 public class S3Service {
 
     private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
@@ -42,9 +43,6 @@ public class S3Service {
     }
 
     public String generatePreSignedUrl(String key) {
-
-        S3Presigner preSigner = S3Presigner.create();
-
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
@@ -52,21 +50,20 @@ public class S3Service {
 
         GetObjectPresignRequest preSignRequest =
                 GetObjectPresignRequest.builder()
-                        .signatureDuration(Duration.ofMinutes(10))
+                        .signatureDuration(Duration.ofMinutes(2))
                         .getObjectRequest(getObjectRequest)
                         .build();
 
         PresignedGetObjectRequest preSignedRequest =
-                preSigner.presignGetObject(preSignRequest);
-
+                s3Presigner.presignGetObject(preSignRequest);
         return preSignedRequest.url().toString();
     }
 
-        public void deleteFile(String key) {
-                DeleteObjectRequest request = DeleteObjectRequest.builder()
-                                .bucket(bucketName)
-                                .key(key)
-                                .build();
-                s3Client.deleteObject(request);
-        }
+    public void deleteFile(String key) {
+        DeleteObjectRequest request = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+        s3Client.deleteObject(request);
+    }
 }

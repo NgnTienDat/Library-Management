@@ -28,6 +28,11 @@ spring:
       database: 0
       timeout: 1000 # milliseconds
 
+app:
+  admin:
+    email: ${ADMIN_EMAIL}
+    password: ${ADMIN_PASSWORD}
+
 auth:
   signer-key: ${SIGNER_KEY}
   valid-duration: 86400 # in second : 1 day
