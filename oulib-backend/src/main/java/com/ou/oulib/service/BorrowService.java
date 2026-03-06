@@ -81,35 +81,7 @@ public class BorrowService {
         return toBorrowRecordResponse(record);
     }
 
-    @Transactional(readOnly = true)
-    public ReadBookResponse readBook(String bookId, Jwt jwt) {
-        User user = getAuthenticatedUser(jwt);
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
 
-        // Check active borrow record exists
-        BorrowRecord record = borrowRecordRepository
-                .findByUserIdAndBookIdAndStatus(user.getId(), book.getId(), BorrowStatus.BORROWING)
-                .orElseThrow(() -> new AppException(ErrorCode.BORROW_RECORD_NOT_FOUND));
-
-        // Check due date not exceeded
-        if (LocalDate.now().isAfter(record.getDueDate())) {
-            throw new AppException(ErrorCode.BORROW_EXPIRED);
-        }
-
-        // Validate book has digital content
-        if (book.getContentKey() == null || book.getContentKey().isBlank()) {
-            throw new AppException(ErrorCode.BOOK_CONTENT_NOT_AVAILABLE);
-        }
-
-        String url = s3Service.generatePreSignedUrl(book.getContentKey());
-
-        return ReadBookResponse.builder()
-                .bookId(book.getId())
-                .bookTitle(book.getTitle())
-                .readUrl(url)
-                .build();
-    }
 
     private User getAuthenticatedUser(Jwt jwt) {
         String email = jwt.getSubject();

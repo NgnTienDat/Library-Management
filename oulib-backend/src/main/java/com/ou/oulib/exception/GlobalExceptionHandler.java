@@ -7,6 +7,7 @@ import com.ou.oulib.utils.ResponseUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,6 +32,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(ErrorCode.UNCATEGORIZED_ERROR.getHttpStatusCode())
                 .body(apiResponse);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthorizationDeniedException(
+            AuthorizationDeniedException exception) {
+
+        log.info("Authorization denied exception", exception);
+
+        ApiResponse<Void> apiResponse = new ApiResponse<>();
+        apiResponse.setCode(ErrorCode.PERMISSION_DENIED.getCode());
+        apiResponse.setMessage(ErrorCode.PERMISSION_DENIED.getMessage());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiResponse);
     }
 
     @ExceptionHandler(value = AppException.class)
