@@ -1,17 +1,23 @@
 package com.ou.oulib.controller;
 
 import com.ou.oulib.dto.request.BookCreationRequest;
+import com.ou.oulib.dto.request.BookUpdateRequest;
+import com.ou.oulib.dto.response.BookResponse;
 import com.ou.oulib.service.BookService;
 import com.ou.oulib.utils.ApiResponse;
+import com.ou.oulib.utils.PageResponse;
+import com.ou.oulib.utils.PageResponseUtils;
 import com.ou.oulib.utils.ResponseUtils;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,13 +35,41 @@ public class BookController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<?>> addNewBook(
             @RequestPart("metadata") @Valid BookCreationRequest bookCreationRequest,
-            @RequestPart(value = "file", required = false) MultipartFile file,
             @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail
-    ) throws IOException {
+    ) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ResponseUtils.created(bookService.addNewBook(bookCreationRequest, file, thumbnail)));
+                .body(ResponseUtils.created(bookService.addNewBook(bookCreationRequest, thumbnail)));
     }
 
+    @GetMapping
+    public ResponseEntity<?> getBooks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
 
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseUtils.ok(bookService.getBooks(page, size)));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<BookResponse>> getBookById(@PathVariable String id) {
+        return ResponseEntity.ok(ResponseUtils.ok(bookService.getBookById(id)));
+    }
+
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<BookResponse>> updateBook(
+            @PathVariable String id,
+            @RequestPart("metadata") @Valid BookUpdateRequest request,
+            @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail
+    ) {
+        return ResponseEntity.ok(ResponseUtils.ok(bookService.updateBook(id, request, thumbnail)));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteBook(@PathVariable String id) {
+        bookService.deleteBook(id);
+        return ResponseEntity.ok(ResponseUtils.ok("Book deleted successfully"));
+    }
 
 }

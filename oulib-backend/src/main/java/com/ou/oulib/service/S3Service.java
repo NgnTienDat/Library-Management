@@ -1,6 +1,10 @@
 package com.ou.oulib.service;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+
+import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,13 +22,15 @@ import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class S3Service {
 
-    private final S3Client s3Client;
-    private final S3Presigner s3Presigner;
+    S3Client s3Client;
+    S3Presigner s3Presigner;
 
+    @NonFinal
     @Value("${aws.s3.bucket-name}")
-    private String bucketName;
+    String bucketName;
 
     public String uploadFile(MultipartFile file, String bookId) throws IOException {
 

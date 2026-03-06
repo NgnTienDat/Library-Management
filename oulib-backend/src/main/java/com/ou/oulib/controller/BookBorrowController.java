@@ -38,11 +38,4 @@ public class BookBorrowController {
         return ResponseEntity.ok(ResponseUtils.ok("Return endpoint - not yet implemented"));
     }
 
-    @GetMapping("/read")
-    public ResponseEntity<ApiResponse<?>> readBook(
-            @PathVariable String bookId,
-            @AuthenticationPrincipal Jwt jwt
-    ) {
-        return ResponseEntity.ok(ResponseUtils.ok(borrowService.readBook(bookId, jwt)));
-    }
 }

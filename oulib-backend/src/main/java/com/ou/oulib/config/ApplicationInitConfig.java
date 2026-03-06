@@ -34,7 +34,7 @@ public class ApplicationInitConfig {
     ApplicationRunner applicationRunner(UserRepository userRepository) {
         log.info("Initializing application.....");
         return args -> {
-            if (userRepository.existsByEmail(adminEmail)) {
+            if (!userRepository.existsByEmail(adminEmail)) {
                 User admin = User.builder()
                         .role(UserRole.SYSADMIN)
                         .email(adminEmail)

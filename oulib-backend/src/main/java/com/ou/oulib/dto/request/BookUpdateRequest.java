@@ -1,4 +1,4 @@
-package com.ou.oulib.dto.response;
+package com.ou.oulib.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -10,16 +10,12 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class BookResponse {
-    String id;
+public class BookUpdateRequest {
     String title;
-    String isbn;
     String publisher;
     Integer numberOfPages;
     String description;
     Integer totalCopies;
-    Integer availableCopies;
-    String thumbnailUrl;
-    String categoryName;
-    List<String> authorNames;
+    String categoryId;
+    List<AuthorRefRequest> authors;
 }
