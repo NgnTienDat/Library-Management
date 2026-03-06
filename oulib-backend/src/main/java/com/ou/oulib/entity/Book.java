@@ -8,6 +8,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.ColumnDefault;
+
 @Entity
 @Table(name = "books")
 @Getter
@@ -30,10 +32,7 @@ public class Book {
     String title;
 
     @Column(columnDefinition = "TEXT")
-    String contentKey;
-
-    @Column(columnDefinition = "TEXT")
-    String thumbnailKey;
+    String thumbnailUrl;
 
     String publisher;
 
@@ -45,6 +44,8 @@ public class Book {
     Integer totalCopies;
 
     Integer availableCopies;
+
+
 
     @ManyToOne
     @JoinColumn(name = "category_id")
@@ -58,8 +59,8 @@ public class Book {
     )
     List<Author> authors = new ArrayList<>();
 
-    @OneToMany(mappedBy = "book")
-    List<BorrowRecord> borrowRecords = new ArrayList<>();
+    @ColumnDefault("true")
+    boolean active;
 
     Instant createdAt;
     Instant updatedAt;
@@ -75,7 +76,7 @@ public class Book {
     }
 
     public void initializeCopies(int total) {
-        this.totalCopies = total;
         this.availableCopies = total;
+        this.totalCopies = total;
     }
 }

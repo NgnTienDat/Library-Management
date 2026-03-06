@@ -23,6 +23,6 @@ public class BookCreationRequest {
     int numberOfPages;
     String description;
     int totalCopies;
-    String category;
+    String categoryId;
     List<AuthorRefRequest> authors = new ArrayList<>();
 }

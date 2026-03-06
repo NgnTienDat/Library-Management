@@ -1,12 +1,11 @@
 package com.ou.oulib.mapper;
 
 import com.ou.oulib.dto.request.BookCreationRequest;
+import com.ou.oulib.dto.request.BookUpdateRequest;
 import com.ou.oulib.dto.response.BookResponse;
 import com.ou.oulib.entity.Author;
 import com.ou.oulib.entity.Book;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.*;
 
 import java.util.List;
 
@@ -16,9 +15,7 @@ public interface BookMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "authors", ignore = true)
-    @Mapping(target = "borrowRecords", ignore = true)
-    @Mapping(target = "contentKey", ignore = true)
-    @Mapping(target = "thumbnailKey", ignore = true)
+    @Mapping(target = "thumbnailUrl", ignore = true)
     @Mapping(target = "availableCopies", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -27,6 +24,17 @@ public interface BookMapper {
     @Mapping(target = "categoryName", source = "category.name")
     @Mapping(target = "authorNames", source = "authors", qualifiedByName = "mapAuthorNames")
     BookResponse toBookResponse(Book book);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "isbn", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "authors", ignore = true)
+    @Mapping(target = "thumbnailUrl", ignore = true)
+    @Mapping(target = "availableCopies", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    void partialUpdate(BookUpdateRequest request, @MappingTarget Book book);
 
     @Named("mapAuthorNames")
     default List<String> mapAuthorNames(List<Author> authors) {

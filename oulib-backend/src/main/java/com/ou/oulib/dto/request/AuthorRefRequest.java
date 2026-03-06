@@ -10,6 +10,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AuthorRefRequest {
 
-    String id;   // optional
-    String name; // required nếu id == null
+    String id;
+    String name;
 }
