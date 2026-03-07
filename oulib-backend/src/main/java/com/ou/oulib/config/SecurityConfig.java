@@ -47,7 +47,7 @@ public class SecurityConfig {
     };
 
     private final String[] PUBLIC_ENDPOINTS_GET = {
-            "/api/v1/home",
+            "/api/v1/home", "/api/v1/books",
     };
 
     @Bean

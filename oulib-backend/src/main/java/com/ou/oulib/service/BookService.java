@@ -1,17 +1,19 @@
 package com.ou.oulib.service;
 
-
 import com.ou.oulib.dto.request.AuthorRefRequest;
 import com.ou.oulib.dto.request.BookCreationRequest;
 import com.ou.oulib.dto.request.BookUpdateRequest;
 import com.ou.oulib.dto.response.BookResponse;
 import com.ou.oulib.entity.Author;
 import com.ou.oulib.entity.Book;
+import com.ou.oulib.entity.BookCopy;
 import com.ou.oulib.entity.Category;
+import com.ou.oulib.enums.BookCopyStatus;
 import com.ou.oulib.enums.ErrorCode;
 import com.ou.oulib.exception.AppException;
 import com.ou.oulib.mapper.BookMapper;
 import com.ou.oulib.repository.AuthorRepository;
+import com.ou.oulib.repository.BookCopyRepository;
 import com.ou.oulib.repository.BookRepository;
 import com.ou.oulib.repository.CategoryRepository;
 import com.ou.oulib.utils.Helper;
@@ -41,23 +43,31 @@ import java.util.List;
 public class BookService {
 
     BookRepository bookRepository;
+    BookCopyRepository bookCopyRepository;
     CategoryRepository categoryRepository;
     AuthorRepository authorRepository;
     BookMapper bookMapper;
     CloudinaryUploadService cloudinaryUploadService;
 
-
     @Transactional
     @PreAuthorize("hasRole('SYSADMIN')")
     public BookResponse addNewBook(BookCreationRequest request,
-                                   MultipartFile thumbnail) {
+            MultipartFile thumbnail) {
 
         if (request.getTotalCopies() <= 0) {
             throw new AppException(ErrorCode.INVALID_TOTAL_COPIES);
         }
-
+        if (request.getCopyBarcodes().size() != request.getTotalCopies()) {
+            throw new AppException(ErrorCode.COPY_IDS_COUNT_MISMATCH);
+        }
         if (bookRepository.existsByIsbn(request.getIsbn())) {
             throw new AppException(ErrorCode.BOOK_ALREADY_EXISTS);
+        }
+        if (request.getCopyBarcodes().size() != request.getCopyBarcodes().stream().distinct().count()) {
+            throw new AppException(ErrorCode.BARCODE_ALREADY_EXISTS);
+        }
+        if (bookCopyRepository.existsByBarcodeIn(request.getCopyBarcodes())) {
+            throw new AppException(ErrorCode.BARCODE_ALREADY_EXISTS);
         }
 
         Book book = bookMapper.toBook(request);
@@ -70,10 +80,16 @@ public class BookService {
         List<Author> authors = resolveAuthors(request.getAuthors());
         book.setAuthors(authors);
 
+        List<BookCopy> copies = request.getCopyBarcodes().stream()
+                .map(barcode -> BookCopy.builder()
+                        .barcode(barcode)
+                        .status(BookCopyStatus.AVAILABLE)
+                        .build())
+                .toList();
+        copies.forEach(book::addCopy);
         book = bookRepository.save(book);
 
         String thumbnailKey = null;
-
         try {
             if (thumbnail != null && !thumbnail.isEmpty()) {
                 Helper.validateImage(thumbnail);
@@ -85,13 +101,12 @@ public class BookService {
             return bookMapper.toBookResponse(book);
 
         } catch (Exception ex) {
-            // If upload fails -> delete the newly created DB record
+            // If upload fails then delete the newly created DB record
             bookRepository.delete(book);
             cleanupUploadedFiles(thumbnailKey);
             throw ex;
         }
     }
-
 
     private List<Author> resolveAuthors(List<AuthorRefRequest> requests) {
         if (requests == null || requests.isEmpty()) {
@@ -111,8 +126,7 @@ public class BookService {
                 Author newAuthor = authorRepository.save(
                         Author.builder()
                                 .name(req.getName().trim())
-                                .build()
-                );
+                                .build());
                 result.add(newAuthor);
             }
         }
@@ -207,6 +221,5 @@ public class BookService {
         book.setActive(false);
         bookRepository.save(book);
     }
-
 
 }

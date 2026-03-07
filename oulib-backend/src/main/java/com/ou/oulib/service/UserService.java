@@ -20,6 +20,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -51,8 +52,6 @@ public class UserService {
         }
         User user = this.userMapper.toUser(userCreation);
         user.setRole(UserRole.USER);
-        user.setStatus(UserStatus.ACTIVE);
-        user.setActive(true);
         user.setPassword(this.passwordEncoder.encode(userCreation.getPassword()));
 
         try {
@@ -60,6 +59,20 @@ public class UserService {
         } catch (DataIntegrityViolationException ex) {
             throw new AppException(ErrorCode.USER_ALREADY_EXISTED);
         }
+        return userMapper.toResponse(user);
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('SYSADMIN')")
+    public UserResponse createLibrarian(UserCreationRequest userCreation) {
+        if (this.userRepository.existsByEmail(userCreation.getEmail())) {
+            throw new AppException(ErrorCode.USER_ALREADY_EXISTED);
+        }
+        User user = this.userMapper.toUser(userCreation);
+        user.setRole(UserRole.LIBRARIAN);
+        user.setPassword(this.passwordEncoder.encode(userCreation.getPassword()));
+
+        userRepository.save(user);
         return userMapper.toResponse(user);
     }
 

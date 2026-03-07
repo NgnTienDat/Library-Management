@@ -1,7 +1,5 @@
 package com.ou.oulib.dto.request;
 
-import com.ou.oulib.entity.Author;
-import com.ou.oulib.entity.Category;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -24,5 +22,6 @@ public class BookCreationRequest {
     String description;
     int totalCopies;
     String categoryId;
+    List<String> copyBarcodes = new ArrayList<>();
     List<AuthorRefRequest> authors = new ArrayList<>();
 }

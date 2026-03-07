@@ -24,9 +24,7 @@ public class Notification {
     @Column(length = 36)
     String id;
 
-    @ManyToOne
-    @JoinColumn(name = "borrow_id", nullable = false)
-    BorrowRecord borrowRecord;
+
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

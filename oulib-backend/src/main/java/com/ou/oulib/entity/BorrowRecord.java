@@ -4,6 +4,7 @@ import com.ou.oulib.enums.BorrowStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -26,30 +27,23 @@ public class BorrowRecord {
     String id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    User user;
+    @JoinColumn(name = "borrower_id", nullable = false)
+    User borrower;
 
     @ManyToOne
-    @JoinColumn(name = "book_id", nullable = false)
-    Book book;
+    @JoinColumn(name = "librarian_id", nullable = false)
+    User librarian;
 
-    LocalDate borrowDate;
-    LocalDate dueDate;
-    LocalDate returnDate;
+    @ManyToOne
+    @JoinColumn(name = "book_copy_id", nullable = false)
+    BookCopy bookCopy;
 
     @Enumerated(EnumType.STRING)
     BorrowStatus status;
 
-    boolean isLate;
-
-    int renewedCount;
-
-    @OneToMany(mappedBy = "borrowRecord")
-    List<BorrowAuditLog> auditLogs = new ArrayList<>();
-
-    @OneToMany(mappedBy = "borrowRecord")
-    List<Notification> notifications = new ArrayList<>();
-
+    LocalDate borrowDate;
+    LocalDate dueDate;
+    LocalDate returnDate;
     Instant createdAt;
     Instant updatedAt;
 

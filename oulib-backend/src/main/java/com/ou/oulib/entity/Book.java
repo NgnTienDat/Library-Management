@@ -45,12 +45,15 @@ public class Book {
 
     Integer availableCopies;
 
-
+    @Builder.Default
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<BookCopy> copies = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "category_id")
     Category category;
 
+    @Builder.Default
     @ManyToMany
     @JoinTable(
             name = "book_authors",
@@ -78,5 +81,10 @@ public class Book {
     public void initializeCopies(int total) {
         this.availableCopies = total;
         this.totalCopies = total;
+    }
+
+    public void addCopy(BookCopy copy) {
+        copies.add(copy);
+        copy.setBook(this);
     }
 }
