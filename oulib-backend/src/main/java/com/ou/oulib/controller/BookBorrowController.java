@@ -1,8 +1,10 @@
 package com.ou.oulib.controller;
 
+import com.ou.oulib.dto.request.BorrowRequest;
 import com.ou.oulib.service.BorrowService;
 import com.ou.oulib.utils.ApiResponse;
 import com.ou.oulib.utils.ResponseUtils;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -13,7 +15,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/books/{bookId}")
+@RequestMapping("/api/v1/books/")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class BookBorrowController {
@@ -22,16 +24,14 @@ public class BookBorrowController {
 
     @PostMapping("/borrow")
     public ResponseEntity<ApiResponse<?>> borrowBook(
-            @PathVariable String bookId,
-            @AuthenticationPrincipal Jwt jwt
-    ) {
+            @RequestBody @Valid BorrowRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ResponseUtils.created(borrowService.borrowBook(bookId, jwt)));
+                .body(ResponseUtils.created(borrowService.borrowBook(request, jwt)));
     }       
 
     @PostMapping("/return")
     public ResponseEntity<ApiResponse<?>> returnBook(
-            @PathVariable String bookId,
             @AuthenticationPrincipal Jwt jwt
     ) {
         // TODO: Implement return logic

@@ -13,6 +13,7 @@ import com.ou.oulib.dto.response.AuthenticationResponse;
 import com.ou.oulib.dto.response.IntrospectResponse;
 import com.ou.oulib.entity.User;
 import com.ou.oulib.enums.ErrorCode;
+import com.ou.oulib.enums.UserStatus;
 import com.ou.oulib.exception.AppException;
 import com.ou.oulib.mapper.UserMapper;
 import com.ou.oulib.repository.UserRepository;
@@ -62,7 +63,7 @@ public class AuthenticationService {
         User user = userRepository.findByEmail(authenticationRequest.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        if (!user.isActive()) throw new AppException(ErrorCode.ACCOUNT_LOCKED);
+        if (user.getStatus().equals(UserStatus.SUSPENDED)) throw new AppException(ErrorCode.ACCOUNT_LOCKED);
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         boolean matches = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
