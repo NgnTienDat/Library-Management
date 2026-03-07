@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum UserRole {
     SYSADMIN("SYSADMIN"),
+    LIBRARIAN("LIBRARIAN"),
     USER("USER");
 
     private final String value;

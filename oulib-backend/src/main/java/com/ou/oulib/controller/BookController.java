@@ -5,23 +5,16 @@ import com.ou.oulib.dto.request.BookUpdateRequest;
 import com.ou.oulib.dto.response.BookResponse;
 import com.ou.oulib.service.BookService;
 import com.ou.oulib.utils.ApiResponse;
-import com.ou.oulib.utils.PageResponse;
-import com.ou.oulib.utils.PageResponseUtils;
 import com.ou.oulib.utils.ResponseUtils;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 
 @RestController
@@ -69,7 +62,7 @@ public class BookController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> deleteBook(@PathVariable String id) {
         bookService.deleteBook(id);
-        return ResponseEntity.ok(ResponseUtils.ok("Book deleted successfully"));
+        return ResponseEntity.ok(ResponseUtils.ok("Book deactivated successfully"));
     }
 
 }

@@ -32,6 +32,10 @@ public enum ErrorCode {
     BORROW_EXPIRED(1035, "Your borrow period has expired", HttpStatus.FORBIDDEN),
     BOOK_CONTENT_NOT_AVAILABLE(1036, "This book has no digital content available", HttpStatus.NOT_FOUND),
     PERMISSION_DENIED(1037, "You do not have permission to perform this action", HttpStatus.FORBIDDEN),
+    COPY_IDS_COUNT_MISMATCH(1038, "The number of copy IDs does not match the total copies", HttpStatus.BAD_REQUEST),
+    BARCODE_ALREADY_EXISTS(1039, "One or more barcodes already exist", HttpStatus.CONFLICT),
+    USER_HAS_OVERDUE_BOOK(1040, "You have overdue books. Please return them before borrowing new ones.", HttpStatus.FORBIDDEN),
+    USER_INACTIVE(1041, "User account is inactivated", HttpStatus.FORBIDDEN),
 
     // Validation: 2XXX
     INVALID_MESSAGE_KEY(2001, "Invalid Message Key", HttpStatus.BAD_REQUEST),

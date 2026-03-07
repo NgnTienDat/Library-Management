@@ -26,7 +26,6 @@ import org.hibernate.annotations.ColumnDefault;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false, length = 36)
@@ -36,11 +35,6 @@ public class User {
     @Column(nullable = false, unique = true)
     String email;
 
-//    @NotBlank(message = "Username is required")
-//    @Size(min = 2, max = 100, message = "username must be between 2 and 100 characters")
-//    @Column(nullable = false, unique = true, length = 100)
-//    String username;
-
     @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters and at most 16 characters")
     @Column(nullable = false)
@@ -49,9 +43,6 @@ public class User {
     @NotBlank(message = "full name is required")
     @Size(min = 1, max = 50, message = "Password must be at most 50 characters")
     String fullName;
-
-    @ColumnDefault("true")
-    boolean active;
 
     @Column(nullable = false)
     @ColumnDefault("5")
@@ -69,14 +60,14 @@ public class User {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = Instant.now();
-        active = true;
+        this.createdAt = Instant.now();
+        this.status = UserStatus.ACTIVE;
         if (borrowQuota == 0) borrowQuota = 5;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = Instant.now();
+        this.updatedAt = Instant.now();
     }
 
 

@@ -13,8 +13,7 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BorrowRecordResponse {
     String id;
-    String bookId;
-    String bookTitle;
+    String barcode;
     LocalDate borrowDate;
     LocalDate dueDate;
     BorrowStatus status;

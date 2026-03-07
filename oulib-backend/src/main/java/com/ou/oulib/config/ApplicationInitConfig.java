@@ -30,6 +30,14 @@ public class ApplicationInitConfig {
     @Value("${app.admin.email}")
     String adminEmail;
 
+    @NonFinal
+    @Value("${app.librarian.password}")
+    String librarianPassword;
+
+    @NonFinal
+    @Value("${app.librarian.email}")
+    String librarianEmail;
+
     @Bean
     ApplicationRunner applicationRunner(UserRepository userRepository) {
         log.info("Initializing application.....");
@@ -44,6 +52,18 @@ public class ApplicationInitConfig {
 
                 userRepository.save(admin);
                 log.info("Created admin user");
+            }
+
+            if (!userRepository.existsByEmail(librarianEmail)) {
+                User librarian = User.builder()
+                        .role(UserRole.LIBRARIAN)
+                        .email(librarianEmail)
+                        .fullName("Librarian")
+                        .password(passwordEncoder.encode(librarianPassword))
+                        .build();
+
+                userRepository.save(librarian);
+                log.info("Created librarian user");
             }
         };
     }

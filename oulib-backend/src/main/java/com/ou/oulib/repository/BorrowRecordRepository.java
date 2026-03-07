@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, String> {
 
-    boolean existsByUserIdAndBookIdAndStatus(String userId, String bookId, BorrowStatus status);
-
-    Optional<BorrowRecord> findByUserIdAndBookIdAndStatus(String userId, String bookId, BorrowStatus status);
+    boolean existsByBorrowerIdAndBookCopyIdAndStatus(String userId, String bookId, BorrowStatus status);
+    boolean existsByBorrowerIdAndStatus(String userId, BorrowStatus status);
+    Optional<BorrowRecord> findByBorrowerIdAndBookCopyIdAndStatus(String userId, String bookId, BorrowStatus status);
 }

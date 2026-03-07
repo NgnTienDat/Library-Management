@@ -1,25 +1,32 @@
 package com.ou.oulib.service;
 
+import com.ou.oulib.dto.request.BorrowRequest;
 import com.ou.oulib.dto.response.BorrowRecordResponse;
-import com.ou.oulib.dto.response.ReadBookResponse;
 import com.ou.oulib.entity.Book;
+import com.ou.oulib.entity.BookCopy;
 import com.ou.oulib.entity.BorrowRecord;
 import com.ou.oulib.entity.User;
+import com.ou.oulib.enums.BookCopyStatus;
 import com.ou.oulib.enums.BorrowStatus;
 import com.ou.oulib.enums.ErrorCode;
+import com.ou.oulib.enums.UserStatus;
 import com.ou.oulib.exception.AppException;
-import com.ou.oulib.repository.BookRepository;
+import com.ou.oulib.mapper.BorrowRecordMapper;
+import com.ou.oulib.repository.BookCopyRepository;
 import com.ou.oulib.repository.BorrowRecordRepository;
 import com.ou.oulib.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,75 +35,71 @@ import java.time.LocalDate;
 public class BorrowService {
 
     BorrowRecordRepository borrowRecordRepository;
-    BookRepository bookRepository;
     UserRepository userRepository;
-    S3Service s3Service;
+    BookCopyRepository bookCopyRepository;
+    BorrowRecordMapper borrowRecordMapper;
 
     @Transactional
-    public BorrowRecordResponse borrowBook(String bookId, Jwt jwt) {
-        User user = getAuthenticatedUser(jwt);
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
+    @PreAuthorize("hasRole('LIBRARIAN')")
+    public List<BorrowRecordResponse> borrowBook(BorrowRequest request, Jwt jwt) {
+        List<String> barcodes = request.getBarcodes();
 
-        // Check borrowing quota
-        if (user.getBorrowQuota() <= 0) {
+        if (barcodes.size() != barcodes.stream().distinct().count())
+            throw new AppException(ErrorCode.BARCODE_ALREADY_EXISTS);
+
+        User borrower = userRepository.findById(request.getBorrowerId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        User librarian = getAuthenticatedUser(jwt);
+
+        if (borrower.getStatus().equals(UserStatus.SUSPENDED))
+            throw new AppException(ErrorCode.USER_INACTIVE);
+
+        if (borrowRecordRepository.existsByBorrowerIdAndStatus(borrower.getId(), BorrowStatus.OVERDUE))
+            throw new AppException(ErrorCode.USER_HAS_OVERDUE_BOOK);
+
+        if (barcodes.size() > borrower.getBorrowQuota())
             throw new AppException(ErrorCode.BORROW_QUOTA_EXCEEDED);
-        }
 
-        // Check available copies
-        if (book.getAvailableCopies() == null || book.getAvailableCopies() <= 0) {
-            throw new AppException(ErrorCode.NO_AVAILABLE_COPIES);
-        }
-
-        // Check duplicate active borrow
-        if (borrowRecordRepository.existsByUserIdAndBookIdAndStatus(
-                user.getId(), book.getId(), BorrowStatus.BORROWING)) {
-            throw new AppException(ErrorCode.ALREADY_BORROWING);
-        }
-
-        // Create borrow record
+        List<BorrowRecordResponse> responses = new ArrayList<>();
         LocalDate now = LocalDate.now();
-        BorrowRecord record = BorrowRecord.builder()
-                .user(user)
-                .book(book)
-                .borrowDate(now)
-                .dueDate(now.plusDays(15))
-                .status(BorrowStatus.BORROWING)
-                .isLate(false)
-                .renewedCount(0)
-                .build();
 
-        borrowRecordRepository.save(record);
+        for (String barcode : barcodes) {
+            BookCopy bookCopy = bookCopyRepository.findByBarcode(barcode)
+                    .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
 
-        // Decrease available copies
-        book.setAvailableCopies(book.getAvailableCopies() - 1);
-        bookRepository.save(book);
+            if (bookCopy.getStatus() != BookCopyStatus.AVAILABLE)
+                throw new AppException(ErrorCode.NO_AVAILABLE_COPIES);
 
-        // Decrease user borrow quota
-        user.setBorrowQuota(user.getBorrowQuota() - 1);
-        userRepository.save(user);
+            if (borrowRecordRepository.existsByBorrowerIdAndBookCopyIdAndStatus(
+                    borrower.getId(), bookCopy.getId(), BorrowStatus.BORROWING))
+                throw new AppException(ErrorCode.ALREADY_BORROWING);
 
-        log.info("User {} borrowed book {} successfully", user.getEmail(), book.getTitle());
+            Book book = bookCopy.getBook();
+            BorrowRecord record = BorrowRecord.builder()
+                    .borrower(borrower)
+                    .librarian(librarian)
+                    .bookCopy(bookCopy)
+                    .borrowDate(now)
+                    .dueDate(now.plusDays(14))
+                    .status(BorrowStatus.BORROWING)
+                    .build();
 
-        return toBorrowRecordResponse(record);
+            borrowRecordRepository.save(record);
+
+            bookCopy.setStatus(BookCopyStatus.BORROWED);
+            book.setAvailableCopies(book.getAvailableCopies() - 1);
+            borrower.setBorrowQuota(borrower.getBorrowQuota() - 1);
+
+            responses.add(borrowRecordMapper.toBorrowRecordResponse(record));
+        }
+
+        return responses;
     }
-
 
 
     private User getAuthenticatedUser(Jwt jwt) {
         String email = jwt.getSubject();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    private BorrowRecordResponse toBorrowRecordResponse(BorrowRecord record) {
-        return BorrowRecordResponse.builder()
-                .id(record.getId())
-                .bookId(record.getBook().getId())
-                .bookTitle(record.getBook().getTitle())
-                .borrowDate(record.getBorrowDate())
-                .dueDate(record.getDueDate())
-                .status(record.getStatus())
-                .build();
     }
 }
