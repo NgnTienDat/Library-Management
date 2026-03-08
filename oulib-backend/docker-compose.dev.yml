@@ -17,7 +17,24 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    container_name: unsaid-rabbitmq
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # UI
+    environment:
+      RABBITMQ_DEFAULT_USER: unsaid
+      RABBITMQ_DEFAULT_PASS: unsaid
+    volumes:
+      - ./rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq_log:/var/log/rabbitmq
+    restart: always
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_running" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   redis:
     image: redis:alpine
     container_name: oulib-redis
