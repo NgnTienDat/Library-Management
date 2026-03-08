@@ -9,9 +9,9 @@
 ## 1. Công việc đã hoàn thành 
 | Thành viên | MSSV | Công việc | Link Commit/PR | 
 |------------|------|-----------|----------------| 
-| Nguyễn Tiến Đạt | 2251012034 | Xác định kiến trúc tổng thể | [6ad3f47](https://github.com/NgnTienDat/Library-Management/commit/6ad3f47acec81c39236d249b3c82c731ea0f0ef4) | 
-| Phạm Minh Hạnh | 2151053015 | Phân tích yêu cầu chức năng, phi chức năng | [d4799c3](https://github.com/NgnTienDat/Library-Management/commit/d4799c3b616f29df4e0d148a7a11609f7e07d128) | 
-| Phạm Tấn Thành | 2351050163 | Phân tích & vẽ use cases | [ghi789](75a3e37124254bd020bbcb6dc33544f0e4dada55) | 
+| Nguyễn Tiến Đạt | 2251012034 | Thiết kế database | [9daef38](https://github.com/NgnTienDat/Library-Management/commit/9daef38bbaa3f56e901df0e9fc9ee97b5b685bc8) | 
+| Phạm Minh Hạnh | 2151053015 | Thiết kế sơ đồ kiến trúc C4 model | [a8add4c](https://github.com/NgnTienDat/Library-Management/commit/a8add4c0fa6224f3a526c1c7cb223e77dc02c5b5) | 
+| Phạm Tấn Thành | 2351050163 | Viết ADR | [ghi789](75a3e37124254bd020bbcb6dc33544f0e4dada55) | 
 --- 
 ## 2. Tiến độ tổng thể 
 | Hạng mục | Trạng thái | % | 
@@ -28,7 +28,7 @@
 | Thành viên | Công việc dự kiến | 
 |------------|-------------------| 
 | Nguyễn Tiến Đạt | Xây dựng Backend | 
-| Phạm Minh Hạnh | Thiết kế UI | 
+| Phạm Minh Hạnh | Thiết kế sơ đồ kiến trúc C4 model | 
 | Phạm Tấn Thành | Xây dựng Backend | 
 
 

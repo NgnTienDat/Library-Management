@@ -29,7 +29,7 @@
 |------------|-------------------| 
 | Nguyễn Tiến Đạt | Thiết kế database | 
 | Phạm Minh Hạnh | Thiết kế sơ đồ kiến trúc C4 model | 
-| Phạm Tấn Thành | Viết ADR | 
+| Phạm Tấn Thành | Viết ADRs | 
 
 
 
