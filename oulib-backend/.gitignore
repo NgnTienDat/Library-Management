@@ -34,3 +34,5 @@ build/
 
 .env
 volumes
+rabbitmq_data
+rabbitmq_log

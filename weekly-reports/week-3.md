@@ -1,6 +1,6 @@
-# Báo cáo Tuần 2
+# Báo cáo Tuần 3
 
-**Tuần:** 2 (02/02/2026 - 08/02/2026)   
+**Tuần:** 3 (02/03/2026 - 08/03/2026)   
 **Nhóm:** Library Management / 5   
 **Đề tài:** C1 - Hệ thống quản lý thư viện số (Library Management)  
 **Nhóm trưởng:** Nguyễn Tiến Đạt - 2251012034
@@ -16,24 +16,24 @@
 ## 2. Tiến độ tổng thể 
 | Hạng mục | Trạng thái | % | 
 |----------|------------|---| 
-| Phân tích yêu cầu | Đang làm | 90% | 
-| Thiết kế kiến trúc | Đang làm | 80% | 
-| Backend API | Chưa bắt đầu | 0% | 
+| Phân tích yêu cầu | Hoàn thành | 100% | 
+| Thiết kế kiến trúc | Hoàn thành | 100% | 
+| Backend API | Chưa bắt đầu | 40% | 
 | Frontend UI | Chưa bắt đầu | 0% | 
 | Docker | Chưa bắt đầu | 0% | 
 | Testing | Chưa bắt đầu | 0% | 
-**Tổng tiến độ: ~20%** 
+**Tổng tiến độ: ~35%** 
 --- 
 ## 3. Kế hoạch tuần tới
 | Thành viên | Công việc dự kiến | 
 |------------|-------------------| 
-| Nguyễn Tiến Đạt | Thiết kế database | 
-| Phạm Minh Hạnh | Thiết kế sơ đồ kiến trúc C4 model | 
-| Phạm Tấn Thành | Viết ADR | 
+| Nguyễn Tiến Đạt | Xây dựng Backend | 
+| Phạm Minh Hạnh | Thiết kế UI | 
+| Phạm Tấn Thành | Xây dựng Backend | 
 
 
 
 
 --- 
-*Ngày nộp: 08/02/2026*   
+*Ngày nộp: 08/03/2026*   
 *Xác nhận của Nhóm trưởng: Nguyễn Tiến Đạt*
