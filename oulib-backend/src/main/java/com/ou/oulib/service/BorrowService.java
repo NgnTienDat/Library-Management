@@ -98,7 +98,7 @@ public class BorrowService {
                     .librarian(librarian)
                     .bookCopy(bookCopy)
                     .borrowDate(now)
-                    .dueDate(LocalDateTime.now().plusMinutes(10))
+                    .dueDate(LocalDateTime.now().plusMinutes(5))
                     // .dueDate(now.plusDays(14))
                     .status(BorrowStatus.BORROWING)
                     .build();
