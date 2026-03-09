@@ -14,6 +14,11 @@ public class RabbitMQConfig {
     public static final String NOTIFICATION_CREATED_QUEUE = "notification.created.queue";
     public static final String NOTIFICATION_CREATED_ROUTING_KEY = "notification.created";
 
+    // Borrow reminder configuration
+    public static final String BORROW_EXCHANGE = "borrow.exchange";
+    public static final String BORROW_REMINDER_QUEUE = "borrow-reminder-queue";
+    public static final String BORROW_REMINDER_ROUTING_KEY = "borrow.reminder";
+
 
     @Bean
     public TopicExchange postExchange() {
@@ -31,6 +36,27 @@ public class RabbitMQConfig {
                 .bind(postCreatedQueue())
                 .to(postExchange())
                 .with(NOTIFICATION_CREATED_ROUTING_KEY);
+    }
+
+    // Borrow reminder exchange
+    @Bean
+    public TopicExchange borrowExchange() {
+        return new TopicExchange(BORROW_EXCHANGE, true, false);
+    }
+
+    // Borrow reminder queue
+    @Bean
+    public Queue borrowReminderQueue() {
+        return QueueBuilder.durable(BORROW_REMINDER_QUEUE).build();
+    }
+
+    // Bind borrow reminder queue to exchange
+    @Bean
+    public Binding borrowReminderBinding() {
+        return BindingBuilder
+                .bind(borrowReminderQueue())
+                .to(borrowExchange())
+                .with(BORROW_REMINDER_ROUTING_KEY);
     }
 
 
