@@ -11,6 +11,8 @@ import com.ou.oulib.enums.BorrowStatus;
 import com.ou.oulib.enums.ErrorCode;
 import com.ou.oulib.enums.UserStatus;
 import com.ou.oulib.exception.AppException;
+import com.ou.oulib.infras.event.ActionMessage;
+import com.ou.oulib.infras.producer.RabbitMQPublisher;
 import com.ou.oulib.mapper.BorrowRecordMapper;
 import com.ou.oulib.repository.BookCopyRepository;
 import com.ou.oulib.repository.BorrowRecordRepository;
@@ -24,6 +26,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +41,19 @@ public class BorrowService {
     UserRepository userRepository;
     BookCopyRepository bookCopyRepository;
     BorrowRecordMapper borrowRecordMapper;
+    RabbitMQPublisher rabbitMQPublisher;
+
+
+    public void rabbitmqConnectionCheck() {
+        ActionMessage actionMessage = ActionMessage.builder()
+                .postId("test-post-id")
+                .actionType("TEST_ACTION")
+                .userId("test-user-id")
+                .createdAt(Instant.now())
+                .build();
+        rabbitMQPublisher.publishActionMessage(actionMessage);
+
+    }
 
     @Transactional
     @PreAuthorize("hasRole('LIBRARIAN')")

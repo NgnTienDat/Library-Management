@@ -1,5 +1,7 @@
 package com.ou.oulib.infras.consumer;
 
+import com.ou.oulib.config.RabbitMQConfig;
+import com.ou.oulib.infras.event.ActionMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -10,20 +12,21 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-@ConditionalOnProperty(name = "app.worker.enabled", havingValue = "true")
+//@ConditionalOnProperty(name = "app.worker.enabled", havingValue = "true")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ActionConsumer {
 
 
-//
-//    @RabbitListener(queues = RabbitMQConfig.ACTION_QUEUE)
-//    public void handle(ActionMessage message) {
+
+    @RabbitListener(queues = RabbitMQConfig.NOTIFICATION_CREATED_QUEUE)
+    public void handle(ActionMessage message) {
 //        try {
 //            actionWorker.handle(message);
 //        } catch (Exception e) {
 //            log.error("Failed to process message {}", message, e);
 //            throw e; // để Rabbit retry
 //        }
-//    }
+        System.out.println("Message received in ActionConsumer: " + message);
+    }
 }

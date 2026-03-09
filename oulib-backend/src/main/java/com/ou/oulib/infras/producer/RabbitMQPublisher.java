@@ -1,5 +1,7 @@
 package com.ou.oulib.infras.producer;
 
+import com.ou.oulib.config.RabbitMQConfig;
+import com.ou.oulib.infras.event.ActionMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -13,12 +15,12 @@ public class RabbitMQPublisher {
 
     RabbitTemplate rabbitTemplate;
 
-//    public void publishActionMessage(ActionMessage message) {
-//        rabbitTemplate.convertAndSend(
-//                RabbitMQConfig.ACTION_EXCHANGE,
-//                RabbitMQConfig.ACTION_ROUTING_KEY,
-//                message
-//        );
-//    }
+    public void publishActionMessage(ActionMessage message) {
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.NOTIFICATION_EXCHANGE,
+                RabbitMQConfig.NOTIFICATION_CREATED_ROUTING_KEY,
+                message
+        );
+    }
 }
 

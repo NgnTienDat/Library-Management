@@ -28,6 +28,12 @@ spring:
       database: 0
       timeout: 1000 # milliseconds
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: 5672
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+
 app:
   admin:
     email: ${ADMIN_EMAIL}
