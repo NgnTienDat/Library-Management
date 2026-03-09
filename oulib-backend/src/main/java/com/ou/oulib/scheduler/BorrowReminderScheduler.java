@@ -86,21 +86,23 @@ public class BorrowReminderScheduler {
      * Queries borrow records that are due within 3 minutes and publishes reminder messages.
      */
     @Scheduled(cron = "0 * * * * *") // Run every minute
-    @Transactional(readOnly = true)
+    @Transactional
     public void sendBorrowReminders() {
         log.info("Starting borrow reminder scheduler...");
 
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime reminderTime = now.plusMinutes(3);
+        LocalDateTime reminderTime = now.plusMinutes(2);
 
         List<BorrowRecord> recordsDueSoon = borrowRecordRepository
-                .findByStatusAndReturnDateIsNullAndDueDateBetween(BorrowStatus.BORROWING, now, reminderTime);
+                .findByStatusAndReturnDateIsNullAndReminderSentFalseAndDueDateBetween(
+                        BorrowStatus.BORROWING, now, reminderTime);
 
         log.info("Found {} borrow records due within 3 minutes ({})", recordsDueSoon.size(), reminderTime);
 
         for (BorrowRecord record : recordsDueSoon) {
             try {
                 borrowReminderProducer.publishBorrowReminder(record.getId());
+                record.setReminderSent(true);
                 log.debug("Published reminder for borrow record: {}", record.getId());
             } catch (Exception e) {
                 log.error("Failed to publish reminder for borrow record: {}", record.getId(), e);

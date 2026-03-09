@@ -16,5 +16,5 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Stri
     boolean existsByBorrowerIdAndStatus(String userId, BorrowStatus status);
     Optional<BorrowRecord> findByBorrowerIdAndBookCopyIdAndStatus(String userId, String bookId, BorrowStatus status);
     // List<BorrowRecord> findByStatusAndReturnDateIsNullAndDueDate(BorrowStatus status, LocalDate dueDate);
-    List<BorrowRecord> findByStatusAndReturnDateIsNullAndDueDateBetween(BorrowStatus status, LocalDateTime start, LocalDateTime end);
+    List<BorrowRecord> findByStatusAndReturnDateIsNullAndReminderSentFalseAndDueDateBetween(BorrowStatus status, LocalDateTime start, LocalDateTime end);
 }

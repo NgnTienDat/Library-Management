@@ -49,6 +49,10 @@ public class BorrowRecord {
     Instant createdAt;
     Instant updatedAt;
 
+    @Column(nullable = false)
+    @Builder.Default
+    boolean reminderSent = false;
+
     @PrePersist
     void onCreate() {
         createdAt = Instant.now();
