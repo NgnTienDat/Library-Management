@@ -5,6 +5,8 @@ import com.ou.oulib.enums.BorrowStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -13,4 +15,6 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Stri
     boolean existsByBorrowerIdAndBookCopyIdAndStatus(String userId, String bookId, BorrowStatus status);
     boolean existsByBorrowerIdAndStatus(String userId, BorrowStatus status);
     Optional<BorrowRecord> findByBorrowerIdAndBookCopyIdAndStatus(String userId, String bookId, BorrowStatus status);
+    // List<BorrowRecord> findByStatusAndReturnDateIsNullAndDueDate(BorrowStatus status, LocalDate dueDate);
+    List<BorrowRecord> findByStatusAndReturnDateIsNullAndDueDateBetween(BorrowStatus status, LocalDateTime start, LocalDateTime end);
 }

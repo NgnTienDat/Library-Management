@@ -5,9 +5,10 @@ import lombok.Builder;
 import java.time.Instant;
 
 @Builder
-public record ActionMessage(
+public record  RemindNotification(
         String userId,
-        String postId,
-        String actionType,
+        String fullName,
+        String bookBarcode,
+        String bookTitle,
         Instant createdAt
 ) {}

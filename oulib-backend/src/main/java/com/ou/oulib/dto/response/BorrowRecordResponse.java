@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -15,6 +16,7 @@ public class BorrowRecordResponse {
     String id;
     String barcode;
     LocalDate borrowDate;
-    LocalDate dueDate;
+    // LocalDate duDate;
+    LocalDateTime dueDate;
     BorrowStatus status;
 }
