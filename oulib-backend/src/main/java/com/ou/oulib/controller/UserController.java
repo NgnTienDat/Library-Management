@@ -27,13 +27,6 @@ public class UserController {
 
     UserService userService;
 
-
-    @GetMapping("/health")
-    public String healthCheck() {
-        return "App is up and running!";
-    }
-
-
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createUser(@RequestBody @Valid UserCreationRequest userRequest) {
 
