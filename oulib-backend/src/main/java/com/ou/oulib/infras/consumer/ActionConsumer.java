@@ -1,7 +1,7 @@
 package com.ou.oulib.infras.consumer;
 
 import com.ou.oulib.config.RabbitMQConfig;
-import com.ou.oulib.infras.event.ActionMessage;
+import com.ou.oulib.infras.event.RemindNotification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,7 +20,7 @@ public class ActionConsumer {
 
 
     @RabbitListener(queues = RabbitMQConfig.NOTIFICATION_CREATED_QUEUE)
-    public void handle(ActionMessage message) {
+    public void handle(RemindNotification message) {
 //        try {
 //            actionWorker.handle(message);
 //        } catch (Exception e) {

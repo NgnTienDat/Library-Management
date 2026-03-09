@@ -11,7 +11,7 @@ import com.ou.oulib.enums.BorrowStatus;
 import com.ou.oulib.enums.ErrorCode;
 import com.ou.oulib.enums.UserStatus;
 import com.ou.oulib.exception.AppException;
-import com.ou.oulib.infras.event.ActionMessage;
+import com.ou.oulib.infras.event.RemindNotification;
 import com.ou.oulib.infras.producer.RabbitMQPublisher;
 import com.ou.oulib.mapper.BorrowRecordMapper;
 import com.ou.oulib.repository.BookCopyRepository;
@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,13 +46,14 @@ public class BorrowService {
 
 
     public void rabbitmqConnectionCheck() {
-        ActionMessage actionMessage = ActionMessage.builder()
-                .postId("test-post-id")
-                .actionType("TEST_ACTION")
+        RemindNotification remindNotification = RemindNotification.builder()
                 .userId("test-user-id")
+                .fullName("Test User")
+                .bookBarcode("test-book-barcode")
+                .bookTitle("Test Book Title")
                 .createdAt(Instant.now())
                 .build();
-        rabbitMQPublisher.publishActionMessage(actionMessage);
+        rabbitMQPublisher.publishActionMessage(remindNotification);
 
     }
 
@@ -96,7 +98,8 @@ public class BorrowService {
                     .librarian(librarian)
                     .bookCopy(bookCopy)
                     .borrowDate(now)
-                    .dueDate(now.plusDays(14))
+                    .dueDate(LocalDateTime.now().plusMinutes(10))
+                    // .dueDate(now.plusDays(14))
                     .status(BorrowStatus.BORROWING)
                     .build();
 

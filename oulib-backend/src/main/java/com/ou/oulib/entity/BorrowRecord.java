@@ -8,6 +8,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +43,8 @@ public class BorrowRecord {
     BorrowStatus status;
 
     LocalDate borrowDate;
-    LocalDate dueDate;
+    // LocalDate dueDate;
+    LocalDateTime dueDate;
     LocalDate returnDate;
     Instant createdAt;
     Instant updatedAt;
