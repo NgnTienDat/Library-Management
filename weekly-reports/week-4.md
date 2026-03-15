@@ -1,6 +1,6 @@
-# Báo cáo Tuần 3
+# Báo cáo Tuần 4
 
-**Tuần:** 3 (02/03/2026 - 08/03/2026)   
+**Tuần:** 4 (09/03/2026 - 15/03/2026)   
 **Nhóm:** Library Management / 5   
 **Đề tài:** C1 - Hệ thống quản lý thư viện số (Library Management)  
 **Nhóm trưởng:** Nguyễn Tiến Đạt - 2251012034
@@ -9,16 +9,16 @@
 ## 1. Công việc đã hoàn thành 
 | Thành viên | MSSV | Công việc | Link Commit/PR | 
 |------------|------|-----------|----------------| 
-| Nguyễn Tiến Đạt | 2251012034 | Thiết kế database | [9daef38](https://github.com/NgnTienDat/Library-Management/commit/9daef38bbaa3f56e901df0e9fc9ee97b5b685bc8) | 
-| Phạm Minh Hạnh | 2151053015 | Thiết kế sơ đồ kiến trúc C4 model | [a8add4c](https://github.com/NgnTienDat/Library-Management/commit/a8add4c0fa6224f3a526c1c7cb223e77dc02c5b5) | 
-| Phạm Tấn Thành | 2351050163 | Viết ADR | [1201d94](https://github.com/NgnTienDat/Library-Management/commit/1201d94c90a1f29cefc16cec6beedb5e7826dc87) | 
+| Nguyễn Tiến Đạt | 2251012034 | Xây dựng Backend | [8c6360e](https://github.com/NgnTienDat/Library-Management/commit/8c6360ed7cf5b6debad5ddb939dfcc6f4f9aa871) | 
+| Phạm Minh Hạnh | 2151053015 | Thiết kế, vẽ UI | [a8add4c](https://github.com/NgnTienDat/Library-Management/commit/a8add4c0fa6224f3a526c1c7cb223e77dc02c5b5) | 
+| Phạm Tấn Thành | 2351050163 | Xây dựng Backend | [ghi789](75a3e37124254bd020bbcb6dc33544f0e4dada55) | 
 --- 
 ## 2. Tiến độ tổng thể 
 | Hạng mục | Trạng thái | % | 
 |----------|------------|---| 
 | Phân tích yêu cầu | Hoàn thành | 100% | 
 | Thiết kế kiến trúc | Hoàn thành | 100% | 
-| Backend API | Đang làm | 40% | 
+| Backend API | Đang làm | 50% | 
 | Frontend UI | Chưa bắt đầu | 0% | 
 | Docker | Chưa bắt đầu | 0% | 
 | Testing | Chưa bắt đầu | 0% | 
@@ -28,12 +28,12 @@
 | Thành viên | Công việc dự kiến | 
 |------------|-------------------| 
 | Nguyễn Tiến Đạt | Xây dựng Backend | 
-| Phạm Minh Hạnh | Thiết kế, vẽ UI | 
+| Phạm Minh Hạnh | Xây dựng Frontend | 
 | Phạm Tấn Thành | Xây dựng Backend | 
 
 
 
 
 --- 
-*Ngày nộp: 08/03/2026*   
+*Ngày nộp: 15/03/2026*   
 *Xác nhận của Nhóm trưởng: Nguyễn Tiến Đạt*
