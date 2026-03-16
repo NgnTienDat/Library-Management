@@ -8,8 +8,8 @@ Hệ thống quản lý thư viện số được xây dựng nhằm hỗ trợ 
 | MSSV | Họ tên | Vai trò |
 |------------|------|-----------|
 | Nguyễn Tiến Đạt | 2251012034 | Full-stack Developer |
-| Phạm Minh Hạnh | 2151053015 | Full-stack Developer |
-| Phạm Tấn Thành | 2351050163 | Full-stack Developer |
+| Phạm Minh Hạnh | 2151053015 | Frontend Developer |
+| Phạm Tấn Thành | 2351050163 | Backend Developer |
 
 
 ## Công nghệ sử dụng
