@@ -27,9 +27,9 @@
 ## 3. Kế hoạch tuần tới
 | Thành viên | Công việc dự kiến | 
 |------------|-------------------| 
-| Nguyễn Tiến Đạt | Xây dựng Backend | 
+| Nguyễn Tiến Đạt | Xây dựng chức năng đề xuất sách | 
 | Phạm Minh Hạnh | Xây dựng Frontend | 
-| Phạm Tấn Thành | Xây dựng Backend | 
+| Phạm Tấn Thành | Xây dựng chức năng báo cáo thống kê | 
 
 
 
