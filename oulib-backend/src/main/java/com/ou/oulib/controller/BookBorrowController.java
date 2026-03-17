@@ -1,6 +1,7 @@
 package com.ou.oulib.controller;
 
 import com.ou.oulib.dto.request.BorrowRequest;
+import com.ou.oulib.dto.request.ReturnRequest;
 import com.ou.oulib.service.BorrowService;
 import com.ou.oulib.utils.ApiResponse;
 import com.ou.oulib.utils.ResponseUtils;
@@ -32,10 +33,9 @@ public class BookBorrowController {
 
     @PostMapping("/return")
     public ResponseEntity<ApiResponse<?>> returnBook(
-            @AuthenticationPrincipal Jwt jwt
-    ) {
-        // TODO: Implement return logic
-        return ResponseEntity.ok(ResponseUtils.ok("Return endpoint - not yet implemented"));
+            @RequestBody @Valid ReturnRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(ResponseUtils.ok(borrowService.returnBook(request, jwt)));
     }
 
 }

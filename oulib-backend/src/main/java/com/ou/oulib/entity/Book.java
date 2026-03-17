@@ -71,6 +71,7 @@ public class Book {
     @PrePersist
     void onCreate() {
         createdAt = Instant.now();
+        active = true;
     }
 
     @PreUpdate

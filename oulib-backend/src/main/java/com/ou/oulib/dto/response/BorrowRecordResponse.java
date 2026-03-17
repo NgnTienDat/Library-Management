@@ -18,5 +18,6 @@ public class BorrowRecordResponse {
     LocalDate borrowDate;
     // LocalDate duDate;
     LocalDateTime dueDate;
+    LocalDate returnDate;
     BorrowStatus status;
 }

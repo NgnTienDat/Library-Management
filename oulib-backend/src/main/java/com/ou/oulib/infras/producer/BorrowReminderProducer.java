@@ -17,7 +17,7 @@ public class BorrowReminderProducer {
     RabbitTemplate rabbitTemplate;
 
     public void publishBorrowReminder(String borrowRecordId) {
-        log.info("Publishing borrow reminder for record: {}", borrowRecordId);
+//        log.info("Publishing borrow reminder for record: {}", borrowRecordId);
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.BORROW_EXCHANGE,
                 RabbitMQConfig.BORROW_REMINDER_ROUTING_KEY,
