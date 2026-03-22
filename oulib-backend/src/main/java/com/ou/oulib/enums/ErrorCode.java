@@ -36,6 +36,8 @@ public enum ErrorCode {
     BARCODE_ALREADY_EXISTS(1039, "One or more barcodes already exist", HttpStatus.CONFLICT),
     USER_HAS_OVERDUE_BOOK(1040, "You have overdue books. Please return them before borrowing new ones.", HttpStatus.FORBIDDEN),
     USER_INACTIVE(1041, "User account is inactivated", HttpStatus.FORBIDDEN),
+    BOOK_NOT_BORROWED(1042, "This book copy is not currently borrowed", HttpStatus.BAD_REQUEST),
+    DUPLICATE_BARCODE_IN_REQUEST(1043, "Duplicate barcodes found in request", HttpStatus.BAD_REQUEST),
 
     // Validation: 2XXX
     INVALID_MESSAGE_KEY(2001, "Invalid Message Key", HttpStatus.BAD_REQUEST),
