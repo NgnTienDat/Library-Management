@@ -1,6 +1,7 @@
 package com.ou.oulib.service;
 
 import com.ou.oulib.dto.request.BorrowRequest;
+import com.ou.oulib.dto.request.ReturnRequest;
 import com.ou.oulib.dto.response.BorrowRecordResponse;
 import com.ou.oulib.entity.Book;
 import com.ou.oulib.entity.BookCopy;
@@ -116,9 +117,65 @@ public class BorrowService {
     }
 
 
+    /**
+     *      if (LocalDateTime.now().isAfter(record.getDueDate())) {
+     *          record.setStatus(BorrowStatus.OVERDUE);
+     *      } else {
+     *          record.setStatus(BorrowStatus.RETURNED);
+     *      }
+     *      Đoạn này sửa lại cho chạy scheduler kiểm tra nếu quá hạn thì set status thành OVERDUE.
+     *      Không nên set OVERDUE nếu lúc trả sách đã quá hạn, nếu không thì người đó sẽ không mượn được sách nữa dù đã trả rồi.
+     */
+
+    @Transactional
+    @PreAuthorize("hasRole('LIBRARIAN')")
+    public List<BorrowRecordResponse> returnBook(ReturnRequest request, Jwt jwt) {
+        List<String> barcodes = request.getBarcodes();
+
+        if (barcodes.size() != barcodes.stream().distinct().count())
+            throw new AppException(ErrorCode.DUPLICATE_BARCODE_IN_REQUEST);
+
+        List<BorrowRecordResponse> responses = new ArrayList<>();
+        LocalDate now = LocalDate.now();
+
+        for (String barcode : barcodes) {
+            BookCopy bookCopy = bookCopyRepository.findByBarcode(barcode)
+                    .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
+
+            if (bookCopy.getStatus() != BookCopyStatus.BORROWED)
+                throw new AppException(ErrorCode.BOOK_NOT_BORROWED);
+
+            BorrowRecord record = borrowRecordRepository.findByBookCopyIdAndStatus(
+                            bookCopy.getId(), BorrowStatus.BORROWING)
+                    .orElseThrow(() -> new AppException(ErrorCode.BORROW_RECORD_NOT_FOUND));
+
+            record.setReturnDate(now);
+            record.setStatus(BorrowStatus.RETURNED);
+//            if (LocalDateTime.now().isAfter(record.getDueDate())) {
+//                record.setStatus(BorrowStatus.OVERDUE);
+//            } else {
+//                record.setStatus(BorrowStatus.RETURNED);
+//            }
+
+            Book book = bookCopy.getBook();
+            bookCopy.setStatus(BookCopyStatus.AVAILABLE);
+            book.setAvailableCopies(book.getAvailableCopies() + 1);
+
+            User borrower = record.getBorrower();
+            borrower.setBorrowQuota(borrower.getBorrowQuota() + 1);
+
+            responses.add(borrowRecordMapper.toBorrowRecordResponse(record));
+        }
+
+        return responses;
+    }
+
+
     private User getAuthenticatedUser(Jwt jwt) {
         String email = jwt.getSubject();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
+
+
 }
