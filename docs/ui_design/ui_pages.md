@@ -30,3 +30,15 @@
 
 !\[Profile](Profile.png)
 
+
+
+\## Edit Profile
+
+!\[Edit Profile](Edit\_Profile.png)
+
+
+
+\## Change Password
+
+!\[Change Password](Change\_Password.png)
+
