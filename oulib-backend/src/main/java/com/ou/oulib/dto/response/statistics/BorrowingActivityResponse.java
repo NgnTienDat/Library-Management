@@ -1,0 +1,15 @@
+package com.ou.oulib.dto.response.statistics;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class BorrowingActivityResponse {
+    String time;
+    long borrowCount;
+    long returnCount;
+}

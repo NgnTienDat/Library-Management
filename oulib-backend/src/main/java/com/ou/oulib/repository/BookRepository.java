@@ -1,6 +1,7 @@
 package com.ou.oulib.repository;
 
 import com.ou.oulib.entity.Book;
+import com.ou.oulib.dto.response.statistics.CategoryDistributionResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -93,4 +94,17 @@ public interface BookRepository extends JpaRepository<Book, String>, JpaSpecific
             @Param("authorId") String authorId,
             @Param("excludedBooks") List<Book> excludedBooks,
             Pageable pageable);
+
+        @Query("""
+                        SELECT new com.ou.oulib.dto.response.statistics.CategoryDistributionResponse(
+                                c.id,
+                                c.name,
+                                COUNT(b.id)
+                        )
+                        FROM Book b
+                        JOIN b.category c
+                        GROUP BY c.id, c.name
+                        ORDER BY c.name ASC
+                        """)
+        List<CategoryDistributionResponse> getCategoryDistribution();
 }
