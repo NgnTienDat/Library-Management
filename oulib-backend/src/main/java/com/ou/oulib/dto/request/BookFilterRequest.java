@@ -1,0 +1,23 @@
+package com.ou.oulib.dto.request;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class BookFilterRequest {
+    String keyword;
+    String categoryId;
+
+    @Builder.Default
+    List<String> authorIds = new ArrayList<>();
+
+    int page;
+    int size;
+}

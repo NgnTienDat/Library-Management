@@ -1,6 +1,7 @@
 package com.ou.oulib.controller;
 
 import com.ou.oulib.dto.request.BookCreationRequest;
+import com.ou.oulib.dto.request.BookFilterRequest;
 import com.ou.oulib.dto.request.BookUpdateRequest;
 import com.ou.oulib.dto.response.BookResponse;
 import com.ou.oulib.service.BookService;
@@ -15,6 +16,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Arrays;
+import java.util.List;
 
 
 @RestController
@@ -36,13 +40,35 @@ public class BookController {
 
     @GetMapping
     public ResponseEntity<?> getBooks(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String categoryId,
+            @RequestParam(required = false) String authorIds,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
+        List<String> parsedAuthorIds = parseAuthorIds(authorIds);
+        BookFilterRequest request = BookFilterRequest.builder()
+                .keyword(keyword)
+                .categoryId(categoryId)
+                .authorIds(parsedAuthorIds)
+                .page(page)
+                .size(size)
+                .build();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ResponseUtils.ok(bookService.getBooks(page, size)));
+                .body(ResponseUtils.ok(bookService.getBooks(request)));
+    }
+
+    private List<String> parseAuthorIds(String authorIds) {
+        if (authorIds == null || authorIds.isBlank()) {
+            return List.of();
+        }
+
+        return Arrays.stream(authorIds.split(","))
+                .map(String::trim)
+                .filter(id -> !id.isBlank())
+                .toList();
     }
 
     @GetMapping("/{id}")
