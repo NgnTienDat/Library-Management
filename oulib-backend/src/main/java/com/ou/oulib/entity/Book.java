@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Table(name = "books")
@@ -46,6 +47,7 @@ public class Book {
     Integer availableCopies;
 
     @Builder.Default
+    @BatchSize(size = 20)
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     List<BookCopy> copies = new ArrayList<>();
 
@@ -54,6 +56,7 @@ public class Book {
     Category category;
 
     @Builder.Default
+    @BatchSize(size = 20)
     @ManyToMany
     @JoinTable(
             name = "book_authors",

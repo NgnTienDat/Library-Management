@@ -2,6 +2,7 @@ package com.ou.oulib.service;
 
 import com.ou.oulib.dto.request.AuthorRefRequest;
 import com.ou.oulib.dto.request.BookCreationRequest;
+import com.ou.oulib.dto.request.BookFilterRequest;
 import com.ou.oulib.dto.request.BookUpdateRequest;
 import com.ou.oulib.dto.response.BookResponse;
 import com.ou.oulib.entity.Author;
@@ -16,6 +17,7 @@ import com.ou.oulib.repository.AuthorRepository;
 import com.ou.oulib.repository.BookCopyRepository;
 import com.ou.oulib.repository.BookRepository;
 import com.ou.oulib.repository.CategoryRepository;
+import com.ou.oulib.specification.BookSpecification;
 import com.ou.oulib.utils.Helper;
 
 import com.ou.oulib.utils.PageResponse;
@@ -145,8 +147,17 @@ public class BookService {
 
     @Transactional(readOnly = true)
     public PageResponse<BookResponse> getBooks(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Book> books = bookRepository.findAll(pageable);
+        BookFilterRequest request = BookFilterRequest.builder()
+                .page(page)
+                .size(size)
+                .build();
+        return getBooks(request);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<BookResponse> getBooks(BookFilterRequest request) {
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
+        Page<Book> books = bookRepository.findAll(BookSpecification.build(request), pageable);
         return PageResponseUtils.build(books, bookMapper::toBookResponse);
     }
 
