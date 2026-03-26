@@ -52,7 +52,7 @@ public class BookService {
     CloudinaryUploadService cloudinaryUploadService;
 
     @Transactional
-    @PreAuthorize("hasRole('SYSADMIN')")
+    @PreAuthorize("hasRole('LIBRARIAN')")
     public BookResponse addNewBook(BookCreationRequest request,
             MultipartFile thumbnail) {
 

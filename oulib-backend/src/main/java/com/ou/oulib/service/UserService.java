@@ -4,6 +4,7 @@ package com.ou.oulib.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.ou.oulib.dto.request.UserCreationRequest;
+import com.ou.oulib.dto.request.UserStatusUpdateRequest;
 import com.ou.oulib.dto.request.UserUpdateRequest;
 import com.ou.oulib.dto.response.UserResponse;
 import com.ou.oulib.entity.User;
@@ -13,6 +14,8 @@ import com.ou.oulib.enums.UserStatus;
 import com.ou.oulib.exception.AppException;
 import com.ou.oulib.mapper.UserMapper;
 import com.ou.oulib.repository.UserRepository;
+import com.ou.oulib.utils.PageResponse;
+import com.ou.oulib.utils.PageResponseUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -72,6 +75,25 @@ public class UserService {
         user.setRole(UserRole.LIBRARIAN);
         user.setPassword(this.passwordEncoder.encode(userCreation.getPassword()));
 
+        userRepository.save(user);
+        return userMapper.toResponse(user);
+    }
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('SYSADMIN','LIBRARIAN')")
+    public PageResponse<UserResponse> getUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> users = userRepository.findAll(pageable);
+        return PageResponseUtils.build(users, userMapper::toResponse);
+    }
+
+    @Transactional
+    @PreAuthorize("hasAnyRole('SYSADMIN','LIBRARIAN')")
+    public UserResponse updateUserStatus(String userId, UserStatusUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        user.setStatus(request.getStatus());
         userRepository.save(user);
         return userMapper.toResponse(user);
     }

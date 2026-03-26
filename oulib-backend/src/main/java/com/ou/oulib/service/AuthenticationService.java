@@ -86,6 +86,7 @@ public class AuthenticationService {
             String jti = signedToken.getJWTClaimsSet().getJWTID();
             Date expiryTime = signedToken.getJWTClaimsSet().getExpirationTime();
 
+            // Thời gian còn lại là
             long ttlSeconds = (expiryTime.getTime() - System.currentTimeMillis()) / 1000;
 
             if (ttlSeconds > 0) {

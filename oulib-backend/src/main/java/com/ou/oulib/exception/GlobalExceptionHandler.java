@@ -82,12 +82,7 @@ public class GlobalExceptionHandler {
         for (FieldError error : exception.getBindingResult().getFieldErrors()) {
             String key = error.getDefaultMessage();
 
-            ErrorCode errorCode;
-            try {
-                errorCode = ErrorCode.valueOf(key.trim());
-            } catch (IllegalArgumentException | NullPointerException e) {
-                errorCode = ErrorCode.INVALID_MESSAGE_KEY;
-            }
+            ErrorCode errorCode = resolveValidationErrorCode(error, key);
 
             errors.put(error.getField(), errorCode.getMessage());
         }
@@ -99,6 +94,27 @@ public class GlobalExceptionHandler {
 
 
         return ResponseEntity.badRequest().body(response);
+    }
+
+    private ErrorCode resolveValidationErrorCode(FieldError error, String messageKey) {
+        if (messageKey != null) {
+            try {
+                return ErrorCode.valueOf(messageKey.trim());
+            } catch (IllegalArgumentException ignored) {
+                // Fall through to constraint-based mapping.
+            }
+        }
+
+        String constraint = error.getCode();
+        if (constraint == null) {
+            return ErrorCode.INVALID_MESSAGE_KEY;
+        }
+
+        return switch (constraint) {
+            case "Email" -> ErrorCode.INVALID_EMAIL;
+            case "NotBlank", "NotNull" -> ErrorCode.NOT_BLANK;
+            default -> ErrorCode.INVALID_MESSAGE_KEY;
+        };
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)

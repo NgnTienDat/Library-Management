@@ -53,7 +53,7 @@ Consumes `multipart/form-data` with request parts:
 
 ### 7. Authentication & Authorization Summary
 - Authentication: `Requires JWT`
-- Authorization: `SYSADMIN` only (enforced at service layer via `@PreAuthorize("hasRole('SYSADMIN')")`)
+- Authorization: `LIBRARIAN` only (enforced at service layer via `@PreAuthorize("hasRole('LIBRARIAN')")`)
 
 ### 8. Response Codes
 
@@ -68,7 +68,7 @@ Consumes `multipart/form-data` with request parts:
 - `403 Forbidden`
   - Internal code: `1037`
   - Message: `You do not have permission to perform this action`
-  - Condition: Authenticated user is not `SYSADMIN`.
+  - Condition: Authenticated user is not `LIBRARIAN`.
 - `400 Bad Request`
   - Internal code: `1038`
   - Message: `The number of copy IDs does not match the total copies`
@@ -416,7 +416,7 @@ Behavior detail for `thumbnail` update:
 
 ### 7. Authentication & Authorization Summary
 - Authentication: `Requires JWT`
-- Authorization: `SYSADMIN` only (enforced at service layer via `@PreAuthorize("hasRole('SYSADMIN')")`)
+- Authorization: `LIBRARIAN` only (enforced at service layer via `@PreAuthorize("hasRole('LIBRARIAN')")`)
 
 ### 8. Response Codes
 
@@ -431,7 +431,7 @@ Behavior detail for `thumbnail` update:
 - `403 Forbidden`
   - Internal code: `1037`
   - Message: `You do not have permission to perform this action`
-  - Condition: Authenticated user is not `SYSADMIN`.
+  - Condition: Authenticated user is not `LIBRARIAN`.
 - `404 Not Found`
   - Internal code: `1030`
   - Message: `Book not found`
@@ -547,7 +547,7 @@ curl -X PATCH "http://localhost:8080/api/v1/books/book-001" \
 
 ### 7. Authentication & Authorization Summary
 - Authentication: `Requires JWT`
-- Authorization: `SYSADMIN` only (enforced at service layer via `@PreAuthorize("hasRole('SYSADMIN')")`)
+- Authorization: `LIBRARIAN` only (enforced at service layer via `@PreAuthorize("hasRole('LIBRARIAN')")`)
 
 ### 8. Response Codes
 
@@ -562,7 +562,7 @@ curl -X PATCH "http://localhost:8080/api/v1/books/book-001" \
 - `403 Forbidden`
   - Internal code: `1037`
   - Message: `You do not have permission to perform this action`
-  - Condition: Authenticated user is not `SYSADMIN`.
+  - Condition: Authenticated user is not `LIBRARIAN`.
 - `404 Not Found`
   - Internal code: `1030`
   - Message: `Book not found`
