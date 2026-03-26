@@ -319,3 +319,213 @@ curl -X PUT "http://localhost:8080/api/v1/users/me" \
   }
 }
 ```
+
+---
+
+## GET /api/v1/users
+
+### 1. Title
+- v1 Get User List (Paginated)
+
+### 2. Endpoint
+- `/api/v1/users`
+
+### 3. Method
+- `GET`
+
+### 4. URL Parameters
+- `None`
+
+### 5. Query Parameters
+
+| Field | Type | Required | Default | Description |
+|---|---|---|---|---|
+| page | integer | false | 0 | Zero-based page index. |
+| size | integer | false | 10 | Number of records per page. |
+
+### 6. Header Parameters
+- `Content-Type: application/json`
+- `Authorization: Bearer <JWT_TOKEN>`
+
+### 7. Authentication & Authorization Summary
+- Authentication: `Requires JWT`
+- Authorization: `Requires role SYSADMIN or LIBRARIAN`
+
+### 8. Response Codes
+
+#### ✅ Success Responses
+- `200 OK`: User list returned with pagination metadata.
+
+#### ❌ Error Responses
+- `401 Unauthorized`
+  - Internal code: `1003`
+  - Message: `Unauthenticated`
+  - Condition: Missing/invalid/expired/blacklisted JWT.
+- `403 Forbidden`
+  - Internal code: `1037`
+  - Message: `You do not have permission to perform this action`
+  - Condition: Authenticated user does not have required role (`SYSADMIN`/`LIBRARIAN`).
+- `500 Internal Server Error`
+  - Internal code: `1000`
+  - Message: `Uncategorized Error`
+  - Condition: Any unhandled runtime exception.
+
+### 9. Sample Calls
+
+#### cURL Example
+```bash
+curl -X GET "http://localhost:8080/api/v1/users?page=0&size=10" \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+```
+
+#### Request JSON
+```json
+None
+```
+
+#### Success Response JSON
+```json
+{
+  "code": 200,
+  "message": "Success",
+  "result": {
+    "content": [
+      {
+        "id": "f5dfc41e-920b-4d50-a9ec-90ce0410f1a0",
+        "username": "reader01",
+        "fullName": "New User",
+        "email": "new.user@example.com",
+        "role": "USER",
+        "avatar": "https://cdn.example.com/avatar.png",
+        "status": "ACTIVE",
+        "active": true,
+        "createdAt": "2026-03-25T09:10:00Z"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "first": true,
+    "last": true,
+    "empty": false
+  }
+}
+```
+
+#### Error Response JSON
+```json
+{
+  "code": 1037,
+  "message": "You do not have permission to perform this action",
+  "result": null
+}
+```
+
+---
+
+## PUT /api/v1/users/{id}/status
+
+### 1. Title
+- v1 Update User Status
+
+### 2. Endpoint
+- `/api/v1/users/{id}/status`
+
+### 3. Method
+- `PUT`
+
+### 4. URL Parameters
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| id | string | true | User ID (UUID). |
+
+### 5. Message Payload
+Based on `UserStatusUpdateRequest`:
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| status | string | true | New status value. Supported values: `ACTIVE`, `SUSPENDED`, `DELETED`, `PRIVATE`. |
+
+### 6. Header Parameters
+- `Content-Type: application/json`
+- `Authorization: Bearer <JWT_TOKEN>`
+
+### 7. Authentication & Authorization Summary
+- Authentication: `Requires JWT`
+- Authorization: `Requires role SYSADMIN or LIBRARIAN`
+
+### 8. Response Codes
+
+#### ✅ Success Responses
+- `200 OK`: User status updated successfully.
+
+#### ❌ Error Responses
+- `400 Bad Request`
+  - Internal code: `400`
+  - Message: `Validation Failed`
+  - Condition: Missing `status` in request body.
+- `401 Unauthorized`
+  - Internal code: `1003`
+  - Message: `Unauthenticated`
+  - Condition: Missing/invalid/expired/blacklisted JWT.
+- `403 Forbidden`
+  - Internal code: `1037`
+  - Message: `You do not have permission to perform this action`
+  - Condition: Authenticated user does not have required role (`SYSADMIN`/`LIBRARIAN`).
+- `404 Not Found`
+  - Internal code: `1001`
+  - Message: `User not found`
+  - Condition: User ID does not exist.
+- `500 Internal Server Error`
+  - Internal code: `1000`
+  - Message: `Uncategorized Error`
+  - Condition: Any unhandled runtime exception.
+
+### 9. Sample Calls
+
+#### cURL Example
+```bash
+curl -X PUT "http://localhost:8080/api/v1/users/f5dfc41e-920b-4d50-a9ec-90ce0410f1a0/status" \
+  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "SUSPENDED"
+  }'
+```
+
+#### Request JSON
+```json
+{
+  "status": "SUSPENDED"
+}
+```
+
+#### Success Response JSON
+```json
+{
+  "code": 200,
+  "message": "Success",
+  "result": {
+    "id": "f5dfc41e-920b-4d50-a9ec-90ce0410f1a0",
+    "username": "reader01",
+    "fullName": "New User",
+    "email": "new.user@example.com",
+    "role": "USER",
+    "avatar": "https://cdn.example.com/avatar.png",
+    "status": "SUSPENDED",
+    "active": true,
+    "createdAt": "2026-03-25T09:10:00Z"
+  }
+}
+```
+
+#### Error Response JSON
+```json
+{
+  "code": 1001,
+  "message": "User not found",
+  "result": null
+}
+```
