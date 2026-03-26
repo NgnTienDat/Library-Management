@@ -1,10 +1,12 @@
 package com.ou.oulib.controller;
 
 import com.ou.oulib.dto.request.UserCreationRequest;
+import com.ou.oulib.dto.request.UserStatusUpdateRequest;
 import com.ou.oulib.dto.request.UserUpdateRequest;
 import com.ou.oulib.dto.response.UserResponse;
 import com.ou.oulib.service.UserService;
 import com.ou.oulib.utils.ApiResponse;
+import com.ou.oulib.utils.PageResponse;
 import com.ou.oulib.utils.ResponseUtils;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -13,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +36,24 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ResponseUtils.created(userService.createUser(userRequest)));
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('SYSADMIN','LIBRARIAN')")
+    public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(ResponseUtils.ok(userService.getUsers(page, size)));
+    }
+
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('SYSADMIN','LIBRARIAN')")
+    public ResponseEntity<ApiResponse<UserResponse>> updateUserStatus(
+            @PathVariable String id,
+            @RequestBody @Valid UserStatusUpdateRequest request
+    ) {
+        return ResponseEntity.ok(ResponseUtils.ok(userService.updateUserStatus(id, request)));
     }
 
     @GetMapping("/me")

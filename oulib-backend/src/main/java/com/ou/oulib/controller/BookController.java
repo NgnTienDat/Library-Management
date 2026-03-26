@@ -29,6 +29,17 @@ public class BookController {
 
     BookService bookService;
 
+    private List<String> parseAuthorIds(String authorIds) {
+        if (authorIds == null || authorIds.isBlank()) {
+            return List.of();
+        }
+
+        return Arrays.stream(authorIds.split(","))
+                .map(String::trim)
+                .filter(id -> !id.isBlank())
+                .toList();
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<?>> addNewBook(
             @RequestPart("metadata") @Valid BookCreationRequest bookCreationRequest,
@@ -58,17 +69,6 @@ public class BookController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseUtils.ok(bookService.getBooks(request)));
-    }
-
-    private List<String> parseAuthorIds(String authorIds) {
-        if (authorIds == null || authorIds.isBlank()) {
-            return List.of();
-        }
-
-        return Arrays.stream(authorIds.split(","))
-                .map(String::trim)
-                .filter(id -> !id.isBlank())
-                .toList();
     }
 
     @GetMapping("/{id}")
