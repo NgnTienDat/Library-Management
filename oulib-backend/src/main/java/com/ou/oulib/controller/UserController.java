@@ -1,6 +1,8 @@
 package com.ou.oulib.controller;
 
 import com.ou.oulib.dto.request.UserCreationRequest;
+import com.ou.oulib.dto.request.ChangePasswordRequest;
+import com.ou.oulib.dto.request.StaffCreationRequest;
 import com.ou.oulib.dto.request.UserStatusUpdateRequest;
 import com.ou.oulib.dto.request.UserUpdateRequest;
 import com.ou.oulib.dto.response.UserResponse;
@@ -38,6 +40,15 @@ public class UserController {
                 .body(ResponseUtils.created(userService.createUser(userRequest)));
     }
 
+    @PostMapping("/staff")
+    @PreAuthorize("hasRole('SYSADMIN')")
+    public ResponseEntity<ApiResponse<?>> createStaff(@RequestBody @Valid StaffCreationRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ResponseUtils.created(userService.createStaff(request)));
+    }
+
+    
+
     @GetMapping
     @PreAuthorize("hasAnyRole('SYSADMIN','LIBRARIAN')")
     public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getUsers(
@@ -68,6 +79,15 @@ public class UserController {
             @RequestPart(value = "avatar", required = false) MultipartFile avatar
     ) {
         return ResponseEntity.ok(ResponseUtils.ok(userService.updateMyProfile(jwt, request, avatar)));
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody @Valid ChangePasswordRequest request
+    ) {
+        userService.changePassword(jwt, request);
+        return ResponseEntity.ok(ResponseUtils.buildResponse(null, "Password changed successfully", HttpStatus.OK));
     }
 
 
