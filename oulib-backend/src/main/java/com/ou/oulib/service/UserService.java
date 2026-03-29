@@ -4,6 +4,8 @@ package com.ou.oulib.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.ou.oulib.dto.request.UserCreationRequest;
+import com.ou.oulib.dto.request.ChangePasswordRequest;
+import com.ou.oulib.dto.request.StaffCreationRequest;
 import com.ou.oulib.dto.request.UserStatusUpdateRequest;
 import com.ou.oulib.dto.request.UserUpdateRequest;
 import com.ou.oulib.dto.response.UserResponse;
@@ -79,6 +81,33 @@ public class UserService {
         return userMapper.toResponse(user);
     }
 
+    @Transactional
+    @PreAuthorize("hasRole('SYSADMIN')")
+    public UserResponse createStaff(StaffCreationRequest request) {
+        if (this.userRepository.existsByEmail(request.getEmail())) {
+            throw new AppException(ErrorCode.USER_ALREADY_EXISTED);
+        }
+
+        if (request.getRole() != UserRole.SYSADMIN && request.getRole() != UserRole.LIBRARIAN) {
+            throw new AppException(ErrorCode.INVALID_ROLE);
+        }
+
+        User user = User.builder()
+                .email(request.getEmail())
+                .fullName(request.getFullName())
+                .role(request.getRole())
+                .password(this.passwordEncoder.encode(request.getPassword()))
+                .build();
+
+        try {
+            userRepository.save(user);
+        } catch (DataIntegrityViolationException ex) {
+            throw new AppException(ErrorCode.USER_ALREADY_EXISTED);
+        }
+
+        return userMapper.toResponse(user);
+    }
+
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('SYSADMIN','LIBRARIAN')")
     public PageResponse<UserResponse> getUsers(int page, int size) {
@@ -126,6 +155,21 @@ public class UserService {
         }
         userRepository.save(user);
         return userMapper.toResponse(user);
+    }
+
+    @Transactional
+    public void changePassword(Jwt jwt, ChangePasswordRequest request) {
+        String userEmail = jwt.getSubject();
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 
 

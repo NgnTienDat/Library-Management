@@ -45,6 +45,7 @@ public enum ErrorCode {
     INVALID_EMAIL(2003, "Invalid email address" , HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(2004, "Invalid password", HttpStatus.BAD_REQUEST),
     INVALID_NAME(2005, "Invalid name account", HttpStatus.BAD_REQUEST),
+    INVALID_ROLE(2010, "Invalid role", HttpStatus.BAD_REQUEST),
     INVALID_IMAGE_TYPE(2006, "Invalid image type", HttpStatus.BAD_REQUEST),
     INVALID_FILE_TYPE(2007, "Invalid file type", HttpStatus.BAD_REQUEST),
     INVALID_TOTAL_COPIES(2008, "Total copies must be greater than 0", HttpStatus.BAD_REQUEST),
