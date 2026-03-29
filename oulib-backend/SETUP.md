@@ -13,11 +13,20 @@ Before running this project, make sure you have installed:
 
 ## Setup Instructions
 
-### 1. Clone the Repository
+### 1a. Clone the Repository (Skip if already done and go to step 1b )
 
 ```bash
 git clone <repository-url>
 cd oulib-backend
+```
+
+### 1b. Pull the newest code from main
+
+```bash
+cd oulib-backend
+git checkout main
+git pull origin main
+git checkout -b <your_branch_name>
 ```
 
 ### 2. Create Environment File
@@ -32,18 +41,22 @@ MYSQL_USER=oulib
 MYSQL_PASSWORD=oulib123
 
 # Application Database Connection
-DBMS_CONNECTION=jdbc:mysql://localhost:3307/oulib?useSSL=false&serverTimezone=UTC
+DBMS_CONNECTION=jdbc:mysql://mysql:3306/oulib
 DBMS_USERNAME=oulib
 DBMS_PASSWORD=oulib123
 
+
 # Redis Configuration
-REDIS_HOST=localhost
+REDIS_HOST=redis
 REDIS_PORT=6379
 
 
-RABBITMQ_HOST=localhost
+RABBITMQ_HOST=rabbitmq
 RABBITMQ_USERNAME=oulib
 RABBITMQ_PASSWORD=oulib
+
+MAIL_USERNAME=your_mail@gmail.com
+MAIL_PASSWORD="xxxx xxxx xxxx xxxx"
 
 # Admin Account (initial setup)
 ADMIN_EMAIL=admin@oulib.com
@@ -62,21 +75,19 @@ CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 ```
 
-> **Note**: Ask the project owner for the actual values of `SIGNER_KEY` and Cloudinary credentials.
-
 ---
 
 ## Running the Project
 
-### Option A: Development Mode (Recommended for Local Development)
+### Development Mode (Recommended for Local Development)
 
 This runs only the infrastructure services (MySQL, Redis, RabbitMQ) in Docker, and you run the Spring Boot app locally.
 
-**Step 1:** Start infrastructure services:
+**Start:** Start infrastructure services:
 ```bash
 docker-compose -f docker-compose.dev.yml up -d
 ```
-
+<!-- 
 **Step 2:** Wait for MySQL to be healthy (check with `docker ps`), then run the application:
 
 **Using Maven Wrapper (Windows):**
@@ -92,7 +103,7 @@ mvnw.cmd spring-boot:run
 **Using installed Maven:**
 ```bash
 mvn spring-boot:run
-```
+``` -->
 
 The application will be available at: `http://localhost:8080`
 
