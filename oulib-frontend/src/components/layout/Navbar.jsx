@@ -1,16 +1,21 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuthContext } from '../../contexts/AuthContext'
-import { getRoleNavItems, getRoleRedirectPath } from '../../utils/helpers'
+import { ROLE_ROUTE_PATHS, ROLES } from '../../utils/constants'
+import { getEffectiveRole, getRoleNavItems, getRoleRedirectPath } from '../../utils/helpers'
 
 function Navbar() {
 	const navigate = useNavigate()
-	const { user, logout } = useAuthContext()
-	const role = user?.role
+	const { user, isAuthenticated, logout } = useAuthContext()
+	const role = getEffectiveRole(user)
 	const navItems = getRoleNavItems(role)
+	const guestBooksPath = ROLE_ROUTE_PATHS[ROLES.USER].books
+	const visibleNavItems = isAuthenticated
+		? navItems
+		: navItems.filter((item) => item.to === guestBooksPath)
 
 	const handleLogout = () => {
 		logout()
-		navigate('/login', { replace: true })
+		navigate('/', { replace: true })
 	}
 
 	return (
@@ -24,7 +29,7 @@ function Navbar() {
 				</NavLink>
 
 				<div className='flex flex-wrap items-center gap-2 sm:justify-end'>
-					{navItems.map((item) => (
+					{visibleNavItems.map((item) => (
 						<NavLink
 							key={item.to}
 							to={item.to}
@@ -41,13 +46,23 @@ function Navbar() {
 						</NavLink>
 					))}
 
-					<button
-						type='button'
-						onClick={handleLogout}
-						className='rounded-md bg-rose-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-rose-500'
-					>
-						Đăng xuất
-					</button>
+					{isAuthenticated ? (
+						<button
+							type='button'
+							onClick={handleLogout}
+							className='rounded-md bg-rose-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-rose-500'
+						>
+							Đăng xuất
+						</button>
+					) : (
+						<button
+							type='button'
+							onClick={() => navigate('/login')}
+							className='rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-700'
+						>
+							Đăng nhập
+						</button>
+					)}
 				</div>
 			</div>
 		</nav>
