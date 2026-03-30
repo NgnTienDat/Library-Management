@@ -4,13 +4,15 @@ import DashboardPage from '../pages/admin/DashboardPage'
 import StatisticsPage from '../pages/admin/StatisticsPage'
 import UserManagementPage from '../pages/admin/UserManagementPage'
 import BorrowRecordsPage from '../pages/librarian/BorrowRecordsPage'
+import AddNewBookPage from '../pages/librarian/AddNewBookPage'
+import BookDetailPageLibrarian from '../pages/librarian/BookDetailPage'
 import LibrarianDashboardPage from '../pages/librarian/DashboardPage'
 import ManageBooksPage from '../pages/librarian/ManageBooksPage'
 import ReturnBooksPage from '../pages/librarian/ReturnBooksPage'
 import UsersPage from '../pages/librarian/UsersPage'
 import LoginPage from '../pages/LoginPage'
 import RegisterPage from '../pages/RegisterPage'
-import BookDetailPage from '../pages/user/BookDetailPage'
+import BookDetailPageUser from '../pages/user/BookDetailPage'
 import BooksPage from '../pages/user/BooksPage'
 import MyBorrowedPage from '../pages/user/MyBorrowedPage'
 import ProfilePage from '../pages/user/ProfilePage'
@@ -30,7 +32,7 @@ function AppRouter() {
 
 			<Route element={<MainLayout />}>
 				<Route path={userPaths.books} element={<BooksPage />} />
-				<Route path={`${userPaths.books}/:bookId`} element={<BookDetailPage />} />
+				<Route path={`${userPaths.books}/:bookId`} element={<BookDetailPageUser />} />
 
 				<Route element={<ProtectedRoute />}>
 					<Route path={adminPaths.dashboard} element={<DashboardPage />} />
@@ -39,6 +41,8 @@ function AppRouter() {
 
 					<Route path={librarianPaths.dashboard} element={<LibrarianDashboardPage />} />
 					<Route path={librarianPaths.books} element={<ManageBooksPage />} />
+					<Route path={librarianPaths.booksCreate} element={<AddNewBookPage />} />
+					<Route path={`${librarianPaths.books}/:id`} element={<BookDetailPageLibrarian />} />
 					<Route path={librarianPaths.borrow} element={<BorrowRecordsPage />} />
 					<Route path={librarianPaths.return} element={<ReturnBooksPage />} />
 					<Route path={librarianPaths.users} element={<UsersPage />} />
