@@ -1,12 +1,14 @@
 import { useAuthContext } from '../../contexts/AuthContext'
 import { ROLES } from '../../utils/constants'
+import { getEffectiveRole } from '../../utils/helpers'
 
 const categories = ['Fiction', 'Science', 'Technology', 'History']
 
 function Sidebar() {
 	const { user } = useAuthContext()
+	const role = getEffectiveRole(user)
 
-	if (user?.role !== ROLES.USER) {
+	if (role !== ROLES.USER) {
 		return null
 	}
 

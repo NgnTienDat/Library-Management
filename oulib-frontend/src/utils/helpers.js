@@ -36,6 +36,14 @@ export function getRoleNavItems(role) {
 	return ROLE_NAV_ITEMS[role] ?? []
 }
 
+export function getEffectiveRole(user) {
+	if (!user) {
+		return ROLES.USER
+	}
+
+	return user.role
+}
+
 export function isPathAllowedForRole(role, pathname) {
 	const roleRoutePaths = Object.values(ROLE_ROUTE_PATHS[role] ?? {})
 
