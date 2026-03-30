@@ -7,9 +7,6 @@ const baseURL =
 
 const axiosInstance = axios.create({
 	baseURL,
-	headers: {
-		'Content-Type': 'application/json',
-	},
 })
 
 axiosInstance.interceptors.request.use(
