@@ -16,6 +16,7 @@ import java.util.Optional;
 @Repository
 public interface BookRepository extends JpaRepository<Book, String>, JpaSpecificationExecutor<Book> {
     boolean existsByIsbn(String isbn);
+        boolean existsByCategoryId(String categoryId);
 
     // Top borrowed books of all time
     @Query("""

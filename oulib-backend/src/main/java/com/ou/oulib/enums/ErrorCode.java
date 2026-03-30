@@ -38,6 +38,8 @@ public enum ErrorCode {
     USER_INACTIVE(1041, "User account is inactivated", HttpStatus.FORBIDDEN),
     BOOK_NOT_BORROWED(1042, "This book copy is not currently borrowed", HttpStatus.BAD_REQUEST),
     DUPLICATE_BARCODE_IN_REQUEST(1043, "Duplicate barcodes found in request", HttpStatus.BAD_REQUEST),
+    CATEGORY_ALREADY_EXISTS(1044, "Category already exists", HttpStatus.CONFLICT),
+    CATEGORY_IN_USE(1045, "Category is assigned to one or more books", HttpStatus.CONFLICT),
 
     // Validation: 2XXX
     INVALID_MESSAGE_KEY(2001, "Invalid Message Key", HttpStatus.BAD_REQUEST),
@@ -46,6 +48,7 @@ public enum ErrorCode {
     INVALID_PASSWORD(2004, "Invalid password", HttpStatus.BAD_REQUEST),
     INVALID_NAME(2005, "Invalid name account", HttpStatus.BAD_REQUEST),
     INVALID_ROLE(2010, "Invalid role", HttpStatus.BAD_REQUEST),
+    INVALID_BORROW_STATUS(2011, "Invalid borrow status. Allowed values: borrowing, return, overdue", HttpStatus.BAD_REQUEST),
     INVALID_IMAGE_TYPE(2006, "Invalid image type", HttpStatus.BAD_REQUEST),
     INVALID_FILE_TYPE(2007, "Invalid file type", HttpStatus.BAD_REQUEST),
     INVALID_TOTAL_COPIES(2008, "Total copies must be greater than 0", HttpStatus.BAD_REQUEST),
