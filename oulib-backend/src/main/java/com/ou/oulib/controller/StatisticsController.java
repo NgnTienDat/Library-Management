@@ -3,6 +3,7 @@ package com.ou.oulib.controller;
 import com.ou.oulib.dto.response.statistics.ActiveUsersStatisticsResponse;
 import com.ou.oulib.dto.response.statistics.BorrowingActivityResponse;
 import com.ou.oulib.dto.response.statistics.InventorySummaryResponse;
+import com.ou.oulib.dto.response.statistics.SystemTotalsResponse;
 import com.ou.oulib.dto.response.statistics.TopBorrowedBookResponse;
 import com.ou.oulib.service.StatisticsService;
 import com.ou.oulib.utils.ApiResponse;
@@ -69,5 +70,11 @@ public class StatisticsController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     ) {
         return ResponseEntity.ok(ResponseUtils.ok(statisticsService.getActiveUsersStatistics(from, to)));
+    }
+
+    @GetMapping("/statistics/system-totals")
+    @PreAuthorize("hasRole('SYSADMIN')")
+    public ResponseEntity<ApiResponse<SystemTotalsResponse>> getSystemTotals() {
+        return ResponseEntity.ok(ResponseUtils.ok(statisticsService.getSystemTotals()));
     }
 }
