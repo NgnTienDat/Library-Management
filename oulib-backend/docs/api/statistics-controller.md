@@ -14,6 +14,90 @@ Standard response wrapper used by all APIs:
 
 ---
 
+## GET /api/v1/statistics/system-totals
+
+### 1. Title
+- v1 Get System Totals Statistics
+
+### 2. Endpoint
+- `/api/v1/statistics/system-totals`
+
+### 3. Method
+- `GET`
+
+### 4. URL Parameters
+- `None`
+
+### 5. Message Payload
+- `None`
+
+### 6. Header Parameters
+- `Content-Type: application/json`
+- `Authorization: Bearer <JWT_TOKEN>`
+
+### 7. Authentication & Authorization Summary
+- Authentication: `Requires JWT`
+- Authorization: `SYSADMIN` (from `@PreAuthorize("hasRole('SYSADMIN')")`)
+
+### 8. Response Codes
+
+#### ✅ Success Responses
+- `200 OK`: System totals statistics generated.
+
+#### ❌ Error Responses
+- `401 Unauthorized`
+  - Internal code: `1003`
+  - Message: `Unauthenticated`
+  - Condition: Missing/invalid/expired/blacklisted JWT.
+- `403 Forbidden`
+  - Internal code: `1037`
+  - Message: `You do not have permission to perform this action`
+  - Condition: Authenticated user does not have `SYSADMIN` role.
+- `500 Internal Server Error`
+  - Internal code: `1000`
+  - Message: `Uncategorized Error`
+  - Condition: Any unhandled runtime/database exception.
+
+### 9. Sample Calls
+
+#### cURL Example
+```bash
+curl -X GET "http://localhost:8080/api/v1/statistics/system-totals" \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+```
+
+#### Request JSON
+```json
+None
+```
+
+#### Success Response JSON
+```json
+{
+  "code": 200,
+  "message": "Success",
+  "result": {
+    "totalUsers": 120,
+    "totalBooks": 125,
+    "totalCopies": 480,
+    "totalBorrowRecords": 358,
+    "totalCurrentlyBorrowed": 97,
+    "totalOverdue": 14
+  }
+}
+```
+
+#### Error Response JSON
+```json
+{
+  "code": 1037,
+  "message": "You do not have permission to perform this action",
+  "result": null
+}
+```
+
+---
+
 ## GET /api/v1/statistics/inventory-summary
 
 ### 1. Title

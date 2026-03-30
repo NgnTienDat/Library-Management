@@ -189,6 +189,25 @@ public class StatisticsService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public SystemTotalsResponse getSystemTotals() {
+        long totalUsers = userRepository.count();
+        long totalBooks = bookRepository.count();
+        long totalCopies = bookCopyRepository.count();
+        long totalBorrowRecords = borrowRecordRepository.count();
+        long totalCurrentlyBorrowed = borrowRecordRepository.countByStatus(BorrowStatus.BORROWING);
+        long totalOverdue = borrowRecordRepository.countByStatus(BorrowStatus.OVERDUE);
+
+        return SystemTotalsResponse.builder()
+                .totalUsers(totalUsers)
+                .totalBooks(totalBooks)
+                .totalCopies(totalCopies)
+                .totalBorrowRecords(totalBorrowRecords)
+                .totalCurrentlyBorrowed(totalCurrentlyBorrowed)
+                .totalOverdue(totalOverdue)
+                .build();
+    }
+
     private Map<String, Long> aggregateByGroup(List<DailyCountResponse> rows, TimeGroup group) {
         return rows.stream()
                 .filter(row -> row.getDate() != null)
