@@ -1,9 +1,12 @@
 package com.ou.oulib.controller;
 
 import com.ou.oulib.dto.request.BorrowRequest;
+import com.ou.oulib.dto.request.BorrowRecordFilterRequest;
 import com.ou.oulib.dto.request.ReturnRequest;
+import com.ou.oulib.dto.response.BorrowRecordResponse;
 import com.ou.oulib.service.BorrowService;
 import com.ou.oulib.utils.ApiResponse;
+import com.ou.oulib.utils.PageResponse;
 import com.ou.oulib.utils.ResponseUtils;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -47,5 +50,25 @@ public class BookBorrowController {
             @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(ResponseUtils.ok(borrowService.getMyBorrowingHistory(status, jwt)));
     }
+
+    @GetMapping("/records")
+    @PreAuthorize("hasAnyRole('LIBRARIAN','SYSADMIN')")
+    public ResponseEntity<ApiResponse<PageResponse<BorrowRecordResponse>>> getBorrowRecords(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String borrowerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        BorrowRecordFilterRequest request = BorrowRecordFilterRequest.builder()
+                .status(status)
+            .borrowerId(borrowerId)
+                .page(page)
+                .size(size)
+                .build();
+
+        return ResponseEntity.ok(ResponseUtils.ok(borrowService.getBorrowRecords(request)));
+    }
+
+    
 
 }

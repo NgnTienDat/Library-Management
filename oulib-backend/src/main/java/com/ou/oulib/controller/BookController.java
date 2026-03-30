@@ -3,6 +3,7 @@ package com.ou.oulib.controller;
 import com.ou.oulib.dto.request.BookCreationRequest;
 import com.ou.oulib.dto.request.BookFilterRequest;
 import com.ou.oulib.dto.request.BookUpdateRequest;
+import com.ou.oulib.dto.response.BookDetailResponse;
 import com.ou.oulib.dto.response.BookResponse;
 import com.ou.oulib.service.BookService;
 import com.ou.oulib.utils.ApiResponse;
@@ -14,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -72,7 +74,7 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<BookResponse>> getBookById(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<BookDetailResponse>> getBookById(@PathVariable String id) {
         return ResponseEntity.ok(ResponseUtils.ok(bookService.getBookById(id)));
     }
 
@@ -86,9 +88,17 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('LIBRARIAN')")
     public ResponseEntity<ApiResponse<String>> deleteBook(@PathVariable String id) {
         bookService.deleteBook(id);
         return ResponseEntity.ok(ResponseUtils.ok("Book deactivated successfully"));
+    }
+
+    @PatchMapping("/{id}/reactivate")
+    @PreAuthorize("hasRole('LIBRARIAN')")
+    public ResponseEntity<ApiResponse<String>> reactivateBook(@PathVariable String id) {
+        bookService.reactivateBook(id);
+        return ResponseEntity.ok(ResponseUtils.ok("Book reactivated successfully"));
     }
 
 }
