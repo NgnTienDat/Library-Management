@@ -58,7 +58,7 @@ public class UserController {
         return ResponseEntity.ok(ResponseUtils.ok(userService.getUsers(page, size)));
     }
 
-    @PutMapping("/{id}/status")
+    @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('SYSADMIN','LIBRARIAN')")
     public ResponseEntity<ApiResponse<UserResponse>> updateUserStatus(
             @PathVariable String id,

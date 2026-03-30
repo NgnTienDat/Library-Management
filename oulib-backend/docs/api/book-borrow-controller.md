@@ -282,3 +282,92 @@ curl -X POST "http://localhost:8080/api/v1/books/return" \
   "result": null
 }
 ```
+
+---
+
+## GET /api/v1/books/history
+
+### 1. Title
+- v1 My Borrowing History
+
+### 2. Endpoint
+- `/api/v1/books/history`
+
+### 3. Method
+- `GET`
+
+### 4. URL Parameters
+| Name | Type | Required | Description |
+|---|---|---|---|
+| status | string | false | Borrow status filter. Allowed values: `borrowing`, `return`, `overdue` (case-insensitive). |
+
+If `status` is omitted, API returns all records for the authenticated user.
+
+### 5. Message Payload
+- `None`
+
+### 6. Header Parameters
+- `Authorization: Bearer <JWT_TOKEN>`
+
+### 7. Authentication & Authorization Summary
+- Authentication: `Requires JWT`
+- Authorization: `USER`, `LIBRARIAN`, `SYSADMIN`
+
+### 8. Response Codes
+
+#### ✅ Success Responses
+- `200 OK`: Borrowing history returned.
+
+#### ❌ Error Responses
+- `401 Unauthorized`
+  - Internal code: `1003`
+  - Message: `Unauthenticated`
+  - Condition: Missing/invalid/expired/blacklisted JWT.
+- `404 Not Found`
+  - Internal code: `1001`
+  - Message: `User not found`
+  - Condition: JWT subject email does not map to a user.
+- `400 Bad Request`
+  - Internal code: `2011`
+  - Message: `Invalid borrow status. Allowed values: borrowing, return, overdue`
+  - Condition: Unsupported `status` value.
+
+### 9. Sample Calls
+
+#### cURL Example (All statuses)
+```bash
+curl -X GET "http://localhost:8080/api/v1/books/history" \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+```
+
+#### cURL Example (Filter by status)
+```bash
+curl -X GET "http://localhost:8080/api/v1/books/history?status=borrowing" \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+```
+
+#### Success Response JSON
+```json
+{
+  "code": 200,
+  "message": "Success",
+  "result": [
+    {
+      "id": "br-1001",
+      "barcode": "BC-0001",
+      "borrowDate": "2026-03-20",
+      "dueDate": "2026-03-25T12:30:00",
+      "returnDate": null,
+      "status": "BORROWING"
+    },
+    {
+      "id": "br-1002",
+      "barcode": "BC-0002",
+      "borrowDate": "2026-03-10",
+      "dueDate": "2026-03-17T12:30:00",
+      "returnDate": "2026-03-15",
+      "status": "RETURNED"
+    }
+  ]
+}
+```
