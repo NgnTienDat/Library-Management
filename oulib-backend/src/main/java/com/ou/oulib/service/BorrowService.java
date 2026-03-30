@@ -170,6 +170,37 @@ public class BorrowService {
         return responses;
     }
 
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('USER','LIBRARIAN','SYSADMIN')")
+    public List<BorrowRecordResponse> getMyBorrowingHistory(String statusParam, Jwt jwt) {
+        User borrower = getAuthenticatedUser(jwt);
+        BorrowStatus status = resolveBorrowStatus(statusParam);
+
+        List<BorrowRecord> records = status == null
+                ? borrowRecordRepository.findByBorrowerIdOrderByBorrowDateDescCreatedAtDesc(borrower.getId())
+                : borrowRecordRepository.findByBorrowerIdAndStatusOrderByBorrowDateDescCreatedAtDesc(
+                        borrower.getId(), status);
+
+        return records.stream()
+                .map(borrowRecordMapper::toBorrowRecordResponse)
+                .toList();
+    }
+
+
+    private BorrowStatus resolveBorrowStatus(String statusParam) {
+        if (statusParam == null || statusParam.isBlank()) {
+            return null;
+        }
+
+        String normalizedStatus = statusParam.trim().toUpperCase();
+        return switch (normalizedStatus) {
+            case "BORROWING" -> BorrowStatus.BORROWING;
+            case "RETURN", "RETURNED" -> BorrowStatus.RETURNED;
+            case "OVERDUE" -> BorrowStatus.OVERDUE;
+            default -> throw new AppException(ErrorCode.INVALID_BORROW_STATUS);
+        };
+    }
+
 
     private User getAuthenticatedUser(Jwt jwt) {
         String email = jwt.getSubject();
