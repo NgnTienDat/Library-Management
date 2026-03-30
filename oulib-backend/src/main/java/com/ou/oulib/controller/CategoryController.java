@@ -42,7 +42,6 @@ public class CategoryController {
 	}
 
 	@GetMapping
-	@PreAuthorize("hasRole('LIBRARIAN')")
 	public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
 		return ResponseEntity.ok(ResponseUtils.ok(categoryService.getAllCategories()));
 	}

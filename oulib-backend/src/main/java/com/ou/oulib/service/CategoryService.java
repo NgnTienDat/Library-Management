@@ -54,7 +54,6 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    @PreAuthorize("hasRole('LIBRARIAN')")
     public List<CategoryResponse> getAllCategories() {
         return categoryRepository.findAll(Sort.by(Sort.Direction.ASC, "name")).stream()
                 .map(this::toResponse)
