@@ -1,12 +1,13 @@
 import { Outlet } from 'react-router-dom'
 import { useAuthContext } from '../../contexts/AuthContext'
 import { ROLES } from '../../utils/constants'
+import { getEffectiveRole } from '../../utils/helpers'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 
 function MainLayout() {
 	const { user } = useAuthContext()
-	const role = user?.role
+	const role = getEffectiveRole(user)
 
 	return (
 		<div className='min-h-screen bg-slate-100'>
