@@ -13,6 +13,7 @@ const SYSADMIN_ROUTE_PATHS = Object.freeze({
 const LIBRARIAN_ROUTE_PATHS = Object.freeze({
 	dashboard: '/librarian/dashboard',
 	books: '/librarian/books',
+	booksCreate: '/librarian/books/new',
 	borrow: '/librarian/borrow',
 	return: '/librarian/return',
 	users: '/librarian/users',

@@ -9,8 +9,7 @@ export const ROLE_NAV_ITEMS = Object.freeze({
 	[ROLES.LIBRARIAN]: Object.freeze([
 		{ label: 'Dashboard', to: ROLE_ROUTE_PATHS[ROLES.LIBRARIAN].dashboard },
 		{ label: 'Quản lý sách', to: ROLE_ROUTE_PATHS[ROLES.LIBRARIAN].books },
-		{ label: 'Mượn sách', to: ROLE_ROUTE_PATHS[ROLES.LIBRARIAN].borrow },
-		{ label: 'Trả sách', to: ROLE_ROUTE_PATHS[ROLES.LIBRARIAN].return },
+		{ label: 'Quản lý mượn trả sách', to: ROLE_ROUTE_PATHS[ROLES.LIBRARIAN].borrow },
 		{ label: 'Người dùng', to: ROLE_ROUTE_PATHS[ROLES.LIBRARIAN].users },
 	]),
 	[ROLES.USER]: Object.freeze([
