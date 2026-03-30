@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class BookResponse {
+public class BookDetailResponse {
     String id;
     boolean active;
     String title;
@@ -18,7 +18,7 @@ public class BookResponse {
     String publisher;
     Integer numberOfPages;
     String description;
-    Integer totalCopies;
+    List<String> copoies;
     Integer availableCopies;
     String thumbnailUrl;
     String categoryName;

@@ -1,6 +1,7 @@
 package com.ou.oulib.service;
 
 import com.ou.oulib.dto.request.BorrowRequest;
+import com.ou.oulib.dto.request.BorrowRecordFilterRequest;
 import com.ou.oulib.dto.request.ReturnRequest;
 import com.ou.oulib.dto.response.BorrowRecordResponse;
 import com.ou.oulib.entity.Book;
@@ -18,10 +19,16 @@ import com.ou.oulib.mapper.BorrowRecordMapper;
 import com.ou.oulib.repository.BookCopyRepository;
 import com.ou.oulib.repository.BorrowRecordRepository;
 import com.ou.oulib.repository.UserRepository;
+import com.ou.oulib.utils.PageResponse;
+import com.ou.oulib.utils.PageResponseUtils;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -184,6 +191,35 @@ public class BorrowService {
         return records.stream()
                 .map(borrowRecordMapper::toBorrowRecordResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('LIBRARIAN','SYSADMIN')")
+    public PageResponse<BorrowRecordResponse> getBorrowRecords(BorrowRecordFilterRequest request) {
+        BorrowStatus status = resolveBorrowStatus(request.getStatus());
+        String borrowerId = request.getBorrowerId() == null ? null : request.getBorrowerId().trim();
+        if (borrowerId != null && borrowerId.isBlank()) {
+            borrowerId = null;
+        }
+
+        Pageable pageable = PageRequest.of(
+                request.getPage(),
+                request.getSize(),
+                Sort.by(Sort.Order.desc("borrowDate"), Sort.Order.desc("createdAt"))
+        );
+
+        Page<BorrowRecord> records;
+        if (borrowerId != null && status != null) {
+            records = borrowRecordRepository.findByBorrowerIdAndStatus(borrowerId, status, pageable);
+        } else if (borrowerId != null) {
+            records = borrowRecordRepository.findByBorrowerId(borrowerId, pageable);
+        } else if (status != null) {
+            records = borrowRecordRepository.findByStatus(status, pageable);
+        } else {
+            records = borrowRecordRepository.findAll(pageable);
+        }
+
+        return PageResponseUtils.build(records, borrowRecordMapper::toBorrowRecordResponse);
     }
 
 

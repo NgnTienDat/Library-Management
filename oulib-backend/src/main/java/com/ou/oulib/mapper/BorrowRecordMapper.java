@@ -8,6 +8,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface BorrowRecordMapper {
 
+    @Mapping(target = "borrowerId", source = "borrower.id")
     @Mapping(target = "barcode", source = "bookCopy.barcode")
     BorrowRecordResponse toBorrowRecordResponse(BorrowRecord record);
 }

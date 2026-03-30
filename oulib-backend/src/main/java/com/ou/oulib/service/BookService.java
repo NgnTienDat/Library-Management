@@ -4,6 +4,7 @@ import com.ou.oulib.dto.request.AuthorRefRequest;
 import com.ou.oulib.dto.request.BookCreationRequest;
 import com.ou.oulib.dto.request.BookFilterRequest;
 import com.ou.oulib.dto.request.BookUpdateRequest;
+import com.ou.oulib.dto.response.BookDetailResponse;
 import com.ou.oulib.dto.response.BookResponse;
 import com.ou.oulib.entity.Author;
 import com.ou.oulib.entity.Book;
@@ -162,14 +163,14 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public BookResponse getBookById(String id) {
+    public BookDetailResponse getBookById(String id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
-        return bookMapper.toBookResponse(book);
+        return bookMapper.toBookDetailResponse(book);
     }
 
     @Transactional
-    @PreAuthorize("hasRole('SYSADMIN')")
+    @PreAuthorize("hasRole('LIBRARIAN')")
     public BookResponse updateBook(String id, BookUpdateRequest request, MultipartFile newThumbnail) {
 
         Book book = bookRepository.findById(id)
@@ -224,12 +225,22 @@ public class BookService {
     }
 
     @Transactional
-    @PreAuthorize("hasRole('SYSADMIN')")
+    @PreAuthorize("hasRole('LIBRARIAN')")
     public void deleteBook(String id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
 
         book.setActive(false);
+        bookRepository.save(book);
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('LIBRARIAN')")
+    public void reactivateBook(String id) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
+
+        book.setActive(true);
         bookRepository.save(book);
     }
 

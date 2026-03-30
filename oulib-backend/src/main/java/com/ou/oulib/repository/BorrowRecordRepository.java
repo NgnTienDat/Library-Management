@@ -26,6 +26,9 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Stri
     long countByStatus(BorrowStatus status);
     Optional<BorrowRecord> findByBorrowerIdAndBookCopyIdAndStatus(String userId, String bookId, BorrowStatus status);
     Optional<BorrowRecord> findByBookCopyIdAndStatus(String bookCopyId, BorrowStatus status);
+    Page<BorrowRecord> findByStatus(BorrowStatus status, Pageable pageable);
+    Page<BorrowRecord> findByBorrowerId(String borrowerId, Pageable pageable);
+    Page<BorrowRecord> findByBorrowerIdAndStatus(String borrowerId, BorrowStatus status, Pageable pageable);
     List<BorrowRecord> findByBorrowerIdOrderByBorrowDateDescCreatedAtDesc(String borrowerId);
     List<BorrowRecord> findByBorrowerIdAndStatusOrderByBorrowDateDescCreatedAtDesc(String borrowerId, BorrowStatus status);
     // List<BorrowRecord> findByStatusAndReturnDateIsNullAndDueDate(BorrowStatus status, LocalDate dueDate);
