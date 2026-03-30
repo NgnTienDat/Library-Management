@@ -52,7 +52,9 @@ public class SecurityConfig {
             "/api/v1/statistics/top-books",
             "/v3/api-docs/**",
             "/swagger-ui.html",
-            "/swagger-ui/**"
+            "/swagger-ui/**",
+            "/api/v1/books/**",
+             "/api/v1/categories/**",
     };
 
     @Bean
