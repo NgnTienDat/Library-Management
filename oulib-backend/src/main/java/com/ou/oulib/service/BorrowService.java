@@ -3,6 +3,7 @@ package com.ou.oulib.service;
 import com.ou.oulib.dto.request.BorrowRequest;
 import com.ou.oulib.dto.request.BorrowRecordFilterRequest;
 import com.ou.oulib.dto.request.ReturnRequest;
+import com.ou.oulib.dto.response.BorrowRecordDetailResponse;
 import com.ou.oulib.dto.response.BorrowRecordResponse;
 import com.ou.oulib.entity.Book;
 import com.ou.oulib.entity.BookCopy;
@@ -36,7 +37,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,8 +106,8 @@ public class BorrowService {
                     .librarian(librarian)
                     .bookCopy(bookCopy)
                     .borrowDate(now)
-                    .dueDate(LocalDateTime.now().plusMinutes(5))
-                    // .dueDate(now.plusDays(14))
+//                    .dueDate(LocalDateTime.now().plusMinutes(request.getBorrowDurationMinutes()))
+                     .dueDate(now.plusDays(request.getBorrowDuration()))
                     .status(BorrowStatus.BORROWING)
                     .build();
 
@@ -220,6 +220,15 @@ public class BorrowService {
         }
 
         return PageResponseUtils.build(records, borrowRecordMapper::toBorrowRecordResponse);
+    }
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('LIBRARIAN','SYSADMIN')")
+    public BorrowRecordDetailResponse getBorrowRecordDetail(String recordId) {
+        BorrowRecord record = borrowRecordRepository.findById(recordId)
+                .orElseThrow(() -> new AppException(ErrorCode.BORROW_RECORD_NOT_FOUND));
+
+        return borrowRecordMapper.toBorrowRecordDetailResponse(record);
     }
 
 
