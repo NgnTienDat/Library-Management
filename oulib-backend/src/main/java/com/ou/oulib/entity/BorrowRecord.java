@@ -43,8 +43,8 @@ public class BorrowRecord {
     BorrowStatus status;
 
     LocalDate borrowDate;
-    // LocalDate dueDate;
-    LocalDateTime dueDate;
+     LocalDate dueDate;
+//    LocalDateTime dueDate;
     LocalDate returnDate;
     Instant createdAt;
     Instant updatedAt;

@@ -1,7 +1,9 @@
 import { Loader2, Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { toast } from 'sonner'
+import { useNavigate } from 'react-router-dom'
 import { useBorrowRecords } from '../../hooks/useBorrowRecords'
+import { ROLE_ROUTE_PATHS, ROLES } from '../../utils/constants'
+import { formatDate } from '../../utils/datetime'
 
 const STATUS_OPTIONS = [
 	{ label: 'Tất cả trạng thái', value: '' },
@@ -9,20 +11,6 @@ const STATUS_OPTIONS = [
 	{ label: 'RETURNED', value: 'RETURNED' },
 	{ label: 'OVERDUE', value: 'OVERDUE' },
 ]
-
-function formatDate(value) {
-	if (!value) return '-'
-	const parsedDate = new Date(value)
-	if (Number.isNaN(parsedDate.getTime())) return value
-	return parsedDate.toLocaleDateString('vi-VN')
-}
-
-function formatDateTime(value) {
-	if (!value) return '-'
-	const parsedDate = new Date(value)
-	if (Number.isNaN(parsedDate.getTime())) return value
-	return parsedDate.toLocaleString('vi-VN')
-}
 
 function getStatusBadgeClass(status) {
 	if (status === 'BORROWING') return 'bg-amber-100 text-amber-700'
@@ -32,6 +20,7 @@ function getStatusBadgeClass(status) {
 }
 
 function BorrowRecordsPage() {
+	const navigate = useNavigate()
 	const [borrowerIdInput, setBorrowerIdInput] = useState('')
 	const [statusInput, setStatusInput] = useState('')
 	const [appliedBorrowerId, setAppliedBorrowerId] = useState('')
@@ -66,7 +55,12 @@ function BorrowRecordsPage() {
 	}
 
 	const handleAddBorrow = () => {
-		toast.info('Chức năng thêm lượt mượn sẽ được cập nhật sau')
+		navigate(ROLE_ROUTE_PATHS[ROLES.LIBRARIAN].borrowCreate)
+	}
+
+	const handleGoToReturnPage = (recordId) => {
+		const pathTemplate = ROLE_ROUTE_PATHS[ROLES.LIBRARIAN].borrowReturn
+		navigate(pathTemplate.replace(':recordId', recordId))
 	}
 
 	return (
@@ -98,7 +92,7 @@ function BorrowRecordsPage() {
 				<select
 					value={statusInput}
 					onChange={(event) => setStatusInput(event.target.value)}
-					className='w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none ring-blue-500 focus:ring-2 lg:max-w-[220px]'
+					className='w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none ring-blue-500 focus:ring-2 lg:max-w-55'
 				>
 					{STATUS_OPTIONS.map((status) => (
 						<option key={status.value || 'ALL'} value={status.value}>
@@ -165,9 +159,9 @@ function BorrowRecordsPage() {
 										<td className='px-4 py-3 text-sm text-slate-700'>{record.id}</td>
 										<td className='px-4 py-3 text-sm text-slate-700'>{record.borrowerId || '-'}</td>
 										<td className='px-4 py-3 text-sm text-slate-700'>{record.barcode || '-'}</td>
-										<td className='px-4 py-3 text-sm text-slate-700'>{formatDate(record.borrowDate)}</td>
-										<td className='px-4 py-3 text-sm text-slate-700'>{formatDateTime(record.dueDate)}</td>
-										<td className='px-4 py-3 text-sm text-slate-700'>{formatDate(record.returnDate)}</td>
+										<td className='px-4 py-3 text-sm text-slate-700'>{formatDate(record.borrowDate) || '-'}</td>
+										<td className='px-4 py-3 text-sm text-slate-700'>{formatDate(record.dueDate) || '-'}</td>
+										<td className='px-4 py-3 text-sm text-slate-700'>{formatDate(record.returnDate) || '-'}</td>
 										<td className='px-4 py-3 text-sm'>
 											<span
 												className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadgeClass(record.status)}`}
@@ -178,10 +172,11 @@ function BorrowRecordsPage() {
 										<td className='px-4 py-3 text-sm'>
 											<button
 												type='button'
-												disabled
+												onClick={() => handleGoToReturnPage(record.id)}
+												disabled={record.status !== 'BORROWING' && record.status !== 'RETURNED'}
 												className='rounded-md bg-slate-400 px-3 py-1.5 text-xs font-medium text-white disabled:cursor-not-allowed disabled:opacity-70'
 											>
-												Trả sách
+												{record.status === 'RETURNED' ? 'Xem' : 'Trả sách'}
 											</button>
 										</td>
 									</tr>

@@ -3,6 +3,7 @@ package com.ou.oulib.controller;
 import com.ou.oulib.dto.request.BorrowRequest;
 import com.ou.oulib.dto.request.BorrowRecordFilterRequest;
 import com.ou.oulib.dto.request.ReturnRequest;
+import com.ou.oulib.dto.response.BorrowRecordDetailResponse;
 import com.ou.oulib.dto.response.BorrowRecordResponse;
 import com.ou.oulib.service.BorrowService;
 import com.ou.oulib.utils.ApiResponse;
@@ -67,6 +68,14 @@ public class BookBorrowController {
                 .build();
 
         return ResponseEntity.ok(ResponseUtils.ok(borrowService.getBorrowRecords(request)));
+    }
+
+    @GetMapping("/records/{recordId}")
+    @PreAuthorize("hasAnyRole('LIBRARIAN','SYSADMIN')")
+    public ResponseEntity<ApiResponse<BorrowRecordDetailResponse>> getBorrowRecordDetail(
+            @PathVariable String recordId
+    ) {
+        return ResponseEntity.ok(ResponseUtils.ok(borrowService.getBorrowRecordDetail(recordId)));
     }
 
     

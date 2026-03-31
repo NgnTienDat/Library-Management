@@ -81,6 +81,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -106,7 +107,7 @@ public class EmailService {
      * @param dueDate   the due date of the book
      * @throws MessagingException if email sending fails
      */
-    public void sendBorrowReminderEmail(String toEmail, String bookTitle, LocalDateTime dueDate) throws MessagingException {
+    public void sendBorrowReminderEmail(String toEmail, String bookTitle, LocalDate dueDate) throws MessagingException {
         log.info("Sending borrow reminder email to: {} for book: {}", toEmail, bookTitle);
 
         MimeMessage message = mailSender.createMimeMessage();
