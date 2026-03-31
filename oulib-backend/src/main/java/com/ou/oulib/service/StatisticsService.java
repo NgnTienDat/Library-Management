@@ -62,7 +62,7 @@ public class StatisticsService {
     @Transactional(readOnly = true)
     public PageResponse<OverdueUserResponse> getOverdueRecords(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        LocalDateTime now = LocalDateTime.now();
+        LocalDate now = LocalDate.now();
 
         Page<OverdueUserInfoResponse> overdueUsersPage = borrowRecordRepository.findOverdueUsers(
                 BorrowStatus.BORROWING,
@@ -95,7 +95,7 @@ public class StatisticsService {
                 .collect(Collectors.groupingBy(
                         OverdueBookDetailResponse::getUserId,
                         Collectors.mapping(detail -> {
-                            LocalDate dueDate = detail.getDueDate().toLocalDate();
+                    LocalDate dueDate = detail.getDueDate();
                             long overdueDays = Math.max(0, ChronoUnit.DAYS.between(dueDate, today));
 
                             return OverdueBookItemResponse.builder()

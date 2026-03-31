@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { getBorrowRecords } from '../api/borrow.api'
+import { createBorrow, getBorrowRecordDetail, getBorrowRecords, returnBorrow } from '../api/borrow.api'
 
 const BORROW_RECORDS_QUERY_KEY = 'borrow-records'
 
@@ -27,4 +27,54 @@ export function useBorrowRecords(queryParams = {}) {
 	}, [query.error])
 
 	return query
+}
+
+export function useBorrowRecordDetail(recordId) {
+	const query = useQuery({
+		queryKey: [BORROW_RECORDS_QUERY_KEY, 'detail', recordId],
+		queryFn: () => getBorrowRecordDetail(recordId),
+		enabled: Boolean(recordId),
+	})
+
+	useEffect(() => {
+		if (query.error) {
+			toast.error(getErrorMessage(query.error))
+		}
+	}, [query.error])
+
+	return query
+}
+
+export function useCreateBorrow(options = {}) {
+	const queryClient = useQueryClient()
+
+	return useMutation({
+		mutationFn: createBorrow,
+		onSuccess: (data, variables, context) => {
+			toast.success('Tạo lượt mượn thành công')
+			queryClient.invalidateQueries({ queryKey: [BORROW_RECORDS_QUERY_KEY] })
+			options.onSuccess?.(data, variables, context)
+		},
+		onError: (error, variables, context) => {
+			toast.error(getErrorMessage(error))
+			options.onError?.(error, variables, context)
+		},
+	})
+}
+
+export function useReturnBorrow(options = {}) {
+	const queryClient = useQueryClient()
+
+	return useMutation({
+		mutationFn: returnBorrow,
+		onSuccess: (data, variables, context) => {
+			toast.success('Trả sách thành công')
+			queryClient.invalidateQueries({ queryKey: [BORROW_RECORDS_QUERY_KEY] })
+			options.onSuccess?.(data, variables, context)
+		},
+		onError: (error, variables, context) => {
+			toast.error(getErrorMessage(error))
+			options.onError?.(error, variables, context)
+		},
+	})
 }
