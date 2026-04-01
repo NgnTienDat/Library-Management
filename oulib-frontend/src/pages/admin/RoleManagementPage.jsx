@@ -81,12 +81,13 @@ function RoleManagementPage() {
 						Password
 					</label>
 					<input
-						type="password"
-						name="password"
-						value={form.password}
-						onChange={handleChange}
-						required
-						className="mt-1 w-full rounded border p-2"
+					type="password"
+					name="password"
+					value={form.password}
+					onChange={handleChange}
+					required
+					minLength={8}
+					className="mt-1 w-full rounded border p-2"
 					/>
 				</div>
 

@@ -21,25 +21,28 @@ function UserManagementPage() {
 
   return (
     <div className="space-y-6">
-    	<h1 className="text-2xl font-semibold">User Management
+		<div className="flex items-center justify-between">
+			<h1 className="text-2xl font-semibold">User Management</h1>
+
 			<Link
-			to="/admin/roles"
-			className="rounded bg-green-600 px-4 py-2 text-white"
-		>
-			Add Staff
-		</Link>
-		</h1>
+				to="/admin/roles"
+				className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-500"
+			>
+				Add Staff
+			</Link>
+		</div>
 		
 		<div className="overflow-x-auto rounded-xl border">
 			<table className="w-full text-left">
 			<thead className="bg-gray-50">
 				<tr>
-				<th className="p-3">ID</th>
-				<th className="p-3">Full Name</th>
-				<th className="p-3">Email</th>
-				<th className="p-3">Status</th>
-				<th className="p-3">Created</th>
-				<th className="p-3">Action</th>
+					<th className="p-3">ID</th>
+					<th className="p-3">Full Name</th>
+					<th className="p-3">Email</th>
+					<th className="p-3">Role</th>
+					<th className="p-3">Status</th>
+					<th className="p-3">Created</th>
+					<th className="p-3">Action</th>
 				</tr>
 			</thead>
 
@@ -49,6 +52,7 @@ function UserManagementPage() {
 					<td className="p-3">{user.id}</td>
 					<td className="p-3">{user.fullName}</td>
 					<td className="p-3">{user.email}</td>
+					<td className="p-3">{user.role}</td>
 					<td className="p-3">{user.status}</td>
 					<td className="p-3">
 					{new Date(user.createdAt).toLocaleDateString()}
