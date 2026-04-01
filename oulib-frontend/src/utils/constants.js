@@ -15,6 +15,8 @@ const LIBRARIAN_ROUTE_PATHS = Object.freeze({
 	books: '/librarian/books',
 	booksCreate: '/librarian/books/new',
 	borrow: '/librarian/borrow',
+	borrowCreate: '/librarian/borrow/new',
+	borrowReturn: '/librarian/borrow/:recordId/return',
 	return: '/librarian/return',
 	users: '/librarian/users',
 })

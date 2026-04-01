@@ -19,3 +19,18 @@ export async function getBorrowRecords(params = {}) {
 
 	return unwrapResponse(response)
 }
+
+export async function getBorrowRecordDetail(recordId) {
+	const response = await axiosInstance.get(`${BORROW_BASE_PATH}/records/${recordId}`)
+	return unwrapResponse(response)
+}
+
+export async function returnBorrow(payload) {
+	const response = await axiosInstance.post(`${BORROW_BASE_PATH}/return`, payload)
+	return unwrapResponse(response)
+}
+
+export async function createBorrow(payload) {
+	const response = await axiosInstance.post(BORROW_BASE_PATH, payload)
+	return unwrapResponse(response)
+}
