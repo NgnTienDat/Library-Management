@@ -1,7 +1,13 @@
 import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { createBorrow, getBorrowRecordDetail, getBorrowRecords, returnBorrow } from '../api/borrow.api'
+import {
+	createBorrow,
+	getBorrowRecordDetail,
+	getBorrowRecords,
+	getUserBorrowingHistory,
+	returnBorrow,
+} from '../api/borrow.api'
 
 const BORROW_RECORDS_QUERY_KEY = 'borrow-records'
 
@@ -34,6 +40,22 @@ export function useBorrowRecordDetail(recordId) {
 		queryKey: [BORROW_RECORDS_QUERY_KEY, 'detail', recordId],
 		queryFn: () => getBorrowRecordDetail(recordId),
 		enabled: Boolean(recordId),
+	})
+
+	useEffect(() => {
+		if (query.error) {
+			toast.error(getErrorMessage(query.error))
+		}
+	}, [query.error])
+
+	return query
+}
+
+export function useUserBorrowingHistory(userId, status) {
+	const query = useQuery({
+		queryKey: [BORROW_RECORDS_QUERY_KEY, 'user-history', userId, status ?? 'ALL'],
+		queryFn: () => getUserBorrowingHistory(userId, { status }),
+		enabled: Boolean(userId),
 	})
 
 	useEffect(() => {

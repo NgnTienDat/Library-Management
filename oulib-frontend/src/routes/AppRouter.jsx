@@ -11,6 +11,7 @@ import LibrarianDashboardPage from '../pages/librarian/DashboardPage'
 import ManageBooksPage from '../pages/librarian/ManageBooksPage'
 import NewBorrowPage from '../pages/librarian/NewBorrowPage'
 import ReturnBooksPage from '../pages/librarian/ReturnBooksPage'
+import UserDetailPage from '../pages/librarian/UserDetailPage'
 import UsersPage from '../pages/librarian/UsersPage'
 import LoginPage from '../pages/LoginPage'
 import RegisterPage from '../pages/RegisterPage'
@@ -50,6 +51,7 @@ function AppRouter() {
 					<Route path={librarianPaths.borrowReturn} element={<BookReturnPage />} />
 					<Route path={librarianPaths.return} element={<ReturnBooksPage />} />
 					<Route path={librarianPaths.users} element={<UsersPage />} />
+					<Route path={`${librarianPaths.users}/:userId`} element={<UserDetailPage />} />
 
 					<Route path={userPaths.myBorrowed} element={<MyBorrowedPage />} />
 					<Route path={userPaths.profile} element={<ProfilePage />} />
