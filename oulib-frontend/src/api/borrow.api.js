@@ -34,3 +34,10 @@ export async function createBorrow(payload) {
 	const response = await axiosInstance.post(BORROW_BASE_PATH, payload)
 	return unwrapResponse(response)
 }
+
+export async function getBorrowHistory(params = {}) {
+	const response = await axiosInstance.get('/api/v1/borrowing/history', {
+		params: cleanParams(params),
+	})
+	return unwrapResponse(response)
+}
