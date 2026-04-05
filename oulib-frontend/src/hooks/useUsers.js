@@ -1,7 +1,6 @@
-import { useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { getUsers, updateUserStatus, createStaff } from "../api/users.api"
 import { toast } from 'sonner'
-import { getUsers } from '../api/users.api'
 
 const USERS_QUERY_KEY = 'users'
 
@@ -18,6 +17,7 @@ export function useUsers(queryParams = {}) {
 	const query = useQuery({
 		queryKey: [USERS_QUERY_KEY, queryParams],
 		queryFn: () => getUsers(queryParams),
+    keepPreviousData: true,
 	})
 
 	useEffect(() => {
@@ -27,4 +27,36 @@ export function useUsers(queryParams = {}) {
 	}, [query.error])
 
 	return query
+}
+
+export function useUpdateUserStatus() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, status }) => updateUserStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] })
+      toast.success('Cập nhật trạng thái người dùng thành công')
+    },
+    
+    onError: (error) => {
+      toát.error(getErrorMessage(error))
+    }
+  })
+}
+
+export function useCreateStaff() {
+	const queryClient = useQueryClient()
+
+	return useMutation({
+		mutationFn: createStaff,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] })
+      toast.success('Thêm nhân viên thành công')
+		},
+    
+    onError: (error) => {
+      toát.error(getErrorMessage(error))
+    }
+	})
 }

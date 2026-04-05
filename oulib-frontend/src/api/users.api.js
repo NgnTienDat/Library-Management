@@ -19,3 +19,15 @@ export async function getUsers(params = {}) {
 
 	return unwrapResponse(response)
 }
+
+export async function updateUserStatus(id, status) {
+  const response = await axiosInstance.patch(`${USERS_BASE_PATH}/${id}/status`, {
+    status,
+  })
+  return unwrapResponse(response)
+}
+
+export async function createStaff(data) {
+	const response = await axiosInstance.post(`${USERS_BASE_PATH}/staff`, data)
+	return unwrapResponse(response)
+}

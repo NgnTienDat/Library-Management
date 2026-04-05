@@ -3,6 +3,7 @@ import MainLayout from '../components/layout/MainLayout'
 import DashboardPage from '../pages/admin/DashboardPage'
 import StatisticsPage from '../pages/admin/StatisticsPage'
 import UserManagementPage from '../pages/admin/UserManagementPage'
+import RoleManagementPage from '../pages/admin/RoleManagementPage'
 import BorrowRecordsPage from '../pages/librarian/BorrowRecordsPage'
 import BookReturnPage from '../pages/librarian/BookReturnPage'
 import AddNewBookPage from '../pages/librarian/AddNewBookPage'
@@ -41,6 +42,7 @@ function AppRouter() {
 					<Route path={adminPaths.dashboard} element={<DashboardPage />} />
 					<Route path={adminPaths.users} element={<UserManagementPage />} />
 					<Route path={adminPaths.statistics} element={<StatisticsPage />} />
+					<Route path={adminPaths.roles} element={<RoleManagementPage />} />
 
 					<Route path={librarianPaths.dashboard} element={<LibrarianDashboardPage />} />
 					<Route path={librarianPaths.books} element={<ManageBooksPage />} />
