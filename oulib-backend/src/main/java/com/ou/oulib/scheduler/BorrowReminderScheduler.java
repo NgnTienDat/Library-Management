@@ -60,6 +60,17 @@ public class BorrowReminderScheduler {
 
         LocalDate today = LocalDate.now();
 
+        List<BorrowRecord> overdueBorrowRecords = borrowRecordRepository
+                .findByStatusAndReturnDateIsNullAndDueDateBefore(BorrowStatus.BORROWING, today);
+
+        for (BorrowRecord record : overdueBorrowRecords) {
+            record.setStatus(BorrowStatus.OVERDUE);
+        }
+
+        if (!overdueBorrowRecords.isEmpty()) {
+            log.info("Marked {} borrow records as OVERDUE", overdueBorrowRecords.size());
+        }
+
         List<BorrowRecord> recordsDueToday = borrowRecordRepository
                 .findByStatusAndReturnDateIsNullAndReminderSentFalseAndDueDate(
                         BorrowStatus.BORROWING,

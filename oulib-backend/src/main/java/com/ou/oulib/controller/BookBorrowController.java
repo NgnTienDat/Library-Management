@@ -52,6 +52,14 @@ public class BookBorrowController {
         return ResponseEntity.ok(ResponseUtils.ok(borrowService.getMyBorrowingHistory(status, jwt)));
     }
 
+    @GetMapping("/{userId}/history")
+    @PreAuthorize("hasAnyRole('LIBRARIAN','SYSADMIN')")
+    public ResponseEntity<ApiResponse<?>> getUserBorrowingHistory(
+            @PathVariable String userId,
+            @RequestParam(required = false) String status) {
+        return ResponseEntity.ok(ResponseUtils.ok(borrowService.getUserBorrowingHistory(userId, status)));
+    }
+
     @GetMapping("/records")
     @PreAuthorize("hasAnyRole('LIBRARIAN','SYSADMIN')")
     public ResponseEntity<ApiResponse<PageResponse<BorrowRecordResponse>>> getBorrowRecords(
