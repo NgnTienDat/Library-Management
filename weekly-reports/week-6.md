@@ -1,6 +1,6 @@
 # Báo cáo Tuần 6
 
-**Tuần:** 6 (23/03/2026 - 30/03/2026)   
+**Tuần:** 6 (23/03/2026 - 29/03/2026)   
 **Nhóm:** Library Management / 5   
 **Đề tài:** C1 - Hệ thống quản lý thư viện số (Library Management)  
 **Nhóm trưởng:** Nguyễn Tiến Đạt - 2251012034
@@ -35,5 +35,5 @@
 
 
 --- 
-*Ngày nộp: 30/03/2026*   
+*Ngày nộp: 29/03/2026*   
 *Xác nhận của Nhóm trưởng: Nguyễn Tiến Đạt*
