@@ -73,7 +73,7 @@ public class StatisticsController {
     }
 
     @GetMapping("/statistics/system-totals")
-    @PreAuthorize("hasRole('SYSADMIN')")
+     @PreAuthorize("hasAnyRole('SYSADMIN','LIBRARIAN')")
     public ResponseEntity<ApiResponse<SystemTotalsResponse>> getSystemTotals() {
         return ResponseEntity.ok(ResponseUtils.ok(statisticsService.getSystemTotals()));
     }

@@ -3,6 +3,7 @@ import MainLayout from '../components/layout/MainLayout'
 import DashboardPage from '../pages/admin/DashboardPage'
 import StatisticsPage from '../pages/admin/StatisticsPage'
 import UserManagementPage from '../pages/admin/UserManagementPage'
+import RoleManagementPage from '../pages/admin/RoleManagementPage'
 import BorrowRecordsPage from '../pages/librarian/BorrowRecordsPage'
 import BookReturnPage from '../pages/librarian/BookReturnPage'
 import AddNewBookPage from '../pages/librarian/AddNewBookPage'
@@ -11,6 +12,7 @@ import LibrarianDashboardPage from '../pages/librarian/DashboardPage'
 import ManageBooksPage from '../pages/librarian/ManageBooksPage'
 import NewBorrowPage from '../pages/librarian/NewBorrowPage'
 import ReturnBooksPage from '../pages/librarian/ReturnBooksPage'
+import UserDetailPage from '../pages/librarian/UserDetailPage'
 import UsersPage from '../pages/librarian/UsersPage'
 import LoginPage from '../pages/LoginPage'
 import RegisterPage from '../pages/RegisterPage'
@@ -40,6 +42,7 @@ function AppRouter() {
 					<Route path={adminPaths.dashboard} element={<DashboardPage />} />
 					<Route path={adminPaths.users} element={<UserManagementPage />} />
 					<Route path={adminPaths.statistics} element={<StatisticsPage />} />
+					<Route path={adminPaths.roles} element={<RoleManagementPage />} />
 
 					<Route path={librarianPaths.dashboard} element={<LibrarianDashboardPage />} />
 					<Route path={librarianPaths.books} element={<ManageBooksPage />} />
@@ -50,6 +53,7 @@ function AppRouter() {
 					<Route path={librarianPaths.borrowReturn} element={<BookReturnPage />} />
 					<Route path={librarianPaths.return} element={<ReturnBooksPage />} />
 					<Route path={librarianPaths.users} element={<UsersPage />} />
+					<Route path={`${librarianPaths.users}/:userId`} element={<UserDetailPage />} />
 
 					<Route path={userPaths.myBorrowed} element={<MyBorrowedPage />} />
 					<Route path={userPaths.profile} element={<ProfilePage />} />
