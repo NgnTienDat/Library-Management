@@ -21,7 +21,7 @@ services:
       - oulib-network
 
   api:
-    build: .
+    build: ./oulib-backend
     image: oulib-backend:latest
     container_name: oulib-api
     restart: unless-stopped
@@ -36,6 +36,22 @@ services:
         condition: service_healthy
     ports:
       - "8080:8080"
+    networks:
+      - oulib-network
+
+  frontend:
+    build:
+      context: ./oulib-frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8080
+    image: oulib-frontend:latest
+    container_name: oulib-frontend
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "3000:80"
     networks:
       - oulib-network
 

@@ -1,7 +1,7 @@
 services:
   mysql:
     image: mysql:8.0
-    container_name: oulib-db
+    container_name: oulib-database
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -23,7 +23,7 @@ services:
   api:
     build: ./oulib-backend
     image: oulib-backend:latest
-    container_name: oulib-api
+    container_name: oulib-api-server
     restart: unless-stopped
     env_file:
       - .env
@@ -39,25 +39,9 @@ services:
     networks:
       - oulib-network
 
-  frontend:
-    build:
-      context: ./oulib-frontend
-      args:
-        VITE_API_BASE_URL: http://localhost:8080
-    image: oulib-frontend:latest
-    container_name: oulib-frontend
-    restart: unless-stopped
-    depends_on:
-      api:
-        condition: service_started
-    ports:
-      - "3000:80"
-    networks:
-      - oulib-network
-
   worker:
     image: oulib-backend:latest
-    container_name: oulib-worker
+    container_name: oulib-worker-service
     restart: unless-stopped
     env_file:
       - .env
@@ -77,7 +61,7 @@ services:
       - oulib-network
   rabbitmq:
     image: rabbitmq:management-alpine
-    container_name: oulib-rabbitmq
+    container_name: oulib-rabbitmq-mq
     ports:
       - "5672:5672"     # AMQP
       - "15672:15672"   # UI
@@ -97,12 +81,28 @@ services:
       - oulib-network
   redis:
     image: redis:alpine
-    container_name: oulib-redis
+    container_name: oulib-redis-cache
     ports:
       - "6379:6379"
     restart: unless-stopped
     volumes:
       - ./volumes/redis/data:/data
+    networks:
+      - oulib-network
+
+  frontend:
+    build:
+      context: ./oulib-frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8080
+    image: oulib-frontend:latest
+    container_name: oulib-frontend
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "3000:80"
     networks:
       - oulib-network
 
