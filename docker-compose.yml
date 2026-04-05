@@ -1,0 +1,111 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: oulib-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: oulib
+      MYSQL_USER: oulib
+      MYSQL_PASSWORD: oulib123
+    volumes:
+      - ./volumes/mysql:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping -h localhost -uroot -proot" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oulib-network
+
+  api:
+    build: ./oulib-backend
+    image: oulib-backend:latest
+    container_name: oulib-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=api
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - oulib-network
+
+  frontend:
+    build:
+      context: ./oulib-frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8080
+    image: oulib-frontend:latest
+    container_name: oulib-frontend
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "3000:80"
+    networks:
+      - oulib-network
+
+  worker:
+    image: oulib-backend:latest
+    container_name: oulib-worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=worker
+      - SERVER_PORT=0
+    depends_on:
+      api:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - oulib-network
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    container_name: oulib-rabbitmq
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # UI
+    environment:
+      RABBITMQ_DEFAULT_USER: oulib
+      RABBITMQ_DEFAULT_PASS: oulib
+    volumes:
+      - ./rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq_log:/var/log/rabbitmq
+    restart: always
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_running" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oulib-network
+  redis:
+    image: redis:alpine
+    container_name: oulib-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    volumes:
+      - ./volumes/redis/data:/data
+    networks:
+      - oulib-network
+
+networks:
+  oulib-network:
+    driver: bridge
