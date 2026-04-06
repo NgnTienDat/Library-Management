@@ -31,3 +31,8 @@ export async function createStaff(data) {
 	const response = await axiosInstance.post(`${USERS_BASE_PATH}/staff`, data)
 	return unwrapResponse(response)
 }
+
+export async function getMyProfile() {
+  const response = await axiosInstance.get(`${USERS_BASE_PATH}/me`)
+  return unwrapResponse(response)
+}
