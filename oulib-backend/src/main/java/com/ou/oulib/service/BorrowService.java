@@ -195,6 +195,26 @@ public class BorrowService {
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('LIBRARIAN','SYSADMIN')")
+    public List<BorrowRecordResponse> getUserBorrowingHistory(String userId, String statusParam) {
+        String normalizedUserId = userId == null ? null : userId.trim();
+        if (normalizedUserId == null || normalizedUserId.isBlank() || !userRepository.existsById(normalizedUserId)) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        BorrowStatus status = resolveBorrowStatus(statusParam);
+
+        List<BorrowRecord> records = status == null
+                ? borrowRecordRepository.findByBorrowerIdOrderByBorrowDateDescCreatedAtDesc(normalizedUserId)
+                : borrowRecordRepository.findByBorrowerIdAndStatusOrderByBorrowDateDescCreatedAtDesc(
+                        normalizedUserId, status);
+
+        return records.stream()
+                .map(borrowRecordMapper::toBorrowRecordResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('LIBRARIAN','SYSADMIN')")
     public PageResponse<BorrowRecordResponse> getBorrowRecords(BorrowRecordFilterRequest request) {
         BorrowStatus status = resolveBorrowStatus(request.getStatus());
         String borrowerId = request.getBorrowerId() == null ? null : request.getBorrowerId().trim();

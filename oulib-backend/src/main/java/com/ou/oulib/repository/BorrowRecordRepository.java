@@ -41,9 +41,12 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Stri
     List<BorrowRecord> findByBorrowerIdAndStatusOrderByBorrowDateDescCreatedAtDesc(String borrowerId, BorrowStatus status);
 
     List<BorrowRecord> findByStatusAndReturnDateIsNullAndDueDate(BorrowStatus status, LocalDate dueDate);
+
     List<BorrowRecord> findByStatusAndReturnDateIsNullAndReminderSentFalseAndDueDate(BorrowStatus status, LocalDate dueDate);
 
-        List<BorrowRecord> findByStatusAndReturnDateIsNullAndReminderSentFalseAndDueDateBetween(BorrowStatus status, LocalDate start, LocalDate end);
+    List<BorrowRecord> findByStatusAndReturnDateIsNullAndDueDateBefore(BorrowStatus status, LocalDate dueDate);
+
+    List<BorrowRecord> findByStatusAndReturnDateIsNullAndReminderSentFalseAndDueDateBetween(BorrowStatus status, LocalDate start, LocalDate end);
 
     @Query(
             value = """

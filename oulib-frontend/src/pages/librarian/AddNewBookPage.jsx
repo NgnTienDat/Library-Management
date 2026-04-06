@@ -132,7 +132,7 @@ function AddNewBookPage() {
 					</label>
 
 					<label className='text-sm font-medium text-slate-700'>
-						Số trang
+						Số trang test
 						<input
 							type='number'
 							value={form.numberOfPages}
