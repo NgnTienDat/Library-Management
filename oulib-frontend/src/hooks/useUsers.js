@@ -10,7 +10,7 @@ function getErrorMessage(error) {
 		error?.response?.data?.message ||
 		error?.response?.data?.result?.message ||
 		error?.message ||
-		'Khong the tai danh sach nguoi dung. Vui long thu lai.'
+		'Không thể tải danh sách người dùng. Vui lòng thử lại.'
 	)
 }
 
@@ -31,19 +31,19 @@ export function useUsers(queryParams = {}) {
 }
 
 export function useUpdateUserStatus() {
-  const queryClient = useQueryClient()
+	const queryClient = useQueryClient()
 
-  return useMutation({
-    mutationFn: ({ id, status }) => updateUserStatus(id, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] })
-      toast.success('Cập nhật trạng thái người dùng thành công')
-    },
+	return useMutation({
+		mutationFn: ({ id, status }) => updateUserStatus(id, status),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] })
+			toast.success('Cập nhật trạng thái người dùng thành công')
+		},
     
-    onError: (error) => {
-      toát.error(getErrorMessage(error))
-    }
-  })
+		onError: (error) => {
+			toast.error(getErrorMessage(error))
+		}
+	})
 }
 
 export function useCreateStaff() {
@@ -57,7 +57,7 @@ export function useCreateStaff() {
 		},
     
     onError: (error) => {
-      toát.error(getErrorMessage(error))
+      toast.error(getErrorMessage(error))
     }
 	})
 }

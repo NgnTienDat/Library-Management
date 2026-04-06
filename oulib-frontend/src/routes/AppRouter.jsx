@@ -22,6 +22,7 @@ import MyBorrowedPage from '../pages/user/MyBorrowedPage'
 import ProfilePage from '../pages/user/ProfilePage'
 import { ROLE_ROUTE_PATHS, ROLES } from '../utils/constants'
 import ProtectedRoute from './ProtectedRoute'
+import UpdateUserPage from '../pages/admin/UpdateUserPage'
 
 const adminPaths = ROLE_ROUTE_PATHS[ROLES.SYSADMIN]
 const librarianPaths = ROLE_ROUTE_PATHS[ROLES.LIBRARIAN]
@@ -43,6 +44,7 @@ function AppRouter() {
 					<Route path={adminPaths.users} element={<UserManagementPage />} />
 					<Route path={adminPaths.statistics} element={<StatisticsPage />} />
 					<Route path={adminPaths.roles} element={<RoleManagementPage />} />
+					<Route path={adminPaths.id} element={<UpdateUserPage />} />
 
 					<Route path={librarianPaths.dashboard} element={<LibrarianDashboardPage />} />
 					<Route path={librarianPaths.books} element={<ManageBooksPage />} />
