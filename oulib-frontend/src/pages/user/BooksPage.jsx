@@ -39,12 +39,19 @@ function BooksPage() {
         size: 12,
       }
 
-      if (search) params.search = search
-      if (categoryId) params.categoryId = categoryId
+      if (search) {
+        params.keyword = search
+      }
+      if (categoryId) {
+        params.categoryId = categoryId
+      }
+
+      console.log("Final params for API call:", params)
 
       const data = await getBooks(params)
 
       const list = data?.result?.content || data?.content || []
+      console.log("Fetched books:", list)
 
       setBooks(list)
     } catch (err) {
