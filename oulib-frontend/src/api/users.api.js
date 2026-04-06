@@ -21,10 +21,10 @@ export async function getUsers(params = {}) {
 }
 
 export async function updateUserStatus(id, status) {
-  const response = await axiosInstance.patch(`${USERS_BASE_PATH}/${id}/status`, {
+	const response = await axiosInstance.patch(`${USERS_BASE_PATH}/${id}/status`, {
     status,
-  })
-  return unwrapResponse(response)
+	})
+	return unwrapResponse(response)
 }
 
 export async function createStaff(data) {
@@ -33,6 +33,6 @@ export async function createStaff(data) {
 }
 
 export async function getMyProfile() {
-  const response = await axiosInstance.get(`${USERS_BASE_PATH}/me`)
-  return unwrapResponse(response)
+	const response = await axiosInstance.get(`${USERS_BASE_PATH}/me`)
+	return unwrapResponse(response)
 }

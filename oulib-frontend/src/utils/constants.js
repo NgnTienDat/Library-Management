@@ -9,6 +9,7 @@ const SYSADMIN_ROUTE_PATHS = Object.freeze({
 	users: '/admin/users',
 	statistics: '/admin/statistics',
 	roles: '/admin/roles',
+	id: '/admin/users/:id'
 })
 
 const LIBRARIAN_ROUTE_PATHS = Object.freeze({
