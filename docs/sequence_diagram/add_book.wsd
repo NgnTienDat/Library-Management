@@ -1,0 +1,78 @@
+@startuml add-book-sequence
+!theme plain
+title Add Book - Sequence Diagram
+autonumber
+
+actor Librarian
+participant BookController
+participant BookService
+database MySQL
+participant Cloudinary
+
+Librarian -> BookController : POST /api/v1/books (metadata + optional thumbnail)
+activate BookController
+
+BookController -> BookService : addNewBook(metadata, thumbnail)
+activate BookService
+
+BookService -> BookService : Authorize LIBRARIAN and validate input rules
+BookService -> BookService : Validate totalCopies, copyBarcodes, ISBN
+BookService -> MySQL : Check ISBN/barcode uniqueness
+activate MySQL
+MySQL --> BookService : Validation query result
+deactivate MySQL
+
+alt validation/reference fails
+    BookService --> BookController : AppException (400/404/409)
+    deactivate BookService
+    BookController --> Librarian : Error response
+    deactivate BookController
+
+else validation/reference passes
+    BookService -> MySQL : Find category, resolve authors, create missing authors
+    activate MySQL
+    MySQL --> BookService : Category/authors resolved
+    deactivate MySQL
+
+    BookService -> MySQL : Save book and book copies
+    activate MySQL
+    MySQL --> BookService : Book persisted
+    deactivate MySQL
+
+    alt thumbnail provided
+        BookService -> BookService : validateImage(thumbnail)
+        BookService -> Cloudinary : uploadThumbnail(thumbnail)
+        activate Cloudinary
+
+        alt upload success
+            Cloudinary --> BookService : thumbnailKey (URL)
+            deactivate Cloudinary
+            BookService -> BookService : setThumbnailUrl(thumbnailKey)
+            BookService --> BookController : BookResponse
+            deactivate BookService
+            BookController --> Librarian : 201 Created
+            deactivate BookController
+
+        else upload failure
+            Cloudinary --> BookService : Upload error
+            deactivate Cloudinary
+            BookService -> MySQL : delete(book) and rollback transaction
+            activate MySQL
+            MySQL --> BookService : Cleanup done
+            deactivate MySQL
+            BookService -> BookService : cleanupUploadedFiles(thumbnailKey)
+            BookService --> BookController : Error response
+            deactivate BookService
+            BookController --> Librarian : Error response
+            deactivate BookController
+        end
+
+    else no thumbnail
+        BookService --> BookController : BookResponse
+        deactivate BookService
+        BookController --> Librarian : 201 Created
+        deactivate BookController
+    end
+end
+
+@enduml

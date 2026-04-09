@@ -16,51 +16,12 @@
     }
   ],
   "paths": {
-    "/api/v1/users/{id}/status": {
-      "put": {
-        "tags": [
-          "user-controller"
-        ],
-        "operationId": "updateUserStatus",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserStatusUpdateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseUserResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/users/me": {
       "get": {
         "tags": [
           "user-controller"
         ],
+        "summary": "Get current user",
         "operationId": "getCurrentUser",
         "responses": {
           "200": {
@@ -79,6 +40,7 @@
         "tags": [
           "user-controller"
         ],
+        "summary": "Update my profile",
         "operationId": "updateMyProfile",
         "requestBody": {
           "content": {
@@ -115,11 +77,43 @@
         }
       }
     },
+    "/api/v1/users/me/password": {
+      "put": {
+        "tags": [
+          "user-controller"
+        ],
+        "summary": "Change my password",
+        "operationId": "changePassword",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/refresh": {
       "post": {
         "tags": [
           "authentication-controller"
         ],
+        "summary": "Refresh access token",
         "operationId": "refreshToken",
         "requestBody": {
           "content": {
@@ -150,6 +144,7 @@
         "tags": [
           "authentication-controller"
         ],
+        "summary": "Logout",
         "operationId": "logout",
         "requestBody": {
           "content": {
@@ -180,6 +175,7 @@
         "tags": [
           "authentication-controller"
         ],
+        "summary": "Login",
         "operationId": "authenticate",
         "requestBody": {
           "content": {
@@ -305,6 +301,144 @@
         }
       }
     },
+    "/api/v1/users/staff": {
+      "post": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "createStaff",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StaffCreationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/categories": {
+      "get": {
+        "tags": [
+          "category-controller"
+        ],
+        "operationId": "getAllCategories",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "category-controller"
+        ],
+        "operationId": "createCategory",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryCreationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/borrowing": {
+      "post": {
+        "tags": [
+          "book-borrow-controller"
+        ],
+        "operationId": "borrowBook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BorrowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/borrowing/return": {
+      "post": {
+        "tags": [
+          "book-borrow-controller"
+        ],
+        "operationId": "returnBook",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/books": {
       "get": {
         "tags": [
@@ -410,47 +544,27 @@
         }
       }
     },
-    "/api/v1/books/return": {
-      "post": {
+    "/api/v1/users/{id}/status": {
+      "patch": {
         "tags": [
-          "book-borrow-controller"
+          "user-controller"
         ],
-        "operationId": "returnBook",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReturnRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseObject"
-                }
-              }
+        "operationId": "updateUserStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
-        }
-      }
-    },
-    "/api/v1/books/borrow": {
-      "post": {
-        "tags": [
-          "book-borrow-controller"
         ],
-        "operationId": "borrowBook",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BorrowRequest"
+                "$ref": "#/components/schemas/UserStatusUpdateRequest"
               }
             }
           },
@@ -462,7 +576,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseObject"
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
                 }
               }
             }
@@ -492,7 +606,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseBookResponse"
+                  "$ref": "#/components/schemas/ApiResponseBookDetailResponse"
                 }
               }
             }
@@ -577,6 +691,36 @@
         }
       }
     },
+    "/api/v1/books/{id}/reactivate": {
+      "patch": {
+        "tags": [
+          "book-controller"
+        ],
+        "operationId": "reactivateBook",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/users/active-users": {
       "get": {
         "tags": [
@@ -642,6 +786,26 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseListTopBorrowedBookResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/statistics/system-totals": {
+      "get": {
+        "tags": [
+          "statistics-controller"
+        ],
+        "operationId": "getSystemTotals",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSystemTotalsResponse"
                 }
               }
             }
@@ -859,26 +1023,213 @@
           }
         }
       }
+    },
+    "/api/v1/borrowing/{userId}/history": {
+      "get": {
+        "tags": [
+          "book-borrow-controller"
+        ],
+        "operationId": "getUserBorrowingHistory",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/borrowing/records": {
+      "get": {
+        "tags": [
+          "book-borrow-controller"
+        ],
+        "operationId": "getBorrowRecords",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "borrowerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseBorrowRecordResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/borrowing/records/{recordId}": {
+      "get": {
+        "tags": [
+          "book-borrow-controller"
+        ],
+        "operationId": "getBorrowRecordDetail",
+        "parameters": [
+          {
+            "name": "recordId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBorrowRecordDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/borrowing/history": {
+      "get": {
+        "tags": [
+          "book-borrow-controller"
+        ],
+        "operationId": "getMyBorrowingHistory",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/categories/{id}": {
+      "delete": {
+        "tags": [
+          "category-controller"
+        ],
+        "operationId": "deleteCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
-      "UserStatusUpdateRequest": {
+      "UserUpdateRequest": {
         "type": "object",
         "properties": {
-          "status": {
+          "fullName": {
             "type": "string",
-            "enum": [
-              "ACTIVE",
-              "SUSPENDED",
-              "DELETED",
-              "PRIVATE"
-            ]
+            "maxLength": 50,
+            "minLength": 1
+          },
+          "username": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 2
+          },
+          "avatar": {
+            "type": "string"
           }
-        },
-        "required": [
-          "status"
-        ]
+        }
       },
       "ApiResponseUserResponse": {
         "type": "object",
@@ -927,21 +1278,35 @@
           }
         }
       },
-      "UserUpdateRequest": {
+      "ChangePasswordRequest": {
         "type": "object",
         "properties": {
-          "fullName": {
-            "type": "string",
-            "maxLength": 50,
-            "minLength": 1
-          },
-          "username": {
-            "type": "string",
-            "maxLength": 100,
-            "minLength": 2
-          },
-          "avatar": {
+          "oldPassword": {
             "type": "string"
+          },
+          "newPassword": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 6
+          }
+        },
+        "required": [
+          "newPassword",
+          "oldPassword"
+        ]
+      },
+      "ApiResponseVoid": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "type": "object"
           }
         }
       },
@@ -987,21 +1352,6 @@
         "properties": {
           "token": {
             "type": "string"
-          }
-        }
-      },
-      "ApiResponseVoid": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
-          },
-          "result": {
-            "type": "object"
           }
         }
       },
@@ -1092,6 +1442,108 @@
           "password"
         ]
       },
+      "StaffCreationRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 6
+          },
+          "fullName": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "SYSADMIN",
+              "LIBRARIAN",
+              "USER"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "fullName",
+          "password",
+          "role"
+        ]
+      },
+      "CategoryCreationRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "ApiResponseCategoryResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/CategoryResponse"
+          }
+        }
+      },
+      "CategoryResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "BorrowRequest": {
+        "type": "object",
+        "properties": {
+          "borrowerId": {
+            "type": "string"
+          },
+          "borrowDuration": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "barcodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "borrowDuration"
+        ]
+      },
+      "ReturnRequest": {
+        "type": "object",
+        "properties": {
+          "barcodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "AuthorRefRequest": {
         "type": "object",
         "properties": {
@@ -1143,30 +1595,22 @@
           }
         }
       },
-      "ReturnRequest": {
+      "UserStatusUpdateRequest": {
         "type": "object",
         "properties": {
-          "barcodes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "SUSPENDED",
+              "DELETED",
+              "PRIVATE"
+            ]
           }
-        }
-      },
-      "BorrowRequest": {
-        "type": "object",
-        "properties": {
-          "borrowerId": {
-            "type": "string"
-          },
-          "barcodes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
+        },
+        "required": [
+          "status"
+        ]
       },
       "BookUpdateRequest": {
         "type": "object",
@@ -1220,6 +1664,9 @@
           "id": {
             "type": "string"
           },
+          "active": {
+            "type": "boolean"
+          },
           "title": {
             "type": "string"
           },
@@ -1255,6 +1702,21 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "ApiResponseString": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
           }
         }
       },
@@ -1365,6 +1827,50 @@
             "type": "string"
           },
           "borrowCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApiResponseSystemTotalsResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/SystemTotalsResponse"
+          }
+        }
+      },
+      "SystemTotalsResponse": {
+        "type": "object",
+        "properties": {
+          "totalUsers": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalBooks": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalCopies": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalBorrowRecords": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalCurrentlyBorrowed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalOverdue": {
             "type": "integer",
             "format": "int64"
           }
@@ -1483,7 +1989,7 @@
           }
         }
       },
-      "ApiResponseString": {
+      "ApiResponseListCategoryResponse": {
         "type": "object",
         "properties": {
           "code": {
@@ -1494,7 +2000,210 @@
             "type": "string"
           },
           "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryResponse"
+            }
+          }
+        }
+      },
+      "ApiResponsePageResponseBorrowRecordResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
             "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/PageResponseBorrowRecordResponse"
+          }
+        }
+      },
+      "BorrowRecordResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "borrowerId": {
+            "type": "string"
+          },
+          "barcode": {
+            "type": "string"
+          },
+          "borrowDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "returnDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "BORROWING",
+              "RETURNED",
+              "OVERDUE"
+            ]
+          }
+        }
+      },
+      "PageResponseBorrowRecordResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BorrowRecordResponse"
+            }
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ApiResponseBorrowRecordDetailResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/BorrowRecordDetailResponse"
+          }
+        }
+      },
+      "BorrowRecordDetailResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "borrowerId": {
+            "type": "string"
+          },
+          "borrowerFullName": {
+            "type": "string"
+          },
+          "borrowerEmail": {
+            "type": "string"
+          },
+          "barcode": {
+            "type": "string"
+          },
+          "borrowDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "BORROWING",
+              "RETURNED",
+              "OVERDUE"
+            ]
+          }
+        }
+      },
+      "ApiResponseBookDetailResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/BookDetailResponse"
+          }
+        }
+      },
+      "BookDetailResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "title": {
+            "type": "string"
+          },
+          "isbn": {
+            "type": "string"
+          },
+          "publisher": {
+            "type": "string"
+          },
+          "numberOfPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
+            "type": "string"
+          },
+          "copoies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "availableCopies": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "thumbnailUrl": {
+            "type": "string"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "authorNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }
@@ -1508,7 +2217,3 @@
     }
   }
 }
-Beta
-10 / 10
-used queries
-1

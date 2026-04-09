@@ -1,6 +1,6 @@
 # BookBorrowController API Documentation
 
-Base path: `/api/v1/books`
+Base path: `/api/v1/borrowing`
 
 Standard response wrapper used by all APIs:
 
@@ -14,13 +14,13 @@ Standard response wrapper used by all APIs:
 
 ---
 
-## POST /api/v1/books/borrow
+## POST /api/v1/borrowing
 
 ### 1. Title
 - v1 Borrow Books
 
 ### 2. Endpoint
-- `/api/v1/books/borrow`
+- `/api/v1/borrowing`
 
 ### 3. Method
 - `POST`
@@ -33,15 +33,9 @@ Based on `BorrowRequest`:
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| borrowerId | string | false | Borrower user ID. No Bean Validation annotation in DTO. |
-| barcodes | array of string | false | List of book-copy barcodes to borrow. Must be unique by business rule. |
-
-Business validations from service:
-- `barcodes` must not contain duplicates.
-- Borrower must exist and must not be suspended.
-- Borrower must not have any overdue borrowing record.
-- Requested barcode count must not exceed current borrower quota.
-- Each barcode must exist, be available, and not already actively borrowed by the same borrower.
+| borrowerId | string | false | Borrower user ID. |
+| borrowDuration | integer | true | Borrow duration in days. `@NotNull`, `@Min(0)`. |
+| barcodes | array of string | false | Book-copy barcodes to borrow. Must be unique in request. |
 
 ### 6. Header Parameters
 - `Content-Type: application/json`
@@ -49,76 +43,44 @@ Business validations from service:
 
 ### 7. Authentication & Authorization Summary
 - Authentication: `Requires JWT`
-- Authorization: `LIBRARIAN` only (enforced at service layer via `@PreAuthorize("hasRole('LIBRARIAN')")`)
+- Authorization: `LIBRARIAN` only
 
 ### 8. Response Codes
 
 #### ✅ Success Responses
-- `201 Created`: Borrow operation completed and records created.
+- `201 Created`: Borrow records created.
 
 #### ❌ Error Responses
-- `401 Unauthorized`
-  - Internal code: `1003`
-  - Message: `Unauthenticated`
-  - Condition: Missing/invalid/expired/blacklisted JWT.
-- `403 Forbidden`
-  - Internal code: `1037`
-  - Message: `You do not have permission to perform this action`
-  - Condition: Authenticated user is not `LIBRARIAN`.
-- `409 Conflict`
-  - Internal code: `1039`
-  - Message: `One or more barcodes already exist`
-  - Condition: Duplicate values detected inside request `barcodes`.
-- `404 Not Found`
-  - Internal code: `1001`
-  - Message: `User not found`
-  - Condition: `borrowerId` does not exist, or authenticated librarian email does not map to a user.
-- `403 Forbidden`
-  - Internal code: `1041`
-  - Message: `User account is inactivated`
-  - Condition: Borrower status is `SUSPENDED`.
-- `403 Forbidden`
-  - Internal code: `1040`
-  - Message: `You have overdue books. Please return them before borrowing new ones.`
-  - Condition: Borrower currently has an `OVERDUE` borrow record.
-- `400 Bad Request`
-  - Internal code: `1031`
-  - Message: `You have reached your borrowing limit`
-  - Condition: Requested number of barcodes exceeds borrower quota.
-- `404 Not Found`
-  - Internal code: `1030`
-  - Message: `Book not found`
-  - Condition: Any barcode does not exist in book-copy table.
-- `400 Bad Request`
-  - Internal code: `1032`
-  - Message: `No available copies for this book`
-  - Condition: Any targeted copy is not in `AVAILABLE` status.
-- `409 Conflict`
-  - Internal code: `1033`
-  - Message: `You are already borrowing this book`
-  - Condition: Borrower already has active `BORROWING` record for that copy.
-- `500 Internal Server Error`
-  - Internal code: `1000`
-  - Message: `Uncategorized Error`
-  - Condition: Any unhandled runtime exception (for example null request fields with no Bean Validation guard).
+- `400 Bad Request` / code `400`
+  - Message: `Validation Failed`
+  - Condition: `borrowDuration` missing or invalid by Bean Validation.
+- `401 Unauthorized` / code `1003`: Missing/invalid JWT.
+- `403 Forbidden` / code `1037`: Role is not `LIBRARIAN`.
+- `409 Conflict` / code `1039`: Duplicate barcodes in request.
+- `404 Not Found` / code `1001`: Borrower not found or authenticated librarian not found.
+- `403 Forbidden` / code `1041`: Borrower is suspended/inactive.
+- `403 Forbidden` / code `1040`: Borrower has overdue books.
+- `400 Bad Request` / code `1031`: Borrow request exceeds borrower quota.
+- `404 Not Found` / code `1030`: Barcode not found.
+- `400 Bad Request` / code `1032`: Copy is not available.
+- `409 Conflict` / code `1033`: Borrower already borrowing the same copy.
+- `500 Internal Server Error` / code `1000`: Any unhandled runtime exception.
 
 ### 9. Sample Calls
 
 #### cURL Example
 ```bash
-curl -X POST "http://localhost:8080/api/v1/books/borrow" \
+curl -X POST "http://localhost:8080/api/v1/borrowing" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <JWT_TOKEN>" \
-  -d '{
-    "borrowerId": "user-001",
-    "barcodes": ["BC-0001", "BC-0002"]
-  }'
+  -d '{"borrowerId":"user-001","borrowDuration":14,"barcodes":["BC-0001","BC-0002"]}'
 ```
 
 #### Request JSON
 ```json
 {
   "borrowerId": "user-001",
+  "borrowDuration": 14,
   "barcodes": ["BC-0001", "BC-0002"]
 }
 ```
@@ -130,18 +92,11 @@ curl -X POST "http://localhost:8080/api/v1/books/borrow" \
   "message": "Created",
   "result": [
     {
-      "id": "br-1001",
+      "id": "br-001",
+      "borrowerId": "user-001",
       "barcode": "BC-0001",
-      "borrowDate": "2026-03-25",
-      "dueDate": "2026-03-25T12:30:00",
-      "returnDate": null,
-      "status": "BORROWING"
-    },
-    {
-      "id": "br-1002",
-      "barcode": "BC-0002",
-      "borrowDate": "2026-03-25",
-      "dueDate": "2026-03-25T12:30:00",
+      "borrowDate": "2026-04-08",
+      "dueDate": "2026-04-22T00:00:00",
       "returnDate": null,
       "status": "BORROWING"
     }
@@ -152,21 +107,21 @@ curl -X POST "http://localhost:8080/api/v1/books/borrow" \
 #### Error Response JSON
 ```json
 {
-  "code": 1040,
-  "message": "You have overdue books. Please return them before borrowing new ones.",
+  "code": 1031,
+  "message": "You have reached your borrowing limit",
   "result": null
 }
 ```
 
 ---
 
-## POST /api/v1/books/return
+## POST /api/v1/borrowing/return
 
 ### 1. Title
 - v1 Return Borrowed Books
 
 ### 2. Endpoint
-- `/api/v1/books/return`
+- `/api/v1/borrowing/return`
 
 ### 3. Method
 - `POST`
@@ -179,12 +134,7 @@ Based on `ReturnRequest`:
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| barcodes | array of string | false | List of borrowed copy barcodes to return. Must be unique by business rule. |
-
-Business validations from service:
-- `barcodes` must not contain duplicates.
-- Each barcode must exist and currently be in `BORROWED` status.
-- There must be an active `BORROWING` record for each targeted copy.
+| barcodes | array of string | false | Book-copy barcodes to return. Must be unique in request. |
 
 ### 6. Header Parameters
 - `Content-Type: application/json`
@@ -192,59 +142,36 @@ Business validations from service:
 
 ### 7. Authentication & Authorization Summary
 - Authentication: `Requires JWT`
-- Authorization: `LIBRARIAN` only (enforced at service layer via `@PreAuthorize("hasRole('LIBRARIAN')")`)
+- Authorization: `LIBRARIAN` only
 
 ### 8. Response Codes
 
 #### ✅ Success Responses
-- `200 OK`: Return operation completed and records updated.
+- `200 OK`: Return operation completed.
 
 #### ❌ Error Responses
-- `401 Unauthorized`
-  - Internal code: `1003`
-  - Message: `Unauthenticated`
-  - Condition: Missing/invalid/expired/blacklisted JWT.
-- `403 Forbidden`
-  - Internal code: `1037`
-  - Message: `You do not have permission to perform this action`
-  - Condition: Authenticated user is not `LIBRARIAN`.
-- `400 Bad Request`
-  - Internal code: `1043`
-  - Message: `Duplicate barcodes found in request`
-  - Condition: Duplicate values detected inside request `barcodes`.
-- `404 Not Found`
-  - Internal code: `1030`
-  - Message: `Book not found`
-  - Condition: Any barcode does not exist in book-copy table.
-- `400 Bad Request`
-  - Internal code: `1042`
-  - Message: `This book copy is not currently borrowed`
-  - Condition: Targeted copy status is not `BORROWED`.
-- `404 Not Found`
-  - Internal code: `1034`
-  - Message: `No active borrow record found for this book`
-  - Condition: No `BORROWING` record found for targeted copy.
-- `500 Internal Server Error`
-  - Internal code: `1000`
-  - Message: `Uncategorized Error`
-  - Condition: Any unhandled runtime exception (for example null request fields with no Bean Validation guard).
+- `401 Unauthorized` / code `1003`: Missing/invalid JWT.
+- `403 Forbidden` / code `1037`: Role is not `LIBRARIAN`.
+- `400 Bad Request` / code `1043`: Duplicate barcodes in request.
+- `404 Not Found` / code `1030`: Barcode not found.
+- `400 Bad Request` / code `1042`: Copy is not currently borrowed.
+- `404 Not Found` / code `1034`: Active borrowing record not found.
+- `500 Internal Server Error` / code `1000`: Any unhandled runtime exception.
 
 ### 9. Sample Calls
 
 #### cURL Example
 ```bash
-curl -X POST "http://localhost:8080/api/v1/books/return" \
+curl -X POST "http://localhost:8080/api/v1/borrowing/return" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <JWT_TOKEN>" \
-  -d '{
-    "barcodes": ["BC-0001", "BC-0002"]
-  }'
+  -d '{"barcodes":["BC-0001"]}'
 ```
 
 #### Request JSON
 ```json
 {
-  "barcodes": ["BC-0001", "BC-0002"]
+  "barcodes": ["BC-0001"]
 }
 ```
 
@@ -255,19 +182,12 @@ curl -X POST "http://localhost:8080/api/v1/books/return" \
   "message": "Success",
   "result": [
     {
-      "id": "br-1001",
+      "id": "br-001",
+      "borrowerId": "user-001",
       "barcode": "BC-0001",
-      "borrowDate": "2026-03-20",
-      "dueDate": "2026-03-25T12:30:00",
-      "returnDate": "2026-03-25",
-      "status": "RETURNED"
-    },
-    {
-      "id": "br-1002",
-      "barcode": "BC-0002",
-      "borrowDate": "2026-03-20",
-      "dueDate": "2026-03-25T12:30:00",
-      "returnDate": "2026-03-25",
+      "borrowDate": "2026-04-01",
+      "dueDate": "2026-04-15T00:00:00",
+      "returnDate": "2026-04-08",
       "status": "RETURNED"
     }
   ]
@@ -285,28 +205,28 @@ curl -X POST "http://localhost:8080/api/v1/books/return" \
 
 ---
 
-## GET /api/v1/books/history
+## GET /api/v1/borrowing/history
 
 ### 1. Title
-- v1 My Borrowing History
+- v1 Get My Borrowing History
 
 ### 2. Endpoint
-- `/api/v1/books/history`
+- `/api/v1/borrowing/history`
 
 ### 3. Method
 - `GET`
 
 ### 4. URL Parameters
+
 | Name | Type | Required | Description |
 |---|---|---|---|
-| status | string | false | Borrow status filter. Allowed values: `borrowing`, `return`, `overdue` (case-insensitive). |
-
-If `status` is omitted, API returns all records for the authenticated user.
+| status | string | false | Allowed: `borrowing`, `return`/`returned`, `overdue` (case-insensitive). |
 
 ### 5. Message Payload
 - `None`
 
 ### 6. Header Parameters
+- `Content-Type: application/json`
 - `Authorization: Bearer <JWT_TOKEN>`
 
 ### 7. Authentication & Authorization Summary
@@ -316,34 +236,25 @@ If `status` is omitted, API returns all records for the authenticated user.
 ### 8. Response Codes
 
 #### ✅ Success Responses
-- `200 OK`: Borrowing history returned.
+- `200 OK`: Authenticated user borrowing history returned.
 
 #### ❌ Error Responses
-- `401 Unauthorized`
-  - Internal code: `1003`
-  - Message: `Unauthenticated`
-  - Condition: Missing/invalid/expired/blacklisted JWT.
-- `404 Not Found`
-  - Internal code: `1001`
-  - Message: `User not found`
-  - Condition: JWT subject email does not map to a user.
-- `400 Bad Request`
-  - Internal code: `2011`
-  - Message: `Invalid borrow status. Allowed values: borrowing, return, overdue`
-  - Condition: Unsupported `status` value.
+- `401 Unauthorized` / code `1003`: Missing/invalid JWT.
+- `404 Not Found` / code `1001`: Authenticated user does not exist.
+- `400 Bad Request` / code `2011`: Invalid status value.
+- `500 Internal Server Error` / code `1000`: Any unhandled runtime exception.
 
 ### 9. Sample Calls
 
-#### cURL Example (All statuses)
+#### cURL Example
 ```bash
-curl -X GET "http://localhost:8080/api/v1/books/history" \
+curl -X GET "http://localhost:8080/api/v1/borrowing/history?status=borrowing" \
   -H "Authorization: Bearer <JWT_TOKEN>"
 ```
 
-#### cURL Example (Filter by status)
-```bash
-curl -X GET "http://localhost:8080/api/v1/books/history?status=borrowing" \
-  -H "Authorization: Bearer <JWT_TOKEN>"
+#### Request JSON
+```json
+None
 ```
 
 #### Success Response JSON
@@ -353,21 +264,272 @@ curl -X GET "http://localhost:8080/api/v1/books/history?status=borrowing" \
   "message": "Success",
   "result": [
     {
-      "id": "br-1001",
+      "id": "br-001",
+      "borrowerId": "user-001",
       "barcode": "BC-0001",
-      "borrowDate": "2026-03-20",
-      "dueDate": "2026-03-25T12:30:00",
+      "borrowDate": "2026-04-01",
+      "dueDate": "2026-04-15T00:00:00",
       "returnDate": null,
       "status": "BORROWING"
-    },
-    {
-      "id": "br-1002",
-      "barcode": "BC-0002",
-      "borrowDate": "2026-03-10",
-      "dueDate": "2026-03-17T12:30:00",
-      "returnDate": "2026-03-15",
-      "status": "RETURNED"
     }
   ]
+}
+```
+
+#### Error Response JSON
+```json
+{
+  "code": 2011,
+  "message": "Invalid borrow status. Allowed values: borrowing, return, overdue",
+  "result": null
+}
+```
+
+---
+
+## GET /api/v1/borrowing/{userId}/history
+
+### 1. Title
+- v1 Get User Borrowing History
+
+### 2. Endpoint
+- `/api/v1/borrowing/{userId}/history`
+
+### 3. Method
+- `GET`
+
+### 4. URL Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| userId | string | true | Target user ID. |
+| status | string | false | Allowed: `borrowing`, `return`/`returned`, `overdue`. |
+
+### 5. Message Payload
+- `None`
+
+### 6. Header Parameters
+- `Content-Type: application/json`
+- `Authorization: Bearer <JWT_TOKEN>`
+
+### 7. Authentication & Authorization Summary
+- Authentication: `Requires JWT`
+- Authorization: `LIBRARIAN`, `SYSADMIN`
+
+### 8. Response Codes
+
+#### ✅ Success Responses
+- `200 OK`: Target user borrowing history returned.
+
+#### ❌ Error Responses
+- `401 Unauthorized` / code `1003`: Missing/invalid JWT.
+- `403 Forbidden` / code `1037`: Role is neither `LIBRARIAN` nor `SYSADMIN`.
+- `404 Not Found` / code `1001`: Target user does not exist.
+- `400 Bad Request` / code `2011`: Invalid status value.
+- `500 Internal Server Error` / code `1000`: Any unhandled runtime exception.
+
+### 9. Sample Calls
+
+#### cURL Example
+```bash
+curl -X GET "http://localhost:8080/api/v1/borrowing/user-001/history?status=returned" \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+```
+
+#### Request JSON
+```json
+None
+```
+
+#### Success Response JSON
+```json
+{
+  "code": 200,
+  "message": "Success",
+  "result": []
+}
+```
+
+#### Error Response JSON
+```json
+{
+  "code": 1001,
+  "message": "User not found",
+  "result": null
+}
+```
+
+---
+
+## GET /api/v1/borrowing/records
+
+### 1. Title
+- v1 Get Borrow Records (Paginated)
+
+### 2. Endpoint
+- `/api/v1/borrowing/records`
+
+### 3. Method
+- `GET`
+
+### 4. URL Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| status | string | false | Allowed: `borrowing`, `return`/`returned`, `overdue`. |
+| borrowerId | string | false | Filter by borrower ID. |
+| page | integer | false | Default `0`. |
+| size | integer | false | Default `10`. |
+
+### 5. Message Payload
+- `None`
+
+### 6. Header Parameters
+- `Content-Type: application/json`
+- `Authorization: Bearer <JWT_TOKEN>`
+
+### 7. Authentication & Authorization Summary
+- Authentication: `Requires JWT`
+- Authorization: `LIBRARIAN`, `SYSADMIN`
+
+### 8. Response Codes
+
+#### ✅ Success Responses
+- `200 OK`: Paginated borrow records returned.
+
+#### ❌ Error Responses
+- `401 Unauthorized` / code `1003`: Missing/invalid JWT.
+- `403 Forbidden` / code `1037`: Role is neither `LIBRARIAN` nor `SYSADMIN`.
+- `400 Bad Request` / code `2011`: Invalid status value.
+- `500 Internal Server Error` / code `1000`: Invalid paging values or any unhandled exception.
+
+### 9. Sample Calls
+
+#### cURL Example
+```bash
+curl -X GET "http://localhost:8080/api/v1/borrowing/records?status=borrowing&page=0&size=10" \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+```
+
+#### Request JSON
+```json
+None
+```
+
+#### Success Response JSON
+```json
+{
+  "code": 200,
+  "message": "Success",
+  "result": {
+    "content": [
+      {
+        "id": "br-001",
+        "borrowerId": "user-001",
+        "barcode": "BC-0001",
+        "borrowDate": "2026-04-01",
+        "dueDate": "2026-04-15T00:00:00",
+        "returnDate": null,
+        "status": "BORROWING"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "first": true,
+    "last": true,
+    "empty": false
+  }
+}
+```
+
+#### Error Response JSON
+```json
+{
+  "code": 2011,
+  "message": "Invalid borrow status. Allowed values: borrowing, return, overdue",
+  "result": null
+}
+```
+
+---
+
+## GET /api/v1/borrowing/records/{recordId}
+
+### 1. Title
+- v1 Get Borrow Record Detail
+
+### 2. Endpoint
+- `/api/v1/borrowing/records/{recordId}`
+
+### 3. Method
+- `GET`
+
+### 4. URL Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| recordId | string | true | Borrow record ID. |
+
+### 5. Message Payload
+- `None`
+
+### 6. Header Parameters
+- `Content-Type: application/json`
+- `Authorization: Bearer <JWT_TOKEN>`
+
+### 7. Authentication & Authorization Summary
+- Authentication: `Requires JWT`
+- Authorization: `LIBRARIAN`, `SYSADMIN`
+
+### 8. Response Codes
+
+#### ✅ Success Responses
+- `200 OK`: Borrow record detail returned.
+
+#### ❌ Error Responses
+- `401 Unauthorized` / code `1003`: Missing/invalid JWT.
+- `403 Forbidden` / code `1037`: Role is neither `LIBRARIAN` nor `SYSADMIN`.
+- `404 Not Found` / code `1034`: Borrow record not found.
+- `500 Internal Server Error` / code `1000`: Any unhandled runtime exception.
+
+### 9. Sample Calls
+
+#### cURL Example
+```bash
+curl -X GET "http://localhost:8080/api/v1/borrowing/records/br-001" \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+```
+
+#### Request JSON
+```json
+None
+```
+
+#### Success Response JSON
+```json
+{
+  "code": 200,
+  "message": "Success",
+  "result": {
+    "id": "br-001",
+    "borrowerId": "user-001",
+    "borrowerFullName": "Nguyen Van A",
+    "borrowerEmail": "a@example.com",
+    "barcode": "BC-0001",
+    "borrowDate": "2026-04-01T02:30:00Z",
+    "dueDate": "2026-04-15",
+    "status": "BORROWING"
+  }
+}
+```
+
+#### Error Response JSON
+```json
+{
+  "code": 1034,
+  "message": "No active borrow record found for this book",
+  "result": null
 }
 ```
