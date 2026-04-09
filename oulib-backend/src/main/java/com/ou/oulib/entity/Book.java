@@ -52,7 +52,7 @@ public class Book {
     List<BookCopy> copies = new ArrayList<>();
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     Category category;
 
     @Builder.Default

@@ -34,18 +34,18 @@ Consumes `multipart/form-data` with request parts:
 | Field | Type | Required | Description |
 |---|---|---|---|
 | metadata | object (`BookCreationRequest`) | true | JSON metadata for book creation. |
-| metadata.isbn | string | false | Book ISBN. No Bean Validation annotation in DTO. Must be unique by business rule. |
-| metadata.title | string | false | Book title. No Bean Validation annotation in DTO. |
-| metadata.publisher | string | false | Publisher name. |
+| metadata.isbn | string | false | ISBN. Must be unique by business rule. |
+| metadata.title | string | false | Book title. |
+| metadata.publisher | string | false | Publisher. |
 | metadata.numberOfPages | integer | false | Number of pages. |
-| metadata.description | string | false | Book description. |
-| metadata.totalCopies | integer | true | Total physical copies. Must be greater than `0` by service rule. |
-| metadata.categoryId | string | false | Category ID. Must exist if provided. |
-| metadata.copyBarcodes | array of string | true | Barcode list for copies. Size must equal `totalCopies`; values must be unique and not already in DB. |
+| metadata.description | string | false | Description. |
+| metadata.totalCopies | integer | true | Must be greater than 0. |
+| metadata.categoryId | string | false | Category ID. Must exist. |
+| metadata.copyBarcodes | array of string | true | Must match `totalCopies`, unique in request, and unique in DB. |
 | metadata.authors | array of object (`AuthorRefRequest`) | false | Author references. |
-| metadata.authors[].id | string | false | Existing author ID. Must exist if provided. |
-| metadata.authors[].name | string | false | New author name when `id` is missing. Must not be blank. |
-| thumbnail | file | false | Thumbnail image file. Must have content type starting with `image/`. |
+| metadata.authors[].id | string | false | Existing author ID. |
+| metadata.authors[].name | string | false | New author name when `id` is empty. |
+| thumbnail | file | false | Image file for thumbnail. |
 
 ### 6. Header Parameters
 - `Content-Type: multipart/form-data`
@@ -53,7 +53,7 @@ Consumes `multipart/form-data` with request parts:
 
 ### 7. Authentication & Authorization Summary
 - Authentication: `Requires JWT`
-- Authorization: `LIBRARIAN` only (enforced at service layer via `@PreAuthorize("hasRole('LIBRARIAN')")`)
+- Authorization: `LIBRARIAN` only (enforced at service layer)
 
 ### 8. Response Codes
 
@@ -84,7 +84,7 @@ Consumes `multipart/form-data` with request parts:
 - `409 Conflict`
   - Internal code: `1039`
   - Message: `One or more barcodes already exist`
-  - Condition: Duplicate barcode in request list or barcode already exists in DB.
+  - Condition: Duplicate barcodes in request or existing barcode in DB.
 - `404 Not Found`
   - Internal code: `1028`
   - Message: `Category not found`
@@ -92,19 +92,19 @@ Consumes `multipart/form-data` with request parts:
 - `404 Not Found`
   - Internal code: `1029`
   - Message: `Author not found`
-  - Condition: Any `authors[].id` does not exist.
+  - Condition: Any provided author ID does not exist.
 - `400 Bad Request`
   - Internal code: `2009`
   - Message: `Invalid author name`
-  - Condition: New author item has missing/blank `name`.
+  - Condition: Missing/blank author name when creating new author.
 - `400 Bad Request`
   - Internal code: `2006`
   - Message: `Invalid image type`
-  - Condition: Uploaded `thumbnail` is not an image content type.
+  - Condition: `thumbnail` is not an image.
 - `413 Payload Too Large`
   - Internal code: `413`
   - Message: `File size is too large!`
-  - Condition: Multipart file exceeds configured limit.
+  - Condition: Uploaded file exceeds multipart limit.
 - `500 Internal Server Error`
   - Internal code: `1000`
   - Message: `Uncategorized Error`
@@ -116,17 +116,7 @@ Consumes `multipart/form-data` with request parts:
 ```bash
 curl -X POST "http://localhost:8080/api/v1/books" \
   -H "Authorization: Bearer <JWT_TOKEN>" \
-  -F 'metadata={
-    "isbn":"9786041234567",
-    "title":"Domain-Driven Design",
-    "publisher":"Addison-Wesley",
-    "numberOfPages":560,
-    "description":"Tactical and strategic design patterns",
-    "totalCopies":2,
-    "categoryId":"cat-001",
-    "copyBarcodes":["BC-0001","BC-0002"],
-    "authors":[{"name":"Eric Evans"}]
-  };type=application/json' \
+  -F 'metadata={"isbn":"9786041234567","title":"DDD","totalCopies":2,"categoryId":"cat-001","copyBarcodes":["BC-0001","BC-0002"],"authors":[{"name":"Eric Evans"}]};type=application/json' \
   -F "thumbnail=@C:/tmp/book-cover.jpg"
 ```
 
@@ -134,18 +124,14 @@ curl -X POST "http://localhost:8080/api/v1/books" \
 ```json
 {
   "isbn": "9786041234567",
-  "title": "Domain-Driven Design",
+  "title": "DDD",
   "publisher": "Addison-Wesley",
   "numberOfPages": 560,
-  "description": "Tactical and strategic design patterns",
+  "description": "Domain Driven Design",
   "totalCopies": 2,
   "categoryId": "cat-001",
   "copyBarcodes": ["BC-0001", "BC-0002"],
-  "authors": [
-    {
-      "name": "Eric Evans"
-    }
-  ]
+  "authors": [{ "name": "Eric Evans" }]
 }
 ```
 
@@ -156,14 +142,15 @@ curl -X POST "http://localhost:8080/api/v1/books" \
   "message": "Created",
   "result": {
     "id": "book-001",
-    "title": "Domain-Driven Design",
+    "active": true,
+    "title": "DDD",
     "isbn": "9786041234567",
     "publisher": "Addison-Wesley",
     "numberOfPages": 560,
-    "description": "Tactical and strategic design patterns",
+    "description": "Domain Driven Design",
     "totalCopies": 2,
     "availableCopies": 2,
-    "thumbnailUrl": "https://res.cloudinary.com/demo/image/upload/v1/oulib/thumbnails/book-cover.jpg",
+    "thumbnailUrl": "https://res.cloudinary.com/demo/image/upload/v1/oulib/thumbnails/book.jpg",
     "categoryName": "Software Architecture",
     "authorNames": ["Eric Evans"]
   }
@@ -196,11 +183,11 @@ curl -X POST "http://localhost:8080/api/v1/books" \
 
 | Name | Type | Required | Description |
 |---|---|---|---|
-| keyword | string | false | Keyword search across title, category name, and author name. |
-| categoryId | string | false | Filter by category ID. |
-| authorIds | string | false | Comma-separated author IDs; parsed into list (e.g., `a1,a2,a3`). |
-| page | integer | false | Page index, default `0`. |
-| size | integer | false | Page size, default `10`. |
+| keyword | string | false | Search across title, category name, and author name. |
+| categoryId | string | false | Category filter. |
+| authorIds | string | false | Comma-separated author IDs. |
+| page | integer | false | Default `0`. |
+| size | integer | false | Default `10`. |
 
 ### 5. Message Payload
 - `None`
@@ -222,13 +209,13 @@ curl -X POST "http://localhost:8080/api/v1/books" \
 - `500 Internal Server Error`
   - Internal code: `1000`
   - Message: `Uncategorized Error`
-  - Condition: Invalid pagination values (for example negative page/size) or any unhandled runtime exception.
+  - Condition: Invalid paging values or any unhandled runtime exception.
 
 ### 9. Sample Calls
 
 #### cURL Example
 ```bash
-curl -X GET "http://localhost:8080/api/v1/books?keyword=design&categoryId=cat-001&authorIds=a1,a2&page=0&size=10"
+curl -X GET "http://localhost:8080/api/v1/books?keyword=ddd&page=0&size=10"
 ```
 
 #### Request JSON
@@ -245,14 +232,15 @@ None
     "content": [
       {
         "id": "book-001",
-        "title": "Domain-Driven Design",
+        "active": true,
+        "title": "DDD",
         "isbn": "9786041234567",
         "publisher": "Addison-Wesley",
         "numberOfPages": 560,
-        "description": "Tactical and strategic design patterns",
+        "description": "Domain Driven Design",
         "totalCopies": 2,
         "availableCopies": 1,
-        "thumbnailUrl": "https://res.cloudinary.com/demo/image/upload/v1/oulib/thumbnails/book-cover.jpg",
+        "thumbnailUrl": "https://res.cloudinary.com/demo/image/upload/v1/oulib/thumbnails/book.jpg",
         "categoryName": "Software Architecture",
         "authorNames": ["Eric Evans"]
       }
@@ -301,24 +289,20 @@ None
 
 ### 6. Header Parameters
 - `Content-Type: application/json`
-- `Authorization: Bearer <JWT_TOKEN>`
+- `Authorization: None`
 
 ### 7. Authentication & Authorization Summary
-- Authentication: `Requires JWT`
-- Authorization: `Any authenticated role` (`USER`, `LIBRARIAN`, `SYSADMIN`)
+- Authentication: `Public`
+- Authorization: `No role restriction`
 
-Note: `/api/v1/books/{id}` is not listed in public GET matchers, so authentication is required even though `/api/v1/books` list is public.
+Note: `SecurityConfig` includes `/api/v1/books/**` in public GET endpoints.
 
 ### 8. Response Codes
 
 #### ✅ Success Responses
-- `200 OK`: Book details returned.
+- `200 OK`: Book detail returned.
 
 #### ❌ Error Responses
-- `401 Unauthorized`
-  - Internal code: `1003`
-  - Message: `Unauthenticated`
-  - Condition: Missing/invalid/expired/blacklisted JWT.
 - `404 Not Found`
   - Internal code: `1030`
   - Message: `Book not found`
@@ -332,8 +316,7 @@ Note: `/api/v1/books/{id}` is not listed in public GET matchers, so authenticati
 
 #### cURL Example
 ```bash
-curl -X GET "http://localhost:8080/api/v1/books/book-001" \
-  -H "Authorization: Bearer <JWT_TOKEN>"
+curl -X GET "http://localhost:8080/api/v1/books/book-001"
 ```
 
 #### Request JSON
@@ -348,14 +331,15 @@ None
   "message": "Success",
   "result": {
     "id": "book-001",
-    "title": "Domain-Driven Design",
+    "active": true,
+    "title": "DDD",
     "isbn": "9786041234567",
     "publisher": "Addison-Wesley",
     "numberOfPages": 560,
-    "description": "Tactical and strategic design patterns",
-    "totalCopies": 2,
+    "description": "Domain Driven Design",
+    "copoies": ["BC-0001", "BC-0002"],
     "availableCopies": 1,
-    "thumbnailUrl": "https://res.cloudinary.com/demo/image/upload/v1/oulib/thumbnails/book-cover.jpg",
+    "thumbnailUrl": "https://res.cloudinary.com/demo/image/upload/v1/oulib/thumbnails/book.jpg",
     "categoryName": "Software Architecture",
     "authorNames": ["Eric Evans"]
   }
@@ -376,7 +360,7 @@ None
 ## PATCH /api/v1/books/{id}
 
 ### 1. Title
-- v1 Update Book Information
+- v1 Update Book
 
 ### 2. Endpoint
 - `/api/v1/books/{id}`
@@ -391,24 +375,19 @@ None
 | id | string | true | Book ID. |
 
 ### 5. Message Payload
-Consumes `multipart/form-data` with request parts:
+Consumes `multipart/form-data`:
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| metadata | object (`BookUpdateRequest`) | true | JSON metadata for update. |
-| metadata.title | string | false | New title. |
-| metadata.publisher | string | false | New publisher. |
-| metadata.numberOfPages | integer | false | New page count. |
-| metadata.description | string | false | New description. |
-| metadata.totalCopies | integer | false | New total copies. Must be `> 0` and not less than currently borrowed copies. |
-| metadata.categoryId | string | false | New category ID. Must exist if provided. |
-| metadata.authors | array of object (`AuthorRefRequest`) | false | Replaces current author list when provided. |
-| metadata.authors[].id | string | false | Existing author ID. Must exist if provided. |
-| metadata.authors[].name | string | false | New author name when `id` is missing. Must not be blank. |
+| metadata | object (`BookUpdateRequest`) | true | Partial book update payload. |
+| metadata.title | string | false | Updated title. |
+| metadata.publisher | string | false | Updated publisher. |
+| metadata.numberOfPages | integer | false | Updated page count. |
+| metadata.description | string | false | Updated description. |
+| metadata.totalCopies | integer | false | Must be > 0 and not less than borrowed count. |
+| metadata.categoryId | string | false | Updated category ID. |
+| metadata.authors | array of object (`AuthorRefRequest`) | false | Replace authors if provided. |
 | thumbnail | file | false | New thumbnail image. |
-
-Behavior detail for `thumbnail` update:
-- Invalid upload/image handling is logged and suppressed in service; API still returns success response with current book state.
 
 ### 6. Header Parameters
 - `Content-Type: multipart/form-data`
@@ -416,46 +395,22 @@ Behavior detail for `thumbnail` update:
 
 ### 7. Authentication & Authorization Summary
 - Authentication: `Requires JWT`
-- Authorization: `LIBRARIAN` only (enforced at service layer via `@PreAuthorize("hasRole('LIBRARIAN')")`)
+- Authorization: `LIBRARIAN` only (enforced at service layer)
 
 ### 8. Response Codes
 
 #### ✅ Success Responses
-- `200 OK`: Book update processed.
+- `200 OK`: Book updated.
 
 #### ❌ Error Responses
-- `401 Unauthorized`
-  - Internal code: `1003`
-  - Message: `Unauthenticated`
-  - Condition: Missing/invalid/expired/blacklisted JWT.
-- `403 Forbidden`
-  - Internal code: `1037`
-  - Message: `You do not have permission to perform this action`
-  - Condition: Authenticated user is not `LIBRARIAN`.
-- `404 Not Found`
-  - Internal code: `1030`
-  - Message: `Book not found`
-  - Condition: Book ID does not exist.
-- `400 Bad Request`
-  - Internal code: `2008`
-  - Message: `Total copies must be greater than 0`
-  - Condition: `totalCopies <= 0` or requested total is less than currently borrowed copies.
-- `404 Not Found`
-  - Internal code: `1028`
-  - Message: `Category not found`
-  - Condition: `categoryId` does not exist.
-- `404 Not Found`
-  - Internal code: `1029`
-  - Message: `Author not found`
-  - Condition: Any `authors[].id` does not exist.
-- `400 Bad Request`
-  - Internal code: `2009`
-  - Message: `Invalid author name`
-  - Condition: New author item has missing/blank `name`.
-- `500 Internal Server Error`
-  - Internal code: `1000`
-  - Message: `Uncategorized Error`
-  - Condition: Missing required multipart part `metadata` or any unhandled runtime exception.
+- `401 Unauthorized` / code `1003`: Missing/invalid JWT.
+- `403 Forbidden` / code `1037`: Role is not `LIBRARIAN`.
+- `404 Not Found` / code `1030`: Book not found.
+- `400 Bad Request` / code `2008`: Invalid `totalCopies`.
+- `404 Not Found` / code `1028`: Category not found.
+- `404 Not Found` / code `1029`: Author not found.
+- `400 Bad Request` / code `2009`: Invalid author name.
+- `500 Internal Server Error` / code `1000`: Missing `metadata` part or other unhandled exception.
 
 ### 9. Sample Calls
 
@@ -463,29 +418,14 @@ Behavior detail for `thumbnail` update:
 ```bash
 curl -X PATCH "http://localhost:8080/api/v1/books/book-001" \
   -H "Authorization: Bearer <JWT_TOKEN>" \
-  -F 'metadata={
-    "title":"Domain-Driven Design (Updated)",
-    "totalCopies":3,
-    "categoryId":"cat-001",
-    "authors":[{"id":"author-001"}]
-  };type=application/json' \
-  -F "thumbnail=@C:/tmp/new-cover.jpg"
+  -F 'metadata={"title":"DDD Updated","totalCopies":3};type=application/json'
 ```
 
 #### Request JSON
 ```json
 {
-  "title": "Domain-Driven Design (Updated)",
-  "publisher": "Addison-Wesley",
-  "numberOfPages": 560,
-  "description": "Updated description",
-  "totalCopies": 3,
-  "categoryId": "cat-001",
-  "authors": [
-    {
-      "id": "author-001"
-    }
-  ]
+  "title": "DDD Updated",
+  "totalCopies": 3
 }
 ```
 
@@ -496,14 +436,15 @@ curl -X PATCH "http://localhost:8080/api/v1/books/book-001" \
   "message": "Success",
   "result": {
     "id": "book-001",
-    "title": "Domain-Driven Design (Updated)",
+    "active": true,
+    "title": "DDD Updated",
     "isbn": "9786041234567",
     "publisher": "Addison-Wesley",
     "numberOfPages": 560,
-    "description": "Updated description",
+    "description": "Domain Driven Design",
     "totalCopies": 3,
     "availableCopies": 2,
-    "thumbnailUrl": "https://res.cloudinary.com/demo/image/upload/v1/oulib/thumbnails/new-cover.jpg",
+    "thumbnailUrl": "https://res.cloudinary.com/demo/image/upload/v1/oulib/thumbnails/book.jpg",
     "categoryName": "Software Architecture",
     "authorNames": ["Eric Evans"]
   }
@@ -547,30 +488,18 @@ curl -X PATCH "http://localhost:8080/api/v1/books/book-001" \
 
 ### 7. Authentication & Authorization Summary
 - Authentication: `Requires JWT`
-- Authorization: `LIBRARIAN` only (enforced at service layer via `@PreAuthorize("hasRole('LIBRARIAN')")`)
+- Authorization: `LIBRARIAN` only
 
 ### 8. Response Codes
 
 #### ✅ Success Responses
-- `200 OK`: Book was soft-deleted by setting `active = false`.
+- `200 OK`: Book deactivated (`active=false`).
 
 #### ❌ Error Responses
-- `401 Unauthorized`
-  - Internal code: `1003`
-  - Message: `Unauthenticated`
-  - Condition: Missing/invalid/expired/blacklisted JWT.
-- `403 Forbidden`
-  - Internal code: `1037`
-  - Message: `You do not have permission to perform this action`
-  - Condition: Authenticated user is not `LIBRARIAN`.
-- `404 Not Found`
-  - Internal code: `1030`
-  - Message: `Book not found`
-  - Condition: Book ID does not exist.
-- `500 Internal Server Error`
-  - Internal code: `1000`
-  - Message: `Uncategorized Error`
-  - Condition: Any unhandled runtime exception.
+- `401 Unauthorized` / code `1003`: Missing/invalid JWT.
+- `403 Forbidden` / code `1037`: Role is not `LIBRARIAN`.
+- `404 Not Found` / code `1030`: Book not found.
+- `500 Internal Server Error` / code `1000`: Any unhandled exception.
 
 ### 9. Sample Calls
 
@@ -591,6 +520,78 @@ None
   "code": 200,
   "message": "Success",
   "result": "Book deactivated successfully"
+}
+```
+
+#### Error Response JSON
+```json
+{
+  "code": 1030,
+  "message": "Book not found",
+  "result": null
+}
+```
+
+---
+
+## PATCH /api/v1/books/{id}/reactivate
+
+### 1. Title
+- v1 Reactivate Book
+
+### 2. Endpoint
+- `/api/v1/books/{id}/reactivate`
+
+### 3. Method
+- `PATCH`
+
+### 4. URL Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| id | string | true | Book ID. |
+
+### 5. Message Payload
+- `None`
+
+### 6. Header Parameters
+- `Content-Type: application/json`
+- `Authorization: Bearer <JWT_TOKEN>`
+
+### 7. Authentication & Authorization Summary
+- Authentication: `Requires JWT`
+- Authorization: `LIBRARIAN` only
+
+### 8. Response Codes
+
+#### ✅ Success Responses
+- `200 OK`: Book reactivated (`active=true`).
+
+#### ❌ Error Responses
+- `401 Unauthorized` / code `1003`: Missing/invalid JWT.
+- `403 Forbidden` / code `1037`: Role is not `LIBRARIAN`.
+- `404 Not Found` / code `1030`: Book not found.
+- `500 Internal Server Error` / code `1000`: Any unhandled exception.
+
+### 9. Sample Calls
+
+#### cURL Example
+```bash
+curl -X PATCH "http://localhost:8080/api/v1/books/book-001/reactivate" \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+```
+
+#### Request JSON
+```json
+None
+```
+
+#### Success Response JSON
+```json
+{
+  "code": 200,
+  "message": "Success",
+  "result": "Book reactivated successfully"
 }
 ```
 

@@ -1,0 +1,63 @@
+@startuml lab3-deployment
+!theme plain
+title E-Commerce Deployment Diagram
+
+skinparam node {
+ BackgroundColor #e8f4fd
+ BorderColor #2196F3
+}
+
+cloud "AWS Cloud" {
+
+ node "Load Balancer\n<<ALB>>" as LB {
+ artifact "Nginx Config" as nginx_conf
+ }
+
+ node "Web Server\n<<EC2 t3.medium>>" as WebServer {
+ node "Docker" as docker_web {
+ artifact "web-ui:latest\n<<Docker Container>>" as WebUI
+ }
+ }
+
+ node "App Server 1\n<<EC2 t3.large>>" as AppServer1 {
+ node "Docker" as docker_app1 {
+ artifact "api-gateway:latest\n<<Container>>" as GW
+ artifact "user-service:latest\n<<Container>>" as UserSvc
+ artifact "product-service:latest\n<<Container>>" as ProdSvc
+ }
+ }
+
+ node "App Server 2\n<<EC2 t3.large>>" as AppServer2 {
+ node "Docker" as docker_app2 {
+ artifact "order-service:latest\n<<Container>>" as OrderSvc
+ artifact "payment-service:latest\n<<Container>>" as PaySvc
+ artifact "notification-service:latest\n<<Container>>" as NotifSvc
+ }
+ }
+
+ database "PostgreSQL\n<<RDS>>" as DB
+ database "Redis\n<<ElastiCache>>" as Cache
+ queue "RabbitMQ\n<<MQ>>" as MQ
+}
+
+actor "Customer" as User
+
+User --> LB : HTTPS (443)
+LB --> WebUI : HTTP (80)
+WebUI --> GW : HTTP (8080)
+GW --> UserSvc : HTTP (8081)
+GW --> ProdSvc : HTTP (8082)
+GW --> OrderSvc : HTTP (8083)
+OrderSvc --> PaySvc : HTTP (8084)
+OrderSvc --> MQ : AMQP (5672)
+MQ --> NotifSvc : AMQP (5672)
+
+UserSvc --> DB : TCP (5432)
+ProdSvc --> DB : TCP (5432)
+OrderSvc --> DB : TCP (5432)
+PaySvc --> DB : TCP (5432)
+
+ProdSvc --> Cache : TCP (6379)
+UserSvc --> Cache : TCP (6379)
+
+@enduml

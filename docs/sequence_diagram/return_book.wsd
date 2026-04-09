@@ -1,0 +1,68 @@
+@startuml return-book-sequence
+!theme plain
+title Return Book - Sequence Diagram
+autonumber
+
+actor User
+actor Librarian
+participant BookBorrowController
+participant BorrowService
+database MySQL
+
+User -> Librarian : Hand over returned book copy
+Librarian -> BookBorrowController : POST /api/v1/borrowing/return (barcodes)
+activate BookBorrowController
+
+BookBorrowController -> BorrowService : returnBook(request, jwt)
+activate BorrowService
+
+BorrowService -> BorrowService : Authorize LIBRARIAN and validate duplicate barcodes
+
+alt request has duplicate barcodes
+    BorrowService --> BookBorrowController : AppException (400)
+    deactivate BorrowService
+    BookBorrowController --> Librarian : Error response
+    deactivate BookBorrowController
+
+else request valid
+    loop each barcode in request
+        BorrowService -> MySQL : Find book copy by barcode
+        activate MySQL
+        MySQL --> BorrowService : BookCopy + Book
+        deactivate MySQL
+
+        BorrowService -> MySQL : Verify copy status is BORROWED
+        activate MySQL
+        MySQL --> BorrowService : Status check result
+        deactivate MySQL
+
+        BorrowService -> MySQL : Find BORROWING record by copyId
+        activate MySQL
+        MySQL --> BorrowService : BorrowRecord
+        deactivate MySQL
+
+        BorrowService -> MySQL : Set returnDate, status RETURNED,
+        activate MySQL
+        BorrowService -> MySQL : update copy AVAILABLE, availableCopies+1, borrowQuota+1
+        MySQL --> BorrowService : State updated
+        deactivate MySQL
+    end
+
+    alt all barcodes processed successfully
+        BorrowService --> BookBorrowController : List<BorrowRecordResponse>
+        deactivate BorrowService
+        BookBorrowController --> Librarian : 200 OK
+        deactivate BookBorrowController
+    else any barcode validation/processing fails
+        BorrowService -> MySQL : Rollback transaction
+        activate MySQL
+        MySQL --> BorrowService : Rollback completed
+        deactivate MySQL
+        BorrowService --> BookBorrowController : AppException (404/409/500)
+        deactivate BorrowService
+        BookBorrowController --> Librarian : Error response
+        deactivate BookBorrowController
+    end
+end
+
+@enduml

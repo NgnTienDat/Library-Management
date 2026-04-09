@@ -26,6 +26,6 @@ public class BookCopy {
     BookCopyStatus status;
 
     @ManyToOne
-    @JoinColumn(name = "book_id")
+    @JoinColumn(name = "book_id", nullable = false)
     Book book;
 }

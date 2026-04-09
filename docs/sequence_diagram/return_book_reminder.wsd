@@ -1,0 +1,66 @@
+@startuml return-book-reminder-sequence
+!theme plain
+title Return Book Reminder - Sequence Diagram
+autonumber
+
+participant BorrowReminderScheduler as ReminderScheduler
+participant BorrowReminderProducer as ReminderProducer
+participant BorrowReminderConsumer as ReminderConsumer
+participant EmailService
+database MySQL
+
+ReminderScheduler -> ReminderScheduler : Trigger scheduled job (daily)
+activate ReminderScheduler
+
+ReminderScheduler -> MySQL : Find BORROWING records
+activate MySQL
+ReminderScheduler -> MySQL : returnDate is null, reminderSent = false,
+ReminderScheduler -> MySQL : dueDate = today + 2 days
+MySQL --> ReminderScheduler : recordsDueSoon
+deactivate MySQL
+
+alt no records to remind
+    ReminderScheduler --> ReminderScheduler : End job
+    deactivate ReminderScheduler
+else records found
+    loop each borrow record
+        ReminderScheduler -> ReminderProducer : publishBorrowReminder(recordId)
+        activate ReminderProducer
+        ReminderProducer --> ReminderScheduler : Message published
+        deactivate ReminderProducer
+
+        ReminderScheduler -> MySQL : Mark reminderSent = true
+        activate MySQL
+        MySQL --> ReminderScheduler : Saved
+        deactivate MySQL
+
+        ReminderProducer -> ReminderConsumer : Borrow reminder message (via RabbitMQ)
+        activate ReminderConsumer
+
+        ReminderConsumer -> MySQL : Load BorrowRecord by id
+        activate MySQL
+        MySQL --> ReminderConsumer : BorrowRecord
+        deactivate MySQL
+
+        ReminderConsumer -> ReminderConsumer : Extract email, book title, due date
+        ReminderConsumer -> EmailService : sendBorrowReminderEmail(email, title, dueDate)
+        activate EmailService
+
+        alt email sent successfully
+            EmailService --> ReminderConsumer : Success
+            deactivate EmailService
+            ReminderConsumer --> ReminderProducer : Message processed
+            deactivate ReminderConsumer
+        else email send fails
+            EmailService --> ReminderConsumer : Failure
+            deactivate EmailService
+            ReminderConsumer --> ReminderProducer : Throw exception for retry
+            deactivate ReminderConsumer
+        end
+    end
+
+    ReminderScheduler --> ReminderScheduler : Job completed
+    deactivate ReminderScheduler
+end
+
+@enduml
