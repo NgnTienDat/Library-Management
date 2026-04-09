@@ -28,69 +28,71 @@ public class BorrowReminderScheduler {
      * Runs once per day at midnight.
      * Queries borrow records that are due tomorrow and publishes reminder messages.
      */
-//    @Scheduled(cron = "0 0 0 * * *") // Run at midnight every day
-//    public void sendBorrowReminders() {
-//        log.info("Starting borrow reminder scheduler...");
-//
-//        LocalDate dueDate = LocalDate.now().plusDays(2);
-//
-//        List<BorrowRecord> recordsDueTomorrow = borrowRecordRepository
-//                .findByStatusAndReturnDateIsNullAndReminderSentFalseAndDueDate(BorrowStatus.BORROWING, dueDate);
-//
-//        log.info("Found {} borrow records due tomorrow ({})", recordsDueTomorrow.size(), dueDate);
-//
-//        for (BorrowRecord record : recordsDueTomorrow) {
-//            try {
-//                borrowReminderProducer.publishBorrowReminder(record.getId());
-//                record.setReminderSent(true);
-//                log.debug("Published reminder for borrow record: {}", record.getId());
-//            } catch (Exception e) {
-//                log.error("Failed to publish reminder for borrow record: {}", record.getId(), e);
-//            }
-//        }
-//
-//        log.info("Borrow reminder scheduler completed.");
-//    }
+   @Scheduled(cron = "0 0 0 * * *") // Run at midnight every day
+   public void sendBorrowReminders() {
+       log.info("Starting borrow reminder scheduler...");
+
+       LocalDate dueDate = LocalDate.now().plusDays(2);
+
+       List<BorrowRecord> recordsDueTomorrow = borrowRecordRepository
+               .findByStatusAndReturnDateIsNullAndReminderSentFalseAndDueDate(BorrowStatus.BORROWING, dueDate);
+
+       log.info("Found {} borrow records due tomorrow ({})", recordsDueTomorrow.size(), dueDate);
+
+       for (BorrowRecord record : recordsDueTomorrow) {
+           try {
+               borrowReminderProducer.publishBorrowReminder(record.getId());
+               record.setReminderSent(true);
+               borrowRecordRepository.save(record);
+               log.debug("Published reminder for borrow record: {}", record.getId());
+           } catch (Exception e) {
+               log.error("Failed to publish reminder for borrow record: {}", record.getId(), e);
+           }
+       }
+
+       log.info("Borrow reminder scheduler completed.");
+   }
 
 
-    @Scheduled(cron = "0 * * * * *") // mỗi phút
-    @Transactional
-    public void sendBorrowReminders() {
-        log.info("Starting borrow reminder scheduler...");
+    // @Scheduled(cron = "0 * * * * *") // mỗi phút
+    // @Transactional
+    // public void sendBorrowReminders() {
+    //     log.info("Starting borrow reminder scheduler...");
 
-        LocalDate today = LocalDate.now();
+    //     LocalDate today = LocalDate.now();
 
-        List<BorrowRecord> overdueBorrowRecords = borrowRecordRepository
-                .findByStatusAndReturnDateIsNullAndDueDateBefore(BorrowStatus.BORROWING, today);
+    //     List<BorrowRecord> overdueBorrowRecords = borrowRecordRepository
+    //             .findByStatusAndReturnDateIsNullAndDueDateBefore(BorrowStatus.BORROWING, today);
 
-        for (BorrowRecord record : overdueBorrowRecords) {
-            record.setStatus(BorrowStatus.OVERDUE);
-        }
+    //     for (BorrowRecord record : overdueBorrowRecords) {
+    //         record.setStatus(BorrowStatus.OVERDUE);
+    //     }
 
-        if (!overdueBorrowRecords.isEmpty()) {
-            log.info("Marked {} borrow records as OVERDUE", overdueBorrowRecords.size());
-        }
+    //     if (!overdueBorrowRecords.isEmpty()) {
+    //         log.info("Marked {} borrow records as OVERDUE", overdueBorrowRecords.size());
+    //     }
 
-        List<BorrowRecord> recordsDueToday = borrowRecordRepository
-                .findByStatusAndReturnDateIsNullAndReminderSentFalseAndDueDate(
-                        BorrowStatus.BORROWING,
-                        today
-                );
+    //     List<BorrowRecord> recordsDueToday = borrowRecordRepository
+    //             .findByStatusAndReturnDateIsNullAndReminderSentFalseAndDueDate(
+    //                     BorrowStatus.BORROWING,
+    //                     today
+    //             );
 
-        log.info("Found {} borrow records due today ({})", recordsDueToday.size(), today);
+    //     log.info("Found {} borrow records due today ({})", recordsDueToday.size(), today);
 
-        for (BorrowRecord record : recordsDueToday) {
-            try {
-                borrowReminderProducer.publishBorrowReminder(record.getId());
-                record.setReminderSent(true);
-                log.debug("Published reminder for borrow record: {}", record.getId());
-            } catch (Exception e) {
-                log.error("Failed to publish reminder for borrow record: {}", record.getId(), e);
-            }
-        }
+    //     for (BorrowRecord record : recordsDueToday) {
+    //         try {
+    //             borrowReminderProducer.publishBorrowReminder(record.getId());
+    //             record.setReminderSent(true);
+    //             borrowRecordRepository.save(record);
+    //             log.debug("Published reminder for borrow record: {}", record.getId());
+    //         } catch (Exception e) {
+    //             log.error("Failed to publish reminder for borrow record: {}", record.getId(), e);
+    //         }
+    //     }
 
-        log.info("Borrow reminder scheduler completed.");
-    }
+    //     log.info("Borrow reminder scheduler completed.");
+    // }
 
 }
 

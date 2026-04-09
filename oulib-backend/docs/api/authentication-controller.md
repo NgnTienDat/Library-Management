@@ -257,7 +257,7 @@ Behavior detail: if token verification throws `AppException` (invalid signature/
   - Internal code: `400`
   - Message: `Validation Failed`
   - Condition: Missing/blank `token` field.
-  - Validation result detail: field-level message may become `Invalid Message Key` due to global validator message key mapping.
+  - Validation result detail: field-level message is resolved to `Cannot blank this field` for `@NotBlank`.
 - `500 Internal Server Error`
   - Internal code: `1000`
   - Message: `Uncategorized Error`
@@ -298,7 +298,7 @@ curl -X POST "http://localhost:8080/auth/introspect" \
   "code": 400,
   "message": "Validation Failed",
   "result": {
-    "token": "Invalid Message Key"
+    "token": "Cannot blank this field"
   }
 }
 ```

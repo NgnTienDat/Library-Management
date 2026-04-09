@@ -1,6 +1,5 @@
 package com.ou.oulib.config;
 
-
 import com.ou.oulib.security.CustomJwtDecoder;
 import com.ou.oulib.security.JwtAuthenticationEntryPoint;
 import com.ou.oulib.security.JwtCookieAuthenticationFilter;
@@ -31,90 +30,84 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final CustomJwtDecoder jwtDecoder;
-    private final JwtCookieAuthenticationFilter jwtCookieAuthenticationFilter;
-    private final JwtAuthenticationConverter jwtAuthenticationConverter;
+        private final CustomJwtDecoder jwtDecoder;
+        private final JwtCookieAuthenticationFilter jwtCookieAuthenticationFilter;
+        private final JwtAuthenticationConverter jwtAuthenticationConverter;
 
-    public SecurityConfig(CustomJwtDecoder jwtDecoder, JwtCookieAuthenticationFilter jwtCookieAuthenticationFilter, JwtAuthenticationConverter jwtAuthenticationConverter) {
-        this.jwtDecoder = jwtDecoder;
-        this.jwtCookieAuthenticationFilter = jwtCookieAuthenticationFilter;
-        this.jwtAuthenticationConverter = jwtAuthenticationConverter;
-    }
+        public SecurityConfig(CustomJwtDecoder jwtDecoder, JwtCookieAuthenticationFilter jwtCookieAuthenticationFilter,
+                        JwtAuthenticationConverter jwtAuthenticationConverter) {
+                this.jwtDecoder = jwtDecoder;
+                this.jwtCookieAuthenticationFilter = jwtCookieAuthenticationFilter;
+                this.jwtAuthenticationConverter = jwtAuthenticationConverter;
+        }
 
-    private final String[] PUBLIC_ENDPOINTS_POST = {
-            "/auth/login",  "/auth/logout", "/auth/introspect",
-            "/api/v1/users",
-    };
+        private final String[] PUBLIC_ENDPOINTS_POST = {
+                        "/auth/login", "/auth/logout", "/auth/introspect",
+                        "/api/v1/users",
+        };
 
-    private final String[] PUBLIC_ENDPOINTS_GET = {
-            "/api/v1/home", "/api/v1/books", "/api/v1/health/**",
-            "/api/v1/recommendations/popular", "/api/v1/recommendations/trending",
-            "/api/v1/statistics/top-books",
-            "/v3/api-docs/**",
-            "/swagger-ui.html",
-            "/swagger-ui/**",
-            "/api/v1/books/**",
-            "/api/v1/categories/**",
-    };
+        private final String[] PUBLIC_ENDPOINTS_GET = {
+                        "/api/v1/home", "/api/v1/books", "/api/v1/health/**",
+                        "/api/v1/recommendations/popular", "/api/v1/recommendations/trending",
+                        "/api/v1/statistics/top-books",
+                        "/v3/api-docs/**",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/api/v1/books/**",
+                        "/api/v1/categories/**",
+        };
 
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(10);
-    }
+        @Bean
+        PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder(10);
+        }
 
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+                httpSecurity
+                                .cors(Customizer.withDefaults())
+                                .authorizeHttpRequests(request -> request
+                                                .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS_POST).permitAll()
+                                                .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS_GET).permitAll()
+                                                .anyRequest().authenticated());
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-                .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(request ->
-                        request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS_POST).permitAll()
-                                .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS_GET).permitAll()
-                                .anyRequest().authenticated()
-                );
+                httpSecurity.oauth2ResourceServer(oauth2 -> oauth2
+                                .jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder)
+                                                .jwtAuthenticationConverter(jwtAuthenticationConverter))
+                                .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+                httpSecurity.csrf(AbstractHttpConfigurer::disable);
 
-        httpSecurity.oauth2ResourceServer(oauth2 ->
-                oauth2.jwt(jwtConfigurer ->
-                                jwtConfigurer.decoder(jwtDecoder)
-                                        .jwtAuthenticationConverter(jwtAuthenticationConverter))
-                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
-        );
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+                httpSecurity.headers(headers -> headers
+                                .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
 
-        httpSecurity.headers(headers -> headers
-                .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
+                httpSecurity.addFilterBefore(
+                                jwtCookieAuthenticationFilter,
+                                BearerTokenAuthenticationFilter.class);
 
-        httpSecurity.addFilterBefore(
-                jwtCookieAuthenticationFilter,
-                BearerTokenAuthenticationFilter.class
-        );
+                return httpSecurity.build();
+        }
 
+        @Bean
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+                return configuration.getAuthenticationManager();
+        }
 
-        return httpSecurity.build();
-    }
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration config = new CorsConfiguration();
+                // config.setAllowedOrigins(List.of("http://localhost:5173",
+                // "http://localhost:3000"));
+                // cho phép tất cả origin (cẩn thận khi dùng trong production)
+                config.setAllowedOriginPatterns(List.of("*"));
+                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+                config.setAllowedHeaders(List.of("Authorization", "Content-Type", "uuidKey"));
+                config.setExposedHeaders(List.of("Authorization"));
+                config.setAllowCredentials(true); // Nếu dùng cookie/session
 
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", config);
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
-    }
-
-
-
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "uuidKey"));
-        config.setExposedHeaders(List.of("Authorization"));
-        config.setAllowCredentials(true); // Nếu dùng cookie/session
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-
-        return source;
-    }
+                return source;
+        }
 
 }

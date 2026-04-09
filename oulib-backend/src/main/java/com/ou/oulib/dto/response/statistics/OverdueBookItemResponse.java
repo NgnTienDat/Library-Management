@@ -1,5 +1,7 @@
 package com.ou.oulib.dto.response.statistics;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,9 +12,14 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "DTO phản hồi OverdueBookItemResponse")
 public class OverdueBookItemResponse {
+    @Schema(description = "Trường bookTitle", example = "Clean Code")
     String bookTitle;
+    @Schema(description = "Trường barcode", example = "BC-0001")
     String barcode;
+    @Schema(description = "Trường dueDate", example = "2026-04-08")
     LocalDate dueDate;
+    @Schema(description = "Trường overdueDays", example = "1")
     long overdueDays;
 }

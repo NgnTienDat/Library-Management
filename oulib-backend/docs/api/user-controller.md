@@ -17,7 +17,7 @@ Standard response wrapper used by all APIs:
 ## POST /api/v1/users
 
 ### 1. Title
-- v1 Create/Register User Account 
+- v1 Register User Account
 
 ### 2. Endpoint
 - `/api/v1/users`
@@ -33,9 +33,9 @@ Based on `UserCreationRequest`:
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| email | string | false | User email. Validated with `@Email(message = "INVALID_EMAIL")` if provided. |
-| fullName | string | true | Full name. `@NotBlank`, length `1..50`. |
-| password | string | true | Account password. `@NotBlank`, min length `6`. |
+| email | string | true | `@NotBlank`, `@Email`. |
+| fullName | string | true | `@NotBlank`, length 1..50. |
+| password | string | true | `@NotBlank`, min length 6. |
 
 ### 6. Header Parameters
 - `Content-Type: application/json`
@@ -48,25 +48,12 @@ Based on `UserCreationRequest`:
 ### 8. Response Codes
 
 #### ✅ Success Responses
-- `201 Created`: User account created successfully.
+- `201 Created`: User created.
 
 #### ❌ Error Responses
-- `400 Bad Request`
-  - Internal code: `400`
-  - Message: `Validation Failed`
-  - Condition: Bean validation fails for request body.
-- `400 Bad Request`
-  - Internal code: `400`
-  - Message: `Validation Failed`
-  - Condition: Validation message key is not mapped in `ErrorCode` (for example `fullName` constraints use plain text message keys), resulting in field message `Invalid Message Key`.
-- `409 Conflict`
-  - Internal code: `1002`
-  - Message: `User already exists`
-  - Condition: Email already exists (`existsByEmail`) or unique constraint conflict on save.
-- `500 Internal Server Error`
-  - Internal code: `1000`
-  - Message: `Uncategorized Error`
-  - Condition: Any unhandled runtime exception.
+- `400 Bad Request` / code `400`: Validation failed.
+- `409 Conflict` / code `1002`: User already exists.
+- `500 Internal Server Error` / code `1000`: Unhandled runtime exception.
 
 ### 9. Sample Calls
 
@@ -74,18 +61,14 @@ Based on `UserCreationRequest`:
 ```bash
 curl -X POST "http://localhost:8080/api/v1/users" \
   -H "Content-Type: application/json" \
-  -d '{
-    "email": "new.user@example.com",
-    "fullName": "New User",
-    "password": "Password@123"
-  }'
+  -d '{"email":"user@example.com","fullName":"User Name","password":"Password@123"}'
 ```
 
 #### Request JSON
 ```json
 {
-  "email": "new.user@example.com",
-  "fullName": "New User",
+  "email": "user@example.com",
+  "fullName": "User Name",
   "password": "Password@123"
 }
 ```
@@ -96,15 +79,15 @@ curl -X POST "http://localhost:8080/api/v1/users" \
   "code": 201,
   "message": "Created",
   "result": {
-    "id": "f5dfc41e-920b-4d50-a9ec-90ce0410f1a0",
+    "id": "u-001",
     "username": null,
-    "fullName": "New User",
-    "email": "new.user@example.com",
+    "fullName": "User Name",
+    "email": "user@example.com",
     "role": "USER",
     "avatar": null,
     "status": "ACTIVE",
     "active": false,
-    "createdAt": "2026-03-25T09:10:00Z"
+    "createdAt": "2026-04-08T08:00:00Z"
   }
 }
 ```
@@ -114,6 +97,285 @@ curl -X POST "http://localhost:8080/api/v1/users" \
 {
   "code": 1002,
   "message": "User already exists",
+  "result": null
+}
+```
+
+---
+
+## POST /api/v1/users/staff
+
+### 1. Title
+- v1 Create Staff Account
+
+### 2. Endpoint
+- `/api/v1/users/staff`
+
+### 3. Method
+- `POST`
+
+### 4. URL Parameters
+- `None`
+
+### 5. Message Payload
+Based on `StaffCreationRequest`:
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| email | string | true | `@NotBlank`, `@Email`. |
+| password | string | true | `@NotBlank`, min length 6. |
+| fullName | string | true | `@NotBlank`, length 1..50. |
+| role | enum | true | `SYSADMIN` or `LIBRARIAN`. |
+
+### 6. Header Parameters
+- `Content-Type: application/json`
+- `Authorization: Bearer <JWT_TOKEN>`
+
+### 7. Authentication & Authorization Summary
+- Authentication: `Requires JWT`
+- Authorization: `SYSADMIN` only
+
+### 8. Response Codes
+
+#### ✅ Success Responses
+- `201 Created`: Staff account created.
+
+#### ❌ Error Responses
+- `400 Bad Request` / code `400`: Validation failed.
+- `400 Bad Request` / code `2010`: Invalid role.
+- `401 Unauthorized` / code `1003`: Missing/invalid JWT.
+- `403 Forbidden` / code `1037`: Role is not `SYSADMIN`.
+- `409 Conflict` / code `1002`: User already exists.
+- `500 Internal Server Error` / code `1000`: Unhandled runtime exception.
+
+### 9. Sample Calls
+
+#### cURL Example
+```bash
+curl -X POST "http://localhost:8080/api/v1/users/staff" \
+  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"librarian@example.com","password":"Password@123","fullName":"Library Staff","role":"LIBRARIAN"}'
+```
+
+#### Request JSON
+```json
+{
+  "email": "librarian@example.com",
+  "password": "Password@123",
+  "fullName": "Library Staff",
+  "role": "LIBRARIAN"
+}
+```
+
+#### Success Response JSON
+```json
+{
+  "code": 201,
+  "message": "Created",
+  "result": {
+    "id": "u-002",
+    "username": null,
+    "fullName": "Library Staff",
+    "email": "librarian@example.com",
+    "role": "LIBRARIAN",
+    "avatar": null,
+    "status": "ACTIVE",
+    "active": false,
+    "createdAt": "2026-04-08T08:10:00Z"
+  }
+}
+```
+
+#### Error Response JSON
+```json
+{
+  "code": 2010,
+  "message": "Invalid role",
+  "result": null
+}
+```
+
+---
+
+## GET /api/v1/users
+
+### 1. Title
+- v1 Get Users (Paginated)
+
+### 2. Endpoint
+- `/api/v1/users`
+
+### 3. Method
+- `GET`
+
+### 4. URL Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| page | integer | false | Default `0`. |
+| size | integer | false | Default `10`. |
+
+### 5. Message Payload
+- `None`
+
+### 6. Header Parameters
+- `Content-Type: application/json`
+- `Authorization: Bearer <JWT_TOKEN>`
+
+### 7. Authentication & Authorization Summary
+- Authentication: `Requires JWT`
+- Authorization: `SYSADMIN`, `LIBRARIAN`
+
+### 8. Response Codes
+
+#### ✅ Success Responses
+- `200 OK`: Paginated users returned.
+
+#### ❌ Error Responses
+- `401 Unauthorized` / code `1003`: Missing/invalid JWT.
+- `403 Forbidden` / code `1037`: Missing required role.
+- `500 Internal Server Error` / code `1000`: Invalid paging values or unhandled runtime exception.
+
+### 9. Sample Calls
+
+#### cURL Example
+```bash
+curl -X GET "http://localhost:8080/api/v1/users?page=0&size=10" \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+```
+
+#### Request JSON
+```json
+None
+```
+
+#### Success Response JSON
+```json
+{
+  "code": 200,
+  "message": "Success",
+  "result": {
+    "content": [
+      {
+        "id": "u-001",
+        "username": null,
+        "fullName": "User Name",
+        "email": "user@example.com",
+        "role": "USER",
+        "avatar": null,
+        "status": "ACTIVE",
+        "active": false,
+        "createdAt": "2026-04-08T08:00:00Z"
+      }
+    ],
+    "pageNumber": 0,
+    "pageSize": 10,
+    "totalElements": 1,
+    "totalPages": 1,
+    "first": true,
+    "last": true,
+    "empty": false
+  }
+}
+```
+
+#### Error Response JSON
+```json
+{
+  "code": 1037,
+  "message": "You do not have permission to perform this action",
+  "result": null
+}
+```
+
+---
+
+## PATCH /api/v1/users/{id}/status
+
+### 1. Title
+- v1 Update User Status
+
+### 2. Endpoint
+- `/api/v1/users/{id}/status`
+
+### 3. Method
+- `PATCH`
+
+### 4. URL Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| id | string | true | User ID. |
+
+### 5. Message Payload
+Based on `UserStatusUpdateRequest`:
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| status | enum | true | Target status value (`ACTIVE`, `SUSPENDED`, `DELETED`, `PRIVATE`). |
+
+### 6. Header Parameters
+- `Content-Type: application/json`
+- `Authorization: Bearer <JWT_TOKEN>`
+
+### 7. Authentication & Authorization Summary
+- Authentication: `Requires JWT`
+- Authorization: `SYSADMIN`, `LIBRARIAN`
+
+### 8. Response Codes
+
+#### ✅ Success Responses
+- `200 OK`: Status updated.
+
+#### ❌ Error Responses
+- `400 Bad Request` / code `400`: Validation failed.
+- `401 Unauthorized` / code `1003`: Missing/invalid JWT.
+- `403 Forbidden` / code `1037`: Missing required role.
+- `404 Not Found` / code `1001`: User not found.
+- `500 Internal Server Error` / code `1000`: Unhandled runtime exception.
+
+### 9. Sample Calls
+
+#### cURL Example
+```bash
+curl -X PATCH "http://localhost:8080/api/v1/users/u-001/status" \
+  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"SUSPENDED"}'
+```
+
+#### Request JSON
+```json
+{
+  "status": "SUSPENDED"
+}
+```
+
+#### Success Response JSON
+```json
+{
+  "code": 200,
+  "message": "Success",
+  "result": {
+    "id": "u-001",
+    "username": null,
+    "fullName": "User Name",
+    "email": "user@example.com",
+    "role": "USER",
+    "avatar": null,
+    "status": "SUSPENDED",
+    "active": false,
+    "createdAt": "2026-04-08T08:00:00Z"
+  }
+}
+```
+
+#### Error Response JSON
+```json
+{
+  "code": 1001,
+  "message": "User not found",
   "result": null
 }
 ```
@@ -148,21 +410,12 @@ curl -X POST "http://localhost:8080/api/v1/users" \
 ### 8. Response Codes
 
 #### ✅ Success Responses
-- `200 OK`: Current authenticated user profile retrieved.
+- `200 OK`: Current user returned.
 
 #### ❌ Error Responses
-- `401 Unauthorized`
-  - Internal code: `1003`
-  - Message: `Unauthenticated`
-  - Condition: Missing/invalid/expired/blacklisted JWT.
-- `404 Not Found`
-  - Internal code: `1001`
-  - Message: `User not found`
-  - Condition: JWT subject email does not map to an existing user.
-- `500 Internal Server Error`
-  - Internal code: `1000`
-  - Message: `Uncategorized Error`
-  - Condition: Any unhandled runtime exception.
+- `401 Unauthorized` / code `1003`: Missing/invalid JWT.
+- `404 Not Found` / code `1001`: User not found.
+- `500 Internal Server Error` / code `1000`: Unhandled runtime exception.
 
 ### 9. Sample Calls
 
@@ -183,15 +436,15 @@ None
   "code": 200,
   "message": "Success",
   "result": {
-    "id": "f5dfc41e-920b-4d50-a9ec-90ce0410f1a0",
-    "username": "reader01",
-    "fullName": "New User",
-    "email": "new.user@example.com",
+    "id": "u-001",
+    "username": null,
+    "fullName": "User Name",
+    "email": "user@example.com",
     "role": "USER",
-    "avatar": "https://cdn.example.com/avatar.png",
+    "avatar": null,
     "status": "ACTIVE",
-    "active": true,
-    "createdAt": "2026-03-25T09:10:00Z"
+    "active": false,
+    "createdAt": "2026-04-08T08:00:00Z"
   }
 }
 ```
@@ -199,8 +452,8 @@ None
 #### Error Response JSON
 ```json
 {
-  "code": 1003,
-  "message": "Unauthenticated",
+  "code": 1001,
+  "message": "User not found",
   "result": null
 }
 ```
@@ -210,7 +463,7 @@ None
 ## PUT /api/v1/users/me
 
 ### 1. Title
-- v1 Update Current User Profile
+- v1 Update My Profile
 
 ### 2. Endpoint
 - `/api/v1/users/me`
@@ -222,19 +475,19 @@ None
 - `None`
 
 ### 5. Message Payload
-Consumes `multipart/form-data` with request parts:
+Consumes `multipart/form-data`:
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| data | object (`UserUpdateRequest`) | true | JSON part containing profile fields. |
-| data.fullName | string | false | Full name, length `1..50` if provided. |
-| data.username | string | false | Username, length `2..100` if provided. |
-| data.avatar | string | false | Avatar URL string in DTO. |
-| avatar | file | false | Uploaded avatar file part (`MultipartFile`). |
+| data | object (`UserUpdateRequest`) | true | JSON profile payload. |
+| data.fullName | string | false | Full name, size 1..50 if provided. |
+| data.username | string | false | Username, size 2..100 if provided. |
+| data.avatar | string | false | Avatar URL field from DTO. |
+| avatar | file | false | Multipart avatar file. |
 
-Current service behavior:
-- Only `data.fullName` is applied when changed.
-- `data.username`, `data.avatar`, and file part `avatar` are currently accepted but not persisted by `updateMyProfile`.
+Current behavior in service:
+- Only `fullName` is persisted.
+- `username`, `data.avatar`, and file `avatar` are accepted but currently not persisted.
 
 ### 6. Header Parameters
 - `Content-Type: multipart/form-data`
@@ -247,29 +500,13 @@ Current service behavior:
 ### 8. Response Codes
 
 #### ✅ Success Responses
-- `200 OK`: Profile update request processed.
+- `200 OK`: Profile update processed.
 
 #### ❌ Error Responses
-- `401 Unauthorized`
-  - Internal code: `1003`
-  - Message: `Unauthenticated`
-  - Condition: Missing/invalid/expired/blacklisted JWT.
-- `400 Bad Request`
-  - Internal code: `400`
-  - Message: `Validation Failed`
-  - Condition: Bean validation fails on `data` request part.
-- `400 Bad Request`
-  - Internal code: `400`
-  - Message: `Validation Failed`
-  - Condition: Validation message key is not mapped in `ErrorCode` (for example username/fullName `@Size` messages), resulting in field message `Invalid Message Key`.
-- `404 Not Found`
-  - Internal code: `1001`
-  - Message: `User not found`
-  - Condition: JWT subject email does not map to an existing user.
-- `500 Internal Server Error`
-  - Internal code: `1000`
-  - Message: `Uncategorized Error`
-  - Condition: Missing required multipart part `data` or any other unhandled runtime exception.
+- `400 Bad Request` / code `400`: Validation failed for request part `data`.
+- `401 Unauthorized` / code `1003`: Missing/invalid JWT.
+- `404 Not Found` / code `1001`: User not found.
+- `500 Internal Server Error` / code `1000`: Missing `data` part or unhandled runtime exception.
 
 ### 9. Sample Calls
 
@@ -296,15 +533,15 @@ curl -X PUT "http://localhost:8080/api/v1/users/me" \
   "code": 200,
   "message": "Success",
   "result": {
-    "id": "f5dfc41e-920b-4d50-a9ec-90ce0410f1a0",
-    "username": "reader01",
+    "id": "u-001",
+    "username": null,
     "fullName": "Updated Name",
-    "email": "new.user@example.com",
+    "email": "user@example.com",
     "role": "USER",
-    "avatar": "https://cdn.example.com/avatar.png",
+    "avatar": null,
     "status": "ACTIVE",
-    "active": true,
-    "createdAt": "2026-03-25T09:10:00Z"
+    "active": false,
+    "createdAt": "2026-04-08T08:00:00Z"
   }
 }
 ```
@@ -315,138 +552,34 @@ curl -X PUT "http://localhost:8080/api/v1/users/me" \
   "code": 400,
   "message": "Validation Failed",
   "result": {
-    "username": "Invalid Message Key"
+    "fullName": "Invalid Message Key"
   }
 }
 ```
 
 ---
 
-## GET /api/v1/users
+## PUT /api/v1/users/me/password
 
 ### 1. Title
-- v1 Get User List (Paginated)
+- v1 Change My Password
 
 ### 2. Endpoint
-- `/api/v1/users`
-
-### 3. Method
-- `GET`
-
-### 4. URL Parameters
-- `None`
-
-### 5. Query Parameters
-
-| Field | Type | Required | Default | Description |
-|---|---|---|---|---|
-| page | integer | false | 0 | Zero-based page index. |
-| size | integer | false | 10 | Number of records per page. |
-
-### 6. Header Parameters
-- `Content-Type: application/json`
-- `Authorization: Bearer <JWT_TOKEN>`
-
-### 7. Authentication & Authorization Summary
-- Authentication: `Requires JWT`
-- Authorization: `Requires role SYSADMIN or LIBRARIAN`
-
-### 8. Response Codes
-
-#### ✅ Success Responses
-- `200 OK`: User list returned with pagination metadata.
-
-#### ❌ Error Responses
-- `401 Unauthorized`
-  - Internal code: `1003`
-  - Message: `Unauthenticated`
-  - Condition: Missing/invalid/expired/blacklisted JWT.
-- `403 Forbidden`
-  - Internal code: `1037`
-  - Message: `You do not have permission to perform this action`
-  - Condition: Authenticated user does not have required role (`SYSADMIN`/`LIBRARIAN`).
-- `500 Internal Server Error`
-  - Internal code: `1000`
-  - Message: `Uncategorized Error`
-  - Condition: Any unhandled runtime exception.
-
-### 9. Sample Calls
-
-#### cURL Example
-```bash
-curl -X GET "http://localhost:8080/api/v1/users?page=0&size=10" \
-  -H "Authorization: Bearer <JWT_TOKEN>"
-```
-
-#### Request JSON
-```json
-None
-```
-
-#### Success Response JSON
-```json
-{
-  "code": 200,
-  "message": "Success",
-  "result": {
-    "content": [
-      {
-        "id": "f5dfc41e-920b-4d50-a9ec-90ce0410f1a0",
-        "username": "reader01",
-        "fullName": "New User",
-        "email": "new.user@example.com",
-        "role": "USER",
-        "avatar": "https://cdn.example.com/avatar.png",
-        "status": "ACTIVE",
-        "active": true,
-        "createdAt": "2026-03-25T09:10:00Z"
-      }
-    ],
-    "pageNumber": 0,
-    "pageSize": 10,
-    "totalElements": 1,
-    "totalPages": 1,
-    "first": true,
-    "last": true,
-    "empty": false
-  }
-}
-```
-
-#### Error Response JSON
-```json
-{
-  "code": 1037,
-  "message": "You do not have permission to perform this action",
-  "result": null
-}
-```
-
----
-
-## PUT /api/v1/users/{id}/status
-
-### 1. Title
-- v1 Update User Status
-
-### 2. Endpoint
-- `/api/v1/users/{id}/status`
+- `/api/v1/users/me/password`
 
 ### 3. Method
 - `PUT`
 
 ### 4. URL Parameters
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| id | string | true | User ID (UUID). |
+- `None`
 
 ### 5. Message Payload
-Based on `UserStatusUpdateRequest`:
+Based on `ChangePasswordRequest`:
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| status | string | true | New status value. Supported values: `ACTIVE`, `SUSPENDED`, `DELETED`, `PRIVATE`. |
+| oldPassword | string | true | Current password. `@NotBlank`. |
+| newPassword | string | true | New password. `@NotBlank`, min length 6. |
 
 ### 6. Header Parameters
 - `Content-Type: application/json`
@@ -454,51 +587,34 @@ Based on `UserStatusUpdateRequest`:
 
 ### 7. Authentication & Authorization Summary
 - Authentication: `Requires JWT`
-- Authorization: `Requires role SYSADMIN or LIBRARIAN`
+- Authorization: `Any authenticated role` (`USER`, `LIBRARIAN`, `SYSADMIN`)
 
 ### 8. Response Codes
 
 #### ✅ Success Responses
-- `200 OK`: User status updated successfully.
+- `200 OK`: Password changed successfully.
 
 #### ❌ Error Responses
-- `400 Bad Request`
-  - Internal code: `400`
-  - Message: `Validation Failed`
-  - Condition: Missing `status` in request body.
-- `401 Unauthorized`
-  - Internal code: `1003`
-  - Message: `Unauthenticated`
-  - Condition: Missing/invalid/expired/blacklisted JWT.
-- `403 Forbidden`
-  - Internal code: `1037`
-  - Message: `You do not have permission to perform this action`
-  - Condition: Authenticated user does not have required role (`SYSADMIN`/`LIBRARIAN`).
-- `404 Not Found`
-  - Internal code: `1001`
-  - Message: `User not found`
-  - Condition: User ID does not exist.
-- `500 Internal Server Error`
-  - Internal code: `1000`
-  - Message: `Uncategorized Error`
-  - Condition: Any unhandled runtime exception.
+- `400 Bad Request` / code `400`: Validation failed.
+- `401 Unauthorized` / code `1003`: Missing/invalid JWT or old password mismatch.
+- `404 Not Found` / code `1001`: Authenticated user not found.
+- `500 Internal Server Error` / code `1000`: Unhandled runtime exception.
 
 ### 9. Sample Calls
 
 #### cURL Example
 ```bash
-curl -X PUT "http://localhost:8080/api/v1/users/f5dfc41e-920b-4d50-a9ec-90ce0410f1a0/status" \
+curl -X PUT "http://localhost:8080/api/v1/users/me/password" \
   -H "Authorization: Bearer <JWT_TOKEN>" \
   -H "Content-Type: application/json" \
-  -d '{
-    "status": "SUSPENDED"
-  }'
+  -d '{"oldPassword":"OldPass@123","newPassword":"NewPass@123"}'
 ```
 
 #### Request JSON
 ```json
 {
-  "status": "SUSPENDED"
+  "oldPassword": "OldPass@123",
+  "newPassword": "NewPass@123"
 }
 ```
 
@@ -506,26 +622,16 @@ curl -X PUT "http://localhost:8080/api/v1/users/f5dfc41e-920b-4d50-a9ec-90ce0410
 ```json
 {
   "code": 200,
-  "message": "Success",
-  "result": {
-    "id": "f5dfc41e-920b-4d50-a9ec-90ce0410f1a0",
-    "username": "reader01",
-    "fullName": "New User",
-    "email": "new.user@example.com",
-    "role": "USER",
-    "avatar": "https://cdn.example.com/avatar.png",
-    "status": "SUSPENDED",
-    "active": true,
-    "createdAt": "2026-03-25T09:10:00Z"
-  }
+  "message": "Password changed successfully",
+  "result": null
 }
 ```
 
 #### Error Response JSON
 ```json
 {
-  "code": 1001,
-  "message": "User not found",
+  "code": 1003,
+  "message": "Unauthenticated",
   "result": null
 }
 ```

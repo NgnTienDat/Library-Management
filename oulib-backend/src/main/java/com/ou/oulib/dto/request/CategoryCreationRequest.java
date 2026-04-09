@@ -1,5 +1,7 @@
 package com.ou.oulib.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -13,8 +15,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Schema(description = "DTO yêu cầu CategoryCreationRequest")
 public class CategoryCreationRequest {
 
     @NotBlank(message = "NOT_BLANK")
+    @Schema(description = "Trường name", example = "sample")
     String name;
 }

@@ -1,0 +1,64 @@
+@startuml lab2-order-sequence
+!theme plain
+title Order Flow - Sequence Diagram
+
+actor Customer as C
+participant "API Gateway" as GW
+participant "Order Service" as OS
+participant "Payment Service" as PS
+database "Database" as DB
+participant "Notification\nService" as NS
+
+C -> GW : POST /api/orders\n{items, shippingAddr, paymentMethod}
+activate GW
+
+GW -> GW : Validate JWT Token
+GW -> OS : createOrder(orderData)
+activate OS
+
+OS -> OS : Validate order data\n(items, quantities, prices)
+
+alt Validation fails
+ OS --> GW : 400 Bad Request
+ GW --> C : 400 Bad Request\n{error: "Invalid order data"}
+else Validation passes
+
+ OS -> PS : processPayment(amount, method)
+ activate PS
+
+ alt Payment success
+ PS --> OS : PaymentResult(success, transactionId)
+ deactivate PS
+
+ OS -> DB : INSERT order\n(status = CONFIRMED)
+ activate DB
+ DB --> OS : orderSaved(orderId)
+ deactivate DB
+
+ OS ->> NS : OrderConfirmed event (async)
+ activate NS
+ NS -> NS : Send email + push notification
+ deactivate NS
+
+ OS --> GW : 201 Created\n{orderId, status: CONFIRMED}
+ deactivate OS
+ GW --> C : 201 Created\n{orderId, status: CONFIRMED}
+ deactivate GW
+
+ else Payment failed
+ PS --> OS : PaymentResult(failed, reason)
+ deactivate PS
+
+ OS -> DB : INSERT order\n(status = PAYMENT_FAILED)
+ activate DB
+ DB --> OS : orderSaved
+ deactivate DB
+
+ OS --> GW : 402 Payment Required\n{error: reason}
+ deactivate OS
+ GW --> C : 402 Payment Required
+ deactivate GW
+ end
+end
+
+@enduml

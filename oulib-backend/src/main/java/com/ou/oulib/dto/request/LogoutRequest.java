@@ -1,5 +1,7 @@
 package com.ou.oulib.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,6 +11,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
+@Schema(description = "DTO yêu cầu LogoutRequest")
 public class LogoutRequest {
+    @Schema(description = "Trường token", example = "<JWT_TOKEN>")
     String token;
 }
