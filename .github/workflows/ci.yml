@@ -73,5 +73,11 @@ jobs:
                        -t ${{ secrets.DOCKERHUB_USERNAME }}/oulib-backend:$IMAGE_TAG \
                        ${{ env.BACKEND_CONTEXT }}
 
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/oulib-frontend:latest \
+                 -t ${{ secrets.DOCKERHUB_USERNAME }}/oulib-frontend:$IMAGE_TAG \
+                 ${{ env.FRONTEND_CONTEXT }}
+
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/oulib-backend:$IMAGE_TAG
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/oulib-backend:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/oulib-frontend:$IMAGE_TAG
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/oulib-frontend:latest
