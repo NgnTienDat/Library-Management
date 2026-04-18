@@ -35,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
 
     UserService userService;
+    // test ci pipeline
 
     @PostMapping
     @Operation(summary = "Đăng ký tài khoản người dùng", description = "Tạo mới tài khoản người dùng với vai trò USER từ thông tin đăng ký cơ bản")
