@@ -21,29 +21,33 @@ public class RabbitMQConfig {
 
 
     @Bean
-    public TopicExchange postExchange() {
+    public TopicExchange notificationExchange() {
         return new TopicExchange(NOTIFICATION_EXCHANGE, true, false);
     }
 
     @Bean
-    public Queue postCreatedQueue() {
+    public Queue notificationCreatedQueue() {
         return QueueBuilder.durable(NOTIFICATION_CREATED_QUEUE).build();
     }
 
     @Bean
-    public Binding postCreatedBinding() {
+    public Binding notificationCreatedBinding() {
         return BindingBuilder
-                .bind(postCreatedQueue())
-                .to(postExchange())
+                .bind(notificationCreatedQueue())
+                .to(notificationExchange())
                 .with(NOTIFICATION_CREATED_ROUTING_KEY);
     }
 
     // Borrow reminder exchange
-    @Bean
-    public TopicExchange borrowExchange() {
-        return new TopicExchange(BORROW_EXCHANGE, true, false);
-    }
+//    @Bean
+//    public TopicExchange borrowExchange() {
+//        return new TopicExchange(BORROW_EXCHANGE, true, false);
+//    }
 
+    @Bean
+    public DirectExchange borrowDirectExchange() {
+        return new DirectExchange(BORROW_EXCHANGE, true, false);
+    }
     // Borrow reminder queue
     @Bean
     public Queue borrowReminderQueue() {
@@ -55,7 +59,7 @@ public class RabbitMQConfig {
     public Binding borrowReminderBinding() {
         return BindingBuilder
                 .bind(borrowReminderQueue())
-                .to(borrowExchange())
+                .to(borrowDirectExchange())
                 .with(BORROW_REMINDER_ROUTING_KEY);
     }
 

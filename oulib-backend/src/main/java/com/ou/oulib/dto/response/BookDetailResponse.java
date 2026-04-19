@@ -29,7 +29,7 @@ public class BookDetailResponse {
     @Schema(description = "Trường description", example = "Mo ta du lieu")
     String description;
     @Schema(description = "Trường copoies", example = "[]")
-    List<String> copoies;
+    List<String> copies;
     @Schema(description = "Trường availableCopies", example = "1")
     Integer availableCopies;
     @Schema(description = "Trường thumbnailUrl", example = "https://example.com/resource")

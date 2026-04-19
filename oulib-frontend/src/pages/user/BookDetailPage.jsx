@@ -109,7 +109,7 @@ function BookDetailPage() {
 
           <p className="mb-4">
             <strong>Status:</strong>{" "}
-            {book.active ? "Available" : "Unavailable"}
+            {book.active ? "Có sẵn" : "Không có sẵn"}
           </p>
 
           <div className="border-t pt-4">

@@ -82,7 +82,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -97,7 +96,7 @@ public class EmailService {
     @Value("${app.mail.username}")
     String sendFrom;
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("MMMM dd, yyyy HH:mm");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
 
     /**
      * Sends a borrow reminder email to the user.
@@ -117,9 +116,9 @@ public class EmailService {
         helper.setTo(toEmail);
         helper.setSubject("Library Book Due Reminder");
 
-        String formattedDate = dueDate.format(DATE_TIME_FORMATTER);
+        String formattedDate = dueDate.format(DATE_FORMATTER);
         String body = String.format(
-                "You borrowed the book '%s'. It is due soon at %s. Please return it to avoid overdue penalties.",
+            "You borrowed the book '%s'. It is due on %s. Please return it to avoid overdue penalties.",
                 bookTitle,
                 formattedDate
         );
