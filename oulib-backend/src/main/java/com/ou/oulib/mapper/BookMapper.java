@@ -29,7 +29,7 @@ public interface BookMapper {
 
     @Mapping(target = "categoryName", source = "category.name")
     @Mapping(target = "authorNames", source = "authors", qualifiedByName = "mapAuthorNames")
-    @Mapping(target = "copoies", source = "copies", qualifiedByName = "mapCopyBarcodes")
+    @Mapping(target = "copies", source = "copies", qualifiedByName = "mapCopyBarcodes")
     BookDetailResponse toBookDetailResponse(Book book);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

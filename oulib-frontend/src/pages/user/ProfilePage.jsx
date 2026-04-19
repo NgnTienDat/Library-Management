@@ -54,7 +54,8 @@ function ProfilePage() {
         <h1 className="text-2xl font-bold mb-4">My Profile</h1>
 
         <div className="space-y-2">
-          <p><strong>Name:</strong> {profile.name}</p>
+          <p><strong>ID:</strong> {profile.id}</p>
+          <p><strong>Name:</strong> {profile.fullName}</p>
           <p><strong>Email:</strong> {profile.email}</p>
           <p><strong>Role:</strong> {profile.role}</p>
           <p><strong>Status:</strong> {profile.active ? "Active" : "Inactive"}</p>
