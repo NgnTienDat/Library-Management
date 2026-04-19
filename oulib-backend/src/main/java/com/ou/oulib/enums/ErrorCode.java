@@ -40,6 +40,7 @@ public enum ErrorCode {
     DUPLICATE_BARCODE_IN_REQUEST(1043, "Duplicate barcodes found in request", HttpStatus.BAD_REQUEST),
     CATEGORY_ALREADY_EXISTS(1044, "Category already exists", HttpStatus.CONFLICT),
     CATEGORY_IN_USE(1045, "Category is assigned to one or more books", HttpStatus.CONFLICT),
+    BOOK_INACTIVE(1046, "This book has been discontinued", HttpStatus.FORBIDDEN),
 
     // Validation: 2XXX
     INVALID_MESSAGE_KEY(2001, "Invalid Message Key", HttpStatus.BAD_REQUEST),

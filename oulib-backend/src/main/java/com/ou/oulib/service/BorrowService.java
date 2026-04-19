@@ -101,6 +101,10 @@ public class BorrowService {
                 throw new AppException(ErrorCode.ALREADY_BORROWING);
 
             Book book = bookCopy.getBook();
+            if (!book.isActive()) {
+                throw new AppException(ErrorCode.BOOK_INACTIVE);
+            }
+
             BorrowRecord record = BorrowRecord.builder()
                     .borrower(borrower)
                     .librarian(librarian)

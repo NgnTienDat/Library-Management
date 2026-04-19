@@ -215,3 +215,6 @@ rm -rf volumes/redis
 ## Contact
 
 If you have any issues, contact the project maintainer.
+
+docker exec -it oulib-database mysql -u root -p
+pass word: root

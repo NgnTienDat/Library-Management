@@ -84,9 +84,9 @@ function NewBorrowPage() {
 
 			<div>
 				<h1 className='text-2xl font-semibold text-slate-900'>Thêm lượt mượn mới</h1>
-				<p className='mt-1 text-sm text-slate-600'>
+				{/* <p className='mt-1 text-sm text-slate-600'>
 					Nhập payload theo BorrowRequest: borrowerId, borrowDuration, barcodes.
-				</p>
+				</p> */}
 			</div>
 
 			<form onSubmit={handleSubmit} className='space-y-4 rounded-lg border border-slate-200 bg-white p-5'>

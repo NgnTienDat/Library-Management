@@ -43,9 +43,11 @@ function BookDetailPage() {
 
 	const book = bookQuery.data
 	const copyBarcodes = useMemo(
-		() => (Array.isArray(book?.copoies) ? book.copoies : []),
-		[book?.copoies],
+		() => (Array.isArray(book?.copies) ? book.copies : []),
+		[book?.copies],
 	)
+
+	console.log('barcode list:', copyBarcodes)
 
 	useEffect(() => {
 		if (!book) {
