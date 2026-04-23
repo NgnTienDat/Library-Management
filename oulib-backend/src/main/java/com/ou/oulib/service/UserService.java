@@ -165,7 +165,7 @@ public class UserService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.OLD_PASSWORD_MISMATCH);
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));

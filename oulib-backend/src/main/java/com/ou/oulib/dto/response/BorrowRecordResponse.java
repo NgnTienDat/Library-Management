@@ -22,6 +22,10 @@ public class BorrowRecordResponse {
     String borrowerId;
     @Schema(description = "Trường barcode", example = "BC-0001")
     String barcode;
+    @Schema(description = "Trường bookTitle", example = "Clean Code")
+    String bookTitle;
+    @Schema(description = "Trường thumbnailUrl", example = "https://example.com/resource")
+    String thumbnailUrl;
     @Schema(description = "Trường borrowDate", example = "2026-04-08")
     LocalDate borrowDate;
     // LocalDate duDate;
