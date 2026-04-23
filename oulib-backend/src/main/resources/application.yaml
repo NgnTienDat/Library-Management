@@ -13,11 +13,17 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
     show-sql: true
+
+  flyway:
+    enabled: true
+    connect-retries: 10
+    locations: classpath:db/migration
+    baseline-on-migrate: true
 
   data:
     redis:

@@ -10,14 +10,19 @@ import com.ou.oulib.entity.Author;
 import com.ou.oulib.entity.Book;
 import com.ou.oulib.entity.BookCopy;
 import com.ou.oulib.entity.Category;
+import com.ou.oulib.enums.AuditAction;
 import com.ou.oulib.enums.BookCopyStatus;
 import com.ou.oulib.enums.ErrorCode;
+import com.ou.oulib.enums.ResourceType;
 import com.ou.oulib.exception.AppException;
+import com.ou.oulib.infras.event.AuditMessage;
+import com.ou.oulib.infras.producer.AuditProducer;
 import com.ou.oulib.mapper.BookMapper;
 import com.ou.oulib.repository.AuthorRepository;
 import com.ou.oulib.repository.BookCopyRepository;
 import com.ou.oulib.repository.BookRepository;
 import com.ou.oulib.repository.CategoryRepository;
+import com.ou.oulib.repository.UserRepository;
 import com.ou.oulib.specification.BookSpecification;
 import com.ou.oulib.utils.Helper;
 
@@ -31,10 +36,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -52,6 +61,8 @@ public class BookService {
     AuthorRepository authorRepository;
     BookMapper bookMapper;
     CloudinaryUploadService cloudinaryUploadService;
+    UserRepository userRepository;
+    AuditProducer auditProducer;
 
     @Transactional
     @PreAuthorize("hasRole('LIBRARIAN')")
@@ -105,6 +116,16 @@ public class BookService {
                 thumbnailKey = cloudinaryUploadService.uploadThumbnail(thumbnail);
                 book.setThumbnailUrl(thumbnailKey);
             }
+
+            auditProducer.sendAuditLog(AuditMessage.builder()
+                    .userId(getCurrentActorUserId())
+                    .action(AuditAction.CREATE.name())
+                    .resourceType(ResourceType.BOOK.name())
+                    .resourceId(parseToLong(book.getId()))
+                    .newValue("{\"bookId\":\"" + book.getId() + "\",\"isbn\":\"" + book.getIsbn() + "\"}")
+                    .timestamp(Instant.now())
+                    .build());
+
             // It's not necessary to save the book (thumbnail) again
             // because it's still in the persistence context.
             return bookMapper.toBookResponse(book);
@@ -182,6 +203,8 @@ public class BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
 
+        String oldState = "{\"title\":\"" + book.getTitle() + "\",\"active\":" + book.isActive() + "}";
+
         if (request.getTotalCopies() != null) {
             int newTotal = request.getTotalCopies();
             if (newTotal <= 0) {
@@ -227,6 +250,16 @@ public class BookService {
             }
         }
 
+        auditProducer.sendAuditLog(AuditMessage.builder()
+                .userId(getCurrentActorUserId())
+                .action(AuditAction.UPDATE.name())
+                .resourceType(ResourceType.BOOK.name())
+                .resourceId(parseToLong(book.getId()))
+                .oldValue(oldState)
+                .newValue("{\"title\":\"" + book.getTitle() + "\",\"active\":" + book.isActive() + "}")
+                .timestamp(Instant.now())
+                .build());
+
         return bookMapper.toBookResponse(book);
     }
 
@@ -236,8 +269,19 @@ public class BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
 
+        boolean oldActive = book.isActive();
         book.setActive(false);
         bookRepository.save(book);
+
+        auditProducer.sendAuditLog(AuditMessage.builder()
+            .userId(getCurrentActorUserId())
+            .action(AuditAction.DELETE.name())
+            .resourceType(ResourceType.BOOK.name())
+            .resourceId(parseToLong(book.getId()))
+            .oldValue("{\"active\":" + oldActive + "}")
+            .newValue("{\"active\":" + book.isActive() + "}")
+            .timestamp(Instant.now())
+            .build());
     }
 
     @Transactional
@@ -246,8 +290,60 @@ public class BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
 
+        boolean oldActive = book.isActive();
         book.setActive(true);
         bookRepository.save(book);
+
+        auditProducer.sendAuditLog(AuditMessage.builder()
+                .userId(getCurrentActorUserId())
+                .action(AuditAction.UPDATE.name())
+                .resourceType(ResourceType.BOOK.name())
+                .resourceId(parseToLong(book.getId()))
+                .oldValue("{\"active\":" + oldActive + "}")
+                .newValue("{\"active\":" + book.isActive() + "}")
+                .timestamp(Instant.now())
+                .build());
+    }
+
+    private Long getCurrentActorUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return 0L;
+        }
+
+        String email = null;
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof Jwt jwt) {
+            email = jwt.getSubject();
+        }
+
+        if (email == null || email.isBlank()) {
+            email = authentication.getName();
+        }
+
+        if (email == null || email.isBlank()) {
+            return 0L;
+        }
+
+        return userRepository.findByEmail(email)
+                .map(user -> parseToLongOrDefault(user.getId(), 0L))
+                .orElse(0L);
+    }
+
+    private Long parseToLong(String rawId) {
+        if (rawId == null || rawId.isBlank()) {
+            return null;
+        }
+        try {
+            return Long.valueOf(rawId);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private Long parseToLongOrDefault(String rawId, Long defaultValue) {
+        Long value = parseToLong(rawId);
+        return value != null ? value : defaultValue;
     }
 
 }

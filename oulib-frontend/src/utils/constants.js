@@ -8,6 +8,7 @@ const SYSADMIN_ROUTE_PATHS = Object.freeze({
 	dashboard: '/admin/dashboard',
 	users: '/admin/users',
 	statistics: '/admin/statistics',
+	auditLogs: '/admin/audit-logs',
 	roles: '/admin/roles',
 	id: '/admin/users/:id'
 })

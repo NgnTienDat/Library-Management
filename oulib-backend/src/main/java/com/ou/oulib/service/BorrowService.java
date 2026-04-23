@@ -9,12 +9,16 @@ import com.ou.oulib.entity.Book;
 import com.ou.oulib.entity.BookCopy;
 import com.ou.oulib.entity.BorrowRecord;
 import com.ou.oulib.entity.User;
+import com.ou.oulib.enums.AuditAction;
 import com.ou.oulib.enums.BookCopyStatus;
 import com.ou.oulib.enums.BorrowStatus;
 import com.ou.oulib.enums.ErrorCode;
+import com.ou.oulib.enums.ResourceType;
 import com.ou.oulib.enums.UserStatus;
 import com.ou.oulib.exception.AppException;
+import com.ou.oulib.infras.event.AuditMessage;
 import com.ou.oulib.infras.event.RemindNotification;
+import com.ou.oulib.infras.producer.AuditProducer;
 import com.ou.oulib.infras.producer.RabbitMQPublisher;
 import com.ou.oulib.mapper.BorrowRecordMapper;
 import com.ou.oulib.repository.BookCopyRepository;
@@ -51,6 +55,7 @@ public class BorrowService {
     BookCopyRepository bookCopyRepository;
     BorrowRecordMapper borrowRecordMapper;
     RabbitMQPublisher rabbitMQPublisher;
+    AuditProducer auditProducer;
 
 
     public void rabbitmqConnectionCheck() {
@@ -76,6 +81,7 @@ public class BorrowService {
         User borrower = userRepository.findById(request.getBorrowerId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         User librarian = getAuthenticatedUser(jwt);
+        Long actorUserId = parseToLongOrDefault(librarian.getId(), 0L);
 
         if (borrower.getStatus().equals(UserStatus.SUSPENDED))
             throw new AppException(ErrorCode.USER_INACTIVE);
@@ -121,6 +127,15 @@ public class BorrowService {
             book.setAvailableCopies(book.getAvailableCopies() - 1);
             borrower.setBorrowQuota(borrower.getBorrowQuota() - 1);
 
+                auditProducer.sendAuditLog(AuditMessage.builder()
+                    .userId(actorUserId)
+                    .action(AuditAction.CREATE.name())
+                    .resourceType(ResourceType.BORROW_RECORD.name())
+                    .resourceId(parseToLong(record.getId()))
+                    .newValue("{\"borrowRecordId\":\"" + record.getId() + "\",\"barcode\":\"" + barcode + "\"}")
+                    .timestamp(Instant.now())
+                    .build());
+
             responses.add(borrowRecordMapper.toBorrowRecordResponse(record));
         }
 
@@ -128,20 +143,12 @@ public class BorrowService {
     }
 
 
-    /**
-     *      if (LocalDateTime.now().isAfter(record.getDueDate())) {
-     *          record.setStatus(BorrowStatus.OVERDUE);
-     *      } else {
-     *          record.setStatus(BorrowStatus.RETURNED);
-     *      }
-     *      Đoạn này sửa lại cho chạy scheduler kiểm tra nếu quá hạn thì set status thành OVERDUE.
-     *      Không nên set OVERDUE nếu lúc trả sách đã quá hạn, nếu không thì người đó sẽ không mượn được sách nữa dù đã trả rồi.
-     */
-
     @Transactional
     @PreAuthorize("hasRole('LIBRARIAN')")
     public List<BorrowRecordResponse> returnBook(ReturnRequest request, Jwt jwt) {
         List<String> barcodes = request.getBarcodes();
+        User librarian = getAuthenticatedUser(jwt);
+        Long actorUserId = parseToLongOrDefault(librarian.getId(), 0L);
 
         if (barcodes.size() != barcodes.stream().distinct().count())
             throw new AppException(ErrorCode.DUPLICATE_BARCODE_IN_REQUEST);
@@ -174,6 +181,16 @@ public class BorrowService {
 
             User borrower = record.getBorrower();
             borrower.setBorrowQuota(borrower.getBorrowQuota() + 1);
+
+                auditProducer.sendAuditLog(AuditMessage.builder()
+                    .userId(actorUserId)
+                    .action(AuditAction.UPDATE.name())
+                    .resourceType(ResourceType.BORROW_RECORD.name())
+                    .resourceId(parseToLong(record.getId()))
+                    .oldValue("{\"status\":\"BORROWING\"}")
+                    .newValue("{\"status\":\"" + record.getStatus() + "\",\"returnDate\":\"" + record.getReturnDate() + "\"}")
+                    .timestamp(Instant.now())
+                    .build());
 
             responses.add(borrowRecordMapper.toBorrowRecordResponse(record));
         }
@@ -275,6 +292,22 @@ public class BorrowService {
         String email = jwt.getSubject();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private Long parseToLong(String rawId) {
+        if (rawId == null || rawId.isBlank()) {
+            return null;
+        }
+        try {
+            return Long.valueOf(rawId);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private Long parseToLongOrDefault(String rawId, Long defaultValue) {
+        Long value = parseToLong(rawId);
+        return value != null ? value : defaultValue;
     }
 
 
