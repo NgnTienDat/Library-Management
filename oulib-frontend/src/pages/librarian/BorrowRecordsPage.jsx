@@ -173,7 +173,11 @@ function BorrowRecordsPage() {
 											<button
 												type='button'
 												onClick={() => handleGoToReturnPage(record.id)}
-												disabled={record.status !== 'BORROWING' && record.status !== 'RETURNED'}
+												disabled={
+													record.status !== 'BORROWING' &&
+													record.status !== 'OVERDUE' &&
+													record.status !== 'RETURNED'
+												}
 												className='rounded-md bg-slate-400 px-3 py-1.5 text-xs font-medium text-white disabled:cursor-not-allowed disabled:opacity-70'
 											>
 												{record.status === 'RETURNED' ? 'Xem' : 'Trả sách'}

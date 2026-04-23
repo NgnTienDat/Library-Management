@@ -37,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -57,24 +58,29 @@ public class BookService {
     public BookResponse addNewBook(BookCreationRequest request,
             MultipartFile thumbnail) {
 
-        if (request.getTotalCopies() <= 0) {
+        List<String> copyBarcodes = request.getCopyBarcodes() == null
+                ? List.of()
+                : request.getCopyBarcodes().stream()
+                        .filter(Objects::nonNull)
+                        .map(String::trim)
+                        .filter(barcode -> !barcode.isBlank())
+                        .toList();
+
+        if (copyBarcodes.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_TOTAL_COPIES);
-        }
-        if (request.getCopyBarcodes().size() != request.getTotalCopies()) {
-            throw new AppException(ErrorCode.COPY_IDS_COUNT_MISMATCH);
         }
         if (bookRepository.existsByIsbn(request.getIsbn())) {
             throw new AppException(ErrorCode.BOOK_ALREADY_EXISTS);
         }
-        if (request.getCopyBarcodes().size() != request.getCopyBarcodes().stream().distinct().count()) {
-            throw new AppException(ErrorCode.BARCODE_ALREADY_EXISTS);
+        if (copyBarcodes.size() != copyBarcodes.stream().distinct().count()) {
+            throw new AppException(ErrorCode.DUPLICATE_BARCODE_IN_REQUEST);
         }
-        if (bookCopyRepository.existsByBarcodeIn(request.getCopyBarcodes())) {
+        if (bookCopyRepository.existsByBarcodeIn(copyBarcodes)) {
             throw new AppException(ErrorCode.BARCODE_ALREADY_EXISTS);
         }
 
         Book book = bookMapper.toBook(request);
-        book.initializeCopies(request.getTotalCopies());
+        book.initializeCopies(copyBarcodes.size());
 
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -83,7 +89,7 @@ public class BookService {
         List<Author> authors = resolveAuthors(request.getAuthors());
         book.setAuthors(authors);
 
-        List<BookCopy> copies = request.getCopyBarcodes().stream()
+        List<BookCopy> copies = copyBarcodes.stream()
                 .map(barcode -> BookCopy.builder()
                         .barcode(barcode)
                         .status(BookCopyStatus.AVAILABLE)

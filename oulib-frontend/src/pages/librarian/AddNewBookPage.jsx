@@ -11,18 +11,14 @@ const DEFAULT_CREATE_FORM = {
 	publisher: '',
 	numberOfPages: '',
 	description: '',
-	totalCopies: '',
 	categoryId: '',
-	copyBarcodesText: '',
-	authorNamesText: '',
+	copyBarcodes: [''],
+	authorNames: [''],
 	thumbnail: null,
 }
 
-function splitTextToList(value) {
-	return value
-		.split(/[\n,]/)
-		.map((item) => item.trim())
-		.filter(Boolean)
+function countFilledItems(items) {
+	return items.map((item) => item.trim()).filter(Boolean).length
 }
 
 function AddNewBookPage() {
@@ -35,13 +31,58 @@ function AddNewBookPage() {
 		},
 	})
 
+	const handleBarcodeChange = (index, value) => {
+		setForm((prev) => ({
+			...prev,
+			copyBarcodes: prev.copyBarcodes.map((barcode, itemIndex) =>
+				itemIndex === index ? value : barcode,
+			),
+		}))
+	}
+
+	const handleAddBarcodeInput = () => {
+		setForm((prev) => ({
+			...prev,
+			copyBarcodes: [...prev.copyBarcodes, ''],
+		}))
+	}
+
+	const handleRemoveBarcodeInput = (index) => {
+		setForm((prev) => ({
+			...prev,
+			copyBarcodes: prev.copyBarcodes.filter((_, itemIndex) => itemIndex !== index),
+		}))
+	}
+
+	const handleAuthorChange = (index, value) => {
+		setForm((prev) => ({
+			...prev,
+			authorNames: prev.authorNames.map((author, itemIndex) =>
+				itemIndex === index ? value : author,
+			),
+		}))
+	}
+
+	const handleAddAuthorInput = () => {
+		setForm((prev) => ({
+			...prev,
+			authorNames: [...prev.authorNames, ''],
+		}))
+	}
+
+	const handleRemoveAuthorInput = (index) => {
+		setForm((prev) => ({
+			...prev,
+			authorNames: prev.authorNames.filter((_, itemIndex) => itemIndex !== index),
+		}))
+	}
+
 	const handleSubmit = (event) => {
 		event.preventDefault()
 
-		const totalCopies = Number(form.totalCopies)
 		const numberOfPages = Number(form.numberOfPages || 0)
-		const copyBarcodes = splitTextToList(form.copyBarcodesText)
-		const authorNames = splitTextToList(form.authorNamesText)
+		const copyBarcodes = form.copyBarcodes.map((barcode) => barcode.trim()).filter(Boolean)
+		const authorNames = form.authorNames.map((name) => name.trim()).filter(Boolean)
 
 		if (!form.isbn.trim() || !form.title.trim()) {
 			toast.error('ISBN và tiêu đề không được để trống')
@@ -53,13 +94,13 @@ function AddNewBookPage() {
 			return
 		}
 
-		if (!Number.isFinite(totalCopies) || totalCopies <= 0) {
-			toast.error('Tổng số bản sao phải lớn hơn 0')
+		if (copyBarcodes.length === 0) {
+			toast.error('Cần nhập ít nhất 1 barcode')
 			return
 		}
 
-		if (copyBarcodes.length !== totalCopies) {
-			toast.error('Số lượng barcode phải bằng tổng số bản sao')
+		if (copyBarcodes.length !== new Set(copyBarcodes).size) {
+			toast.error('Danh sách barcode không được trùng nhau')
 			return
 		}
 
@@ -73,7 +114,6 @@ function AddNewBookPage() {
 			publisher: form.publisher,
 			numberOfPages,
 			description: form.description,
-			totalCopies,
 			categoryId: form.categoryId,
 			copyBarcodes,
 			authors: authorNames.map((name) => ({ name })),
@@ -132,25 +172,13 @@ function AddNewBookPage() {
 					</label>
 
 					<label className='text-sm font-medium text-slate-700'>
-						Số trang test
+						Số trang
 						<input
 							type='number'
 							value={form.numberOfPages}
 							onChange={(event) => setForm((prev) => ({ ...prev, numberOfPages: event.target.value }))}
 							className='mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring-2'
 							min={0}
-						/>
-					</label>
-
-					<label className='text-sm font-medium text-slate-700'>
-						Tổng số bản sao
-						<input
-							type='number'
-							value={form.totalCopies}
-							onChange={(event) => setForm((prev) => ({ ...prev, totalCopies: event.target.value }))}
-							className='mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring-2'
-							min={1}
-							required
 						/>
 					</label>
 
@@ -174,26 +202,75 @@ function AddNewBookPage() {
 					/>
 				</label>
 
-				<label className='block text-sm font-medium text-slate-700'>
-					Danh sách barcode (tách bởi dấu phẩy hoặc xuống dòng)
-					<textarea
-						value={form.copyBarcodesText}
-						onChange={(event) => setForm((prev) => ({ ...prev, copyBarcodesText: event.target.value }))}
-						rows={3}
-						className='mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring-2'
-						required
-					/>
-				</label>
+				<div className='space-y-2'>
+					<div className='flex items-center justify-between gap-2'>
+						<p className='text-sm font-medium text-slate-700'>Danh sách barcode</p>
+						<p className='text-xs text-slate-500'>
+							Tổng bản sao sẽ được tính tự động: {countFilledItems(form.copyBarcodes)}
+						</p>
+					</div>
+					{form.copyBarcodes.map((barcode, index) => (
+						<div key={`barcode-${index}`} className='flex items-center gap-2'>
+							<input
+								type='text'
+								value={barcode}
+								onChange={(event) => handleBarcodeChange(index, event.target.value)}
+								placeholder={`Nhập barcode #${index + 1}`}
+								className='w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring-2'
+								required={index === 0}
+							/>
+							{index === form.copyBarcodes.length - 1 ? (
+								<button
+									type='button'
+									onClick={handleAddBarcodeInput}
+									className='shrink-0 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-medium text-blue-700 transition hover:bg-blue-100'
+								>
+									Thêm barcode/bản sao
+								</button>
+							) : (
+								<button
+									type='button'
+									onClick={() => handleRemoveBarcodeInput(index)}
+									className='shrink-0 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 transition hover:bg-rose-100'
+								>
+									Xóa
+								</button>
+							)}
+						</div>
+					))}
+				</div>
 
-				<label className='block text-sm font-medium text-slate-700'>
-					Tác giả mới (tên, tách bởi dấu phẩy hoặc xuống dòng)
-					<textarea
-						value={form.authorNamesText}
-						onChange={(event) => setForm((prev) => ({ ...prev, authorNamesText: event.target.value }))}
-						rows={2}
-						className='mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring-2'
-					/>
-				</label>
+				<div className='space-y-2'>
+					<p className='text-sm font-medium text-slate-700'>Danh sách tác giả mới</p>
+					{form.authorNames.map((authorName, index) => (
+						<div key={`author-${index}`} className='flex items-center gap-2'>
+							<input
+								type='text'
+								value={authorName}
+								onChange={(event) => handleAuthorChange(index, event.target.value)}
+								placeholder={`Nhập tác giả #${index + 1}`}
+								className='w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none ring-blue-500 focus:ring-2'
+							/>
+							{index === form.authorNames.length - 1 ? (
+								<button
+									type='button'
+									onClick={handleAddAuthorInput}
+									className='shrink-0 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-medium text-blue-700 transition hover:bg-blue-100'
+								>
+									Thêm tác giả
+								</button>
+							) : (
+								<button
+									type='button'
+									onClick={() => handleRemoveAuthorInput(index)}
+									className='shrink-0 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 transition hover:bg-rose-100'
+								>
+									Xóa
+								</button>
+							)}
+						</div>
+					))}
+				</div>
 
 				<label className='block text-sm font-medium text-slate-700'>
 					Ảnh bìa

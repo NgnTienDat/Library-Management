@@ -3,8 +3,10 @@ package com.ou.oulib.controller;
 import com.ou.oulib.dto.response.statistics.ActiveUsersStatisticsResponse;
 import com.ou.oulib.dto.response.statistics.BorrowingActivityResponse;
 import com.ou.oulib.dto.response.statistics.InventorySummaryResponse;
+import com.ou.oulib.dto.response.statistics.InventoryStatusResponse;
 import com.ou.oulib.dto.response.statistics.SystemTotalsResponse;
 import com.ou.oulib.dto.response.statistics.TopBorrowedBookResponse;
+import com.ou.oulib.dto.response.statistics.TopBorrowedCategoryResponse;
 import com.ou.oulib.service.StatisticsService;
 import com.ou.oulib.utils.ApiResponse;
 import com.ou.oulib.utils.ResponseUtils;
@@ -49,6 +51,22 @@ public class StatisticsController {
         })
     public ResponseEntity<ApiResponse<InventorySummaryResponse>> getInventorySummary() {
         return ResponseEntity.ok(ResponseUtils.ok(statisticsService.getInventorySummary()));
+    }
+
+    @GetMapping("/statistics/inventory-status")
+    @PreAuthorize("hasAnyRole('SYSADMIN','LIBRARIAN')")
+    @Operation(
+            summary = "Lấy trạng thái kho chi tiết",
+            description = "Trả về số lượng bản sao theo từng trạng thái gồm available, borrowed, damaged và lost"
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Lấy trạng thái kho thành công"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Chưa xác thực"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Không có quyền thực hiện"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
+    })
+    public ResponseEntity<ApiResponse<InventoryStatusResponse>> getInventoryStatus() {
+        return ResponseEntity.ok(ResponseUtils.ok(statisticsService.getInventoryStatus()));
     }
 
     @GetMapping("/statistics/overdue")
@@ -111,6 +129,29 @@ public class StatisticsController {
     ) {
         return ResponseEntity.ok(ResponseUtils.ok(statisticsService.getTopBorrowedBooks(limit)));
     }
+
+        @GetMapping("/statistics/top-categories")
+        @PreAuthorize("hasAnyRole('SYSADMIN','LIBRARIAN')")
+        @Operation(
+            summary = "Lấy top thể loại được mượn nhiều",
+            description = "Trả về danh sách thể loại có số lượt mượn cao nhất theo khoảng thời gian"
+        )
+        @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Lấy top thể loại thành công"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Chưa xác thực"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Không có quyền thực hiện"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
+        })
+        public ResponseEntity<ApiResponse<List<TopBorrowedCategoryResponse>>> getTopBorrowedCategories(
+            @Parameter(description = "Ngày bắt đầu (yyyy-MM-dd)")
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "Ngày kết thúc (yyyy-MM-dd)")
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @Parameter(description = "Số lượng thể loại tối đa cần trả về")
+            @RequestParam(defaultValue = "5") int limit
+        ) {
+        return ResponseEntity.ok(ResponseUtils.ok(statisticsService.getTopBorrowedCategories(from, to, limit)));
+        }
 
     @GetMapping("/users/active-users")
     @PreAuthorize("hasRole('SYSADMIN')")
