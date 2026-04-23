@@ -163,9 +163,11 @@ public class BorrowService {
             if (bookCopy.getStatus() != BookCopyStatus.BORROWED)
                 throw new AppException(ErrorCode.BOOK_NOT_BORROWED);
 
-            BorrowRecord record = borrowRecordRepository.findByBookCopyIdAndStatus(
-                            bookCopy.getId(), BorrowStatus.BORROWING)
+            BorrowRecord record = borrowRecordRepository.findByBookCopyIdAndStatusIn(
+                            bookCopy.getId(), List.of(BorrowStatus.BORROWING, BorrowStatus.OVERDUE))
                     .orElseThrow(() -> new AppException(ErrorCode.BORROW_RECORD_NOT_FOUND));
+
+            BorrowStatus previousStatus = record.getStatus();
 
             record.setReturnDate(now);
             record.setStatus(BorrowStatus.RETURNED);
@@ -187,7 +189,7 @@ public class BorrowService {
                     .action(AuditAction.UPDATE.name())
                     .resourceType(ResourceType.BORROW_RECORD.name())
                     .resourceId(parseToLong(record.getId()))
-                    .oldValue("{\"status\":\"BORROWING\"}")
+                    .oldValue("{\"status\":\"" + previousStatus + "\"}")
                     .newValue("{\"status\":\"" + record.getStatus() + "\",\"returnDate\":\"" + record.getReturnDate() + "\"}")
                     .timestamp(Instant.now())
                     .build());

@@ -21,154 +21,151 @@ import java.util.Optional;
 @Repository
 public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, String> {
 
-    boolean existsByBorrowerIdAndBookCopyIdAndStatus(String userId, String bookId, BorrowStatus status);
+        boolean existsByBorrowerIdAndBookCopyIdAndStatus(String userId, String bookId, BorrowStatus status);
 
-    boolean existsByBorrowerIdAndStatus(String userId, BorrowStatus status);
+        boolean existsByBorrowerIdAndStatus(String userId, BorrowStatus status);
 
-    long countByStatus(BorrowStatus status);
+        long countByStatus(BorrowStatus status);
 
-    Optional<BorrowRecord> findByBorrowerIdAndBookCopyIdAndStatus(String userId, String bookId, BorrowStatus status);
+        Optional<BorrowRecord> findByBorrowerIdAndBookCopyIdAndStatus(String userId, String bookId,
+                        BorrowStatus status);
 
-    Optional<BorrowRecord> findByBookCopyIdAndStatus(String bookCopyId, BorrowStatus status);
+        Optional<BorrowRecord> findByBookCopyIdAndStatus(String bookCopyId, BorrowStatus status);
 
-    Page<BorrowRecord> findByStatus(BorrowStatus status, Pageable pageable);
+        Optional<BorrowRecord> findByBookCopyIdAndStatusIn(String bookCopyId, List<BorrowStatus> statuses);
 
-    Page<BorrowRecord> findByBorrowerId(String borrowerId, Pageable pageable);
+        Page<BorrowRecord> findByStatus(BorrowStatus status, Pageable pageable);
 
-    Page<BorrowRecord> findByBorrowerIdAndStatus(String borrowerId, BorrowStatus status, Pageable pageable);
+        Page<BorrowRecord> findByBorrowerId(String borrowerId, Pageable pageable);
 
-    List<BorrowRecord> findByBorrowerIdOrderByBorrowDateDescCreatedAtDesc(String borrowerId);
+        Page<BorrowRecord> findByBorrowerIdAndStatus(String borrowerId, BorrowStatus status, Pageable pageable);
 
-    List<BorrowRecord> findByBorrowerIdAndStatusOrderByBorrowDateDescCreatedAtDesc(String borrowerId, BorrowStatus status);
+        List<BorrowRecord> findByBorrowerIdOrderByBorrowDateDescCreatedAtDesc(String borrowerId);
 
-    List<BorrowRecord> findByStatusAndReturnDateIsNullAndDueDate(BorrowStatus status, LocalDate dueDate);
+        List<BorrowRecord> findByBorrowerIdAndStatusOrderByBorrowDateDescCreatedAtDesc(String borrowerId,
+                        BorrowStatus status);
 
-    List<BorrowRecord> findByStatusAndReturnDateIsNullAndReminderSentFalseAndDueDate(BorrowStatus status, LocalDate dueDate);
+        List<BorrowRecord> findByStatusAndReturnDateIsNullAndDueDate(BorrowStatus status, LocalDate dueDate);
 
-    List<BorrowRecord> findByStatusAndReturnDateIsNullAndDueDateBefore(BorrowStatus status, LocalDate dueDate);
+        List<BorrowRecord> findByStatusAndReturnDateIsNullAndReminderSentFalseAndDueDate(BorrowStatus status,
+                        LocalDate dueDate);
 
-    List<BorrowRecord> findByStatusAndReturnDateIsNullAndReminderSentFalseAndDueDateBetween(BorrowStatus status, LocalDate start, LocalDate end);
+        List<BorrowRecord> findByStatusAndReturnDateIsNullAndDueDateBefore(BorrowStatus status, LocalDate dueDate);
 
-    @Query(
-            value = """
-                    SELECT new com.ou.oulib.dto.response.statistics.OverdueUserInfoResponse(
-                    br.borrower.id,
-                    br.borrower.fullName,
-                    br.borrower.email
-                    )
-                    FROM BorrowRecord br
-                    WHERE br.status = :status
-                      AND br.dueDate < :currentDate
-                    GROUP BY br.borrower.id, br.borrower.fullName, br.borrower.email
-                    ORDER BY br.borrower.fullName ASC
-                    """,
-            countQuery = """
-                    SELECT COUNT(DISTINCT br.borrower.id)
-                    FROM BorrowRecord br
-                    WHERE br.status = :status
-                      AND br.dueDate < :currentDate
-                    """
-    )
-    Page<OverdueUserInfoResponse> findOverdueUsers(
-            @Param("status") BorrowStatus status,
-            @Param("currentDate") LocalDate currentDate,
-            Pageable pageable
-    );
+        List<BorrowRecord> findByStatusAndReturnDateIsNullAndReminderSentFalseAndDueDateBetween(BorrowStatus status,
+                        LocalDate start, LocalDate end);
 
-    @Query("""
-            SELECT new com.ou.oulib.dto.response.statistics.OverdueBookDetailResponse(
-            br.borrower.id,
-            br.borrower.fullName,
-            br.borrower.email,
-            bc.book.title,
-            bc.barcode,
-            br.dueDate
-            )
-            FROM BorrowRecord br
-            JOIN br.bookCopy bc
-            WHERE br.status = :status
-              AND br.dueDate < :currentDate
-              AND br.borrower.id IN :userIds
-            ORDER BY br.borrower.fullName ASC, br.dueDate ASC
-            """)
-    List<OverdueBookDetailResponse> findOverdueDetailsByUserIds(
-            @Param("status") BorrowStatus status,
-            @Param("currentDate") LocalDate currentDate,
-            @Param("userIds") List<String> userIds
-    );
+        @Query(value = """
+                        SELECT new com.ou.oulib.dto.response.statistics.OverdueUserInfoResponse(
+                        br.borrower.id,
+                        br.borrower.fullName,
+                        br.borrower.email
+                        )
+                        FROM BorrowRecord br
+                        WHERE br.status = :status
+                          AND br.dueDate < :currentDate
+                        GROUP BY br.borrower.id, br.borrower.fullName, br.borrower.email
+                        ORDER BY br.borrower.fullName ASC
+                        """, countQuery = """
+                        SELECT COUNT(DISTINCT br.borrower.id)
+                        FROM BorrowRecord br
+                        WHERE br.status = :status
+                          AND br.dueDate < :currentDate
+                        """)
+        Page<OverdueUserInfoResponse> findOverdueUsers(
+                        @Param("status") BorrowStatus status,
+                        @Param("currentDate") LocalDate currentDate,
+                        Pageable pageable);
 
-    @Query("""
-            SELECT new com.ou.oulib.dto.response.statistics.DailyCountResponse(
-            br.borrowDate,
-            COUNT(br.id)
-            )
-            FROM BorrowRecord br
-            WHERE br.borrowDate BETWEEN :fromDate AND :toDate
-            GROUP BY br.borrowDate
-            ORDER BY br.borrowDate ASC
-            """)
-    List<DailyCountResponse> countBorrowActivitiesByDateRange(
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate
-    );
+        @Query("""
+                        SELECT new com.ou.oulib.dto.response.statistics.OverdueBookDetailResponse(
+                        br.borrower.id,
+                        br.borrower.fullName,
+                        br.borrower.email,
+                        bc.book.title,
+                        bc.barcode,
+                        br.dueDate
+                        )
+                        FROM BorrowRecord br
+                        JOIN br.bookCopy bc
+                        WHERE br.status = :status
+                          AND br.dueDate < :currentDate
+                          AND br.borrower.id IN :userIds
+                        ORDER BY br.borrower.fullName ASC, br.dueDate ASC
+                        """)
+        List<OverdueBookDetailResponse> findOverdueDetailsByUserIds(
+                        @Param("status") BorrowStatus status,
+                        @Param("currentDate") LocalDate currentDate,
+                        @Param("userIds") List<String> userIds);
 
-    @Query("""
-            SELECT new com.ou.oulib.dto.response.statistics.DailyCountResponse(
-            br.returnDate,
-            COUNT(br.id)
-            )
-            FROM BorrowRecord br
-            WHERE br.returnDate IS NOT NULL
-              AND br.returnDate BETWEEN :fromDate AND :toDate
-            GROUP BY br.returnDate
-            ORDER BY br.returnDate ASC
-            """)
-    List<DailyCountResponse> countReturnActivitiesByDateRange(
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate
-    );
+        @Query("""
+                        SELECT new com.ou.oulib.dto.response.statistics.DailyCountResponse(
+                        br.borrowDate,
+                        COUNT(br.id)
+                        )
+                        FROM BorrowRecord br
+                        WHERE br.borrowDate BETWEEN :fromDate AND :toDate
+                        GROUP BY br.borrowDate
+                        ORDER BY br.borrowDate ASC
+                        """)
+        List<DailyCountResponse> countBorrowActivitiesByDateRange(
+                        @Param("fromDate") LocalDate fromDate,
+                        @Param("toDate") LocalDate toDate);
 
-    @Query("""
-            SELECT new com.ou.oulib.dto.response.statistics.TopBorrowedBookResponse(
-            b.id,
-            b.title,
-            COUNT(br.id)
-            )
-            FROM BorrowRecord br
-            JOIN br.bookCopy bc
-            JOIN bc.book b
-            GROUP BY b.id, b.title
-            ORDER BY COUNT(br.id) DESC
-            """)
-    List<TopBorrowedBookResponse> findTopBorrowedBooks(Pageable pageable);
+        @Query("""
+                        SELECT new com.ou.oulib.dto.response.statistics.DailyCountResponse(
+                        br.returnDate,
+                        COUNT(br.id)
+                        )
+                        FROM BorrowRecord br
+                        WHERE br.returnDate IS NOT NULL
+                          AND br.returnDate BETWEEN :fromDate AND :toDate
+                        GROUP BY br.returnDate
+                        ORDER BY br.returnDate ASC
+                        """)
+        List<DailyCountResponse> countReturnActivitiesByDateRange(
+                        @Param("fromDate") LocalDate fromDate,
+                        @Param("toDate") LocalDate toDate);
 
-    @Query("""
-            SELECT new com.ou.oulib.dto.response.statistics.TopBorrowedCategoryResponse(
-            c.id,
-            c.name,
-            COUNT(br.id)
-            )
-            FROM BorrowRecord br
-            JOIN br.bookCopy bc
-            JOIN bc.book b
-            JOIN b.category c
-            WHERE br.borrowDate BETWEEN :fromDate AND :toDate
-            GROUP BY c.id, c.name
-            ORDER BY COUNT(br.id) DESC
-            """)
-    List<TopBorrowedCategoryResponse> findTopBorrowedCategoriesByDateRange(
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate,
-            Pageable pageable
-    );
+        @Query("""
+                        SELECT new com.ou.oulib.dto.response.statistics.TopBorrowedBookResponse(
+                        b.id,
+                        b.title,
+                        COUNT(br.id)
+                        )
+                        FROM BorrowRecord br
+                        JOIN br.bookCopy bc
+                        JOIN bc.book b
+                        GROUP BY b.id, b.title
+                        ORDER BY COUNT(br.id) DESC
+                        """)
+        List<TopBorrowedBookResponse> findTopBorrowedBooks(Pageable pageable);
 
-    @Query("""
-            SELECT COUNT(DISTINCT br.borrower.id)
-            FROM BorrowRecord br
-            WHERE br.borrowDate BETWEEN :fromDate AND :toDate
-            """)
-    long countDistinctActiveUsersByBorrowDateRange(
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate
-    );
+        @Query("""
+                        SELECT new com.ou.oulib.dto.response.statistics.TopBorrowedCategoryResponse(
+                        c.id,
+                        c.name,
+                        COUNT(br.id)
+                        )
+                        FROM BorrowRecord br
+                        JOIN br.bookCopy bc
+                        JOIN bc.book b
+                        JOIN b.category c
+                        WHERE br.borrowDate BETWEEN :fromDate AND :toDate
+                        GROUP BY c.id, c.name
+                        ORDER BY COUNT(br.id) DESC
+                        """)
+        List<TopBorrowedCategoryResponse> findTopBorrowedCategoriesByDateRange(
+                        @Param("fromDate") LocalDate fromDate,
+                        @Param("toDate") LocalDate toDate,
+                        Pageable pageable);
+
+        @Query("""
+                        SELECT COUNT(DISTINCT br.borrower.id)
+                        FROM BorrowRecord br
+                        WHERE br.borrowDate BETWEEN :fromDate AND :toDate
+                        """)
+        long countDistinctActiveUsersByBorrowDateRange(
+                        @Param("fromDate") LocalDate fromDate,
+                        @Param("toDate") LocalDate toDate);
 }
