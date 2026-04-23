@@ -10,10 +10,14 @@ import com.ou.oulib.dto.request.UserStatusUpdateRequest;
 import com.ou.oulib.dto.request.UserUpdateRequest;
 import com.ou.oulib.dto.response.UserResponse;
 import com.ou.oulib.entity.User;
+import com.ou.oulib.enums.AuditAction;
 import com.ou.oulib.enums.ErrorCode;
+import com.ou.oulib.enums.ResourceType;
 import com.ou.oulib.enums.UserRole;
 import com.ou.oulib.enums.UserStatus;
 import com.ou.oulib.exception.AppException;
+import com.ou.oulib.infras.event.AuditMessage;
+import com.ou.oulib.infras.producer.AuditProducer;
 import com.ou.oulib.mapper.UserMapper;
 import com.ou.oulib.repository.UserRepository;
 import com.ou.oulib.utils.PageResponse;
@@ -26,6 +30,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -35,6 +41,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -48,6 +55,7 @@ public class UserService {
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
     Cloudinary cloudinary;
+    AuditProducer auditProducer;
 
 
     @Transactional
@@ -64,6 +72,16 @@ public class UserService {
         } catch (DataIntegrityViolationException ex) {
             throw new AppException(ErrorCode.USER_ALREADY_EXISTED);
         }
+
+        auditProducer.sendAuditLog(AuditMessage.builder()
+                .userId(parseToLongOrDefault(user.getId(), 0L))
+                .action(AuditAction.CREATE.name())
+                .resourceType(ResourceType.USER.name())
+                .resourceId(parseToLong(user.getId()))
+                .newValue("{\"email\":\"" + user.getEmail() + "\",\"role\":\"" + user.getRole() + "\"}")
+                .timestamp(Instant.now())
+                .build());
+
         return userMapper.toResponse(user);
     }
 
@@ -105,6 +123,15 @@ public class UserService {
             throw new AppException(ErrorCode.USER_ALREADY_EXISTED);
         }
 
+        auditProducer.sendAuditLog(AuditMessage.builder()
+                .userId(getCurrentActorUserId())
+                .action(AuditAction.CREATE.name())
+                .resourceType(ResourceType.USER.name())
+                .resourceId(parseToLong(user.getId()))
+                .newValue("{\"email\":\"" + user.getEmail() + "\",\"role\":\"" + user.getRole() + "\"}")
+                .timestamp(Instant.now())
+                .build());
+
         return userMapper.toResponse(user);
     }
 
@@ -122,8 +149,20 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
+        UserStatus oldStatus = user.getStatus();
         user.setStatus(request.getStatus());
         userRepository.save(user);
+
+        auditProducer.sendAuditLog(AuditMessage.builder()
+            .userId(getCurrentActorUserId())
+            .action(AuditAction.UPDATE.name())
+            .resourceType(ResourceType.USER.name())
+            .resourceId(parseToLong(user.getId()))
+            .oldValue("{\"status\":\"" + oldStatus + "\"}")
+            .newValue("{\"status\":\"" + user.getStatus() + "\"}")
+            .timestamp(Instant.now())
+            .build());
+
         return userMapper.toResponse(user);
     }
 
@@ -142,6 +181,7 @@ public class UserService {
 
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        String oldFullName = user.getFullName();
         boolean isUpdated = false;
         if (request.getFullName() != null &&
                 !request.getFullName().equals(user.getFullName())) {
@@ -154,6 +194,17 @@ public class UserService {
             return userMapper.toResponse(user);
         }
         userRepository.save(user);
+
+        auditProducer.sendAuditLog(AuditMessage.builder()
+                .userId(parseToLongOrDefault(user.getId(), 0L))
+                .action(AuditAction.UPDATE.name())
+                .resourceType(ResourceType.USER.name())
+                .resourceId(parseToLong(user.getId()))
+                .oldValue("{\"fullName\":\"" + oldFullName + "\"}")
+                .newValue("{\"fullName\":\"" + user.getFullName() + "\"}")
+                .timestamp(Instant.now())
+                .build());
+
         return userMapper.toResponse(user);
     }
 
@@ -170,6 +221,56 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+
+        auditProducer.sendAuditLog(AuditMessage.builder()
+                .userId(parseToLongOrDefault(user.getId(), 0L))
+                .action(AuditAction.UPDATE.name())
+                .resourceType(ResourceType.USER.name())
+                .resourceId(parseToLong(user.getId()))
+                .newValue("{\"passwordChanged\":true}")
+                .timestamp(Instant.now())
+                .build());
+    }
+
+    private Long getCurrentActorUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return 0L;
+        }
+
+        String email = null;
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof Jwt jwt) {
+            email = jwt.getSubject();
+        }
+
+        if (email == null || email.isBlank()) {
+            email = authentication.getName();
+        }
+
+        if (email == null || email.isBlank()) {
+            return 0L;
+        }
+
+        return userRepository.findByEmail(email)
+                .map(user -> parseToLongOrDefault(user.getId(), 0L))
+                .orElse(0L);
+    }
+
+    private Long parseToLong(String rawId) {
+        if (rawId == null || rawId.isBlank()) {
+            return null;
+        }
+        try {
+            return Long.valueOf(rawId);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private Long parseToLongOrDefault(String rawId, Long defaultValue) {
+        Long value = parseToLong(rawId);
+        return value != null ? value : defaultValue;
     }
 
 

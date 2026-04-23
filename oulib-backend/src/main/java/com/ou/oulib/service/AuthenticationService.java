@@ -12,9 +12,13 @@ import com.ou.oulib.dto.request.RefreshRequest;
 import com.ou.oulib.dto.response.AuthenticationResponse;
 import com.ou.oulib.dto.response.IntrospectResponse;
 import com.ou.oulib.entity.User;
+import com.ou.oulib.enums.AuditAction;
 import com.ou.oulib.enums.ErrorCode;
+import com.ou.oulib.enums.ResourceType;
 import com.ou.oulib.enums.UserStatus;
 import com.ou.oulib.exception.AppException;
+import com.ou.oulib.infras.event.AuditMessage;
+import com.ou.oulib.infras.producer.AuditProducer;
 import com.ou.oulib.mapper.UserMapper;
 import com.ou.oulib.repository.UserRepository;
 import lombok.AccessLevel;
@@ -43,6 +47,7 @@ import java.util.UUID;
 public class AuthenticationService {
     UserRepository userRepository;
     TokenBlacklistService blacklistService;
+    AuditProducer auditProducer;
 
 
     UserMapper userMapper;
@@ -72,6 +77,15 @@ public class AuthenticationService {
 
         String token = generateToken(user);
 
+        auditProducer.sendAuditLog(AuditMessage.builder()
+            .userId(parseToLongOrDefault(user.getId(), 0L))
+            .action(AuditAction.LOGIN.name())
+            .resourceType(ResourceType.USER.name())
+            .resourceId(parseToLong(user.getId()))
+            .newValue("{\"email\":\"" + user.getEmail() + "\"}")
+            .timestamp(Instant.now())
+            .build());
+
         return AuthenticationResponse.builder()
                 .authenticated(true)
                 .token(token)
@@ -92,6 +106,16 @@ public class AuthenticationService {
             if (ttlSeconds > 0) {
                 blacklistService.blacklist(jti, ttlSeconds);
             }
+
+            String email = signedToken.getJWTClaimsSet().getSubject();
+            userRepository.findByEmail(email).ifPresent(user -> auditProducer.sendAuditLog(AuditMessage.builder()
+                    .userId(parseToLongOrDefault(user.getId(), 0L))
+                    .action(AuditAction.LOGOUT.name())
+                    .resourceType(ResourceType.USER.name())
+                    .resourceId(parseToLong(user.getId()))
+                    .newValue("{\"email\":\"" + user.getEmail() + "\"}")
+                    .timestamp(Instant.now())
+                    .build()));
 
         } catch (AppException e) {
             log.info("Token expired or invalid during logout");
@@ -188,5 +212,21 @@ public class AuthenticationService {
                 .user(userMapper.toResponse(user))
                 .authenticated(true)
                 .build();
+    }
+
+    private Long parseToLong(String rawId) {
+        if (rawId == null || rawId.isBlank()) {
+            return null;
+        }
+        try {
+            return Long.valueOf(rawId);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private Long parseToLongOrDefault(String rawId, Long defaultValue) {
+        Long value = parseToLong(rawId);
+        return value != null ? value : defaultValue;
     }
 }

@@ -19,6 +19,11 @@ public class RabbitMQConfig {
     public static final String BORROW_REMINDER_QUEUE = "borrow-reminder-queue";
     public static final String BORROW_REMINDER_ROUTING_KEY = "borrow.reminder";
 
+    // Audit log configuration
+    public static final String AUDIT_EXCHANGE = "audit.exchange";
+    public static final String AUDIT_QUEUE = "audit.queue";
+    public static final String AUDIT_ROUTING_KEY = "audit.log";
+
 
     @Bean
     public TopicExchange notificationExchange() {
@@ -61,6 +66,24 @@ public class RabbitMQConfig {
                 .bind(borrowReminderQueue())
                 .to(borrowDirectExchange())
                 .with(BORROW_REMINDER_ROUTING_KEY);
+    }
+
+    @Bean
+    public DirectExchange auditDirectExchange() {
+        return new DirectExchange(AUDIT_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public Queue auditQueue() {
+        return QueueBuilder.durable(AUDIT_QUEUE).build();
+    }
+
+    @Bean
+    public Binding auditBinding() {
+        return BindingBuilder
+                .bind(auditQueue())
+                .to(auditDirectExchange())
+                .with(AUDIT_ROUTING_KEY);
     }
 
 
