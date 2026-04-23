@@ -5,6 +5,7 @@ import com.ou.oulib.dto.response.statistics.DailyCountResponse;
 import com.ou.oulib.dto.response.statistics.OverdueBookDetailResponse;
 import com.ou.oulib.dto.response.statistics.OverdueUserInfoResponse;
 import com.ou.oulib.dto.response.statistics.TopBorrowedBookResponse;
+import com.ou.oulib.dto.response.statistics.TopBorrowedCategoryResponse;
 import com.ou.oulib.enums.BorrowStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -140,6 +141,26 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Stri
             ORDER BY COUNT(br.id) DESC
             """)
     List<TopBorrowedBookResponse> findTopBorrowedBooks(Pageable pageable);
+
+    @Query("""
+            SELECT new com.ou.oulib.dto.response.statistics.TopBorrowedCategoryResponse(
+            c.id,
+            c.name,
+            COUNT(br.id)
+            )
+            FROM BorrowRecord br
+            JOIN br.bookCopy bc
+            JOIN bc.book b
+            JOIN b.category c
+            WHERE br.borrowDate BETWEEN :fromDate AND :toDate
+            GROUP BY c.id, c.name
+            ORDER BY COUNT(br.id) DESC
+            """)
+    List<TopBorrowedCategoryResponse> findTopBorrowedCategoriesByDateRange(
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate,
+            Pageable pageable
+    );
 
     @Query("""
             SELECT COUNT(DISTINCT br.borrower.id)

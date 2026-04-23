@@ -2,9 +2,6 @@ package com.ou.oulib.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -28,12 +25,12 @@ public class BookCreationRequest {
     int numberOfPages;
     @Schema(description = "Trường description", example = "Mo ta du lieu")
     String description;
-    @Schema(description = "Trường totalCopies", example = "1")
-    int totalCopies;
     @Schema(description = "Trường categoryId", example = "id-001")
     String categoryId;
+    @Builder.Default
     @Schema(description = "Trường copyBarcodes", example = "[]")
     List<String> copyBarcodes = new ArrayList<>();
+    @Builder.Default
     @Schema(description = "Trường authors", example = "[]")
     List<AuthorRefRequest> authors = new ArrayList<>();
 }

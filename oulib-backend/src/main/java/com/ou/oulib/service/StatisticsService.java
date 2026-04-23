@@ -60,6 +60,26 @@ public class StatisticsService {
     }
 
     @Transactional(readOnly = true)
+    public InventoryStatusResponse getInventoryStatus() {
+        long totalBooks = bookRepository.count();
+        long totalBookCopies = bookCopyRepository.count();
+        long availableCopies = bookCopyRepository.countByStatus(BookCopyStatus.AVAILABLE);
+        long borrowedCopies = bookCopyRepository.countByStatus(BookCopyStatus.BORROWED);
+        long damagedCopies = bookCopyRepository.countByStatus(BookCopyStatus.DAMAGED);
+        long lostCopies = bookCopyRepository.countByStatus(BookCopyStatus.LOST);
+
+        return InventoryStatusResponse.builder()
+                .totalBooks(totalBooks)
+                .totalBookCopies(totalBookCopies)
+                .availableCopies(availableCopies)
+                .borrowedCopies(borrowedCopies)
+                .damagedCopies(damagedCopies)
+                .lostCopies(lostCopies)
+                .damagedOrLostCopies(damagedCopies + lostCopies)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
     public PageResponse<OverdueUserResponse> getOverdueRecords(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         LocalDate now = LocalDate.now();
@@ -166,6 +186,18 @@ public class StatisticsService {
         int safeLimit = limit <= 0 ? 10 : limit;
         Pageable pageable = PageRequest.of(0, safeLimit);
         return borrowRecordRepository.findTopBorrowedBooks(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TopBorrowedCategoryResponse> getTopBorrowedCategories(LocalDate from, LocalDate to, int limit) {
+        if (from == null || to == null || from.isAfter(to)) {
+            return List.of();
+        }
+
+        int safeLimit = limit <= 0 ? 5 : limit;
+        Pageable pageable = PageRequest.of(0, safeLimit);
+
+        return borrowRecordRepository.findTopBorrowedCategoriesByDateRange(from, to, pageable);
     }
 
     @Transactional(readOnly = true)
