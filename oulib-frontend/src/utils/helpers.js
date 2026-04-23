@@ -5,6 +5,7 @@ export const ROLE_NAV_ITEMS = Object.freeze({
 		{ label: 'Dashboard', to: ROLE_ROUTE_PATHS[ROLES.SYSADMIN].dashboard },
 		{ label: 'Quản lý người dùng', to: ROLE_ROUTE_PATHS[ROLES.SYSADMIN].users },
 		{ label: 'Báo cáo thống kê', to: ROLE_ROUTE_PATHS[ROLES.SYSADMIN].statistics },
+		{ label: 'Audit Logs', to: ROLE_ROUTE_PATHS[ROLES.SYSADMIN].auditLogs },
 	]),
 	[ROLES.LIBRARIAN]: Object.freeze([
 		{ label: 'Dashboard', to: ROLE_ROUTE_PATHS[ROLES.LIBRARIAN].dashboard },
