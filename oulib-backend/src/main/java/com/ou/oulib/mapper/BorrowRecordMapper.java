@@ -11,6 +11,8 @@ public interface BorrowRecordMapper {
 
     @Mapping(target = "borrowerId", source = "borrower.id")
     @Mapping(target = "barcode", source = "bookCopy.barcode")
+    @Mapping(target = "bookTitle", source = "bookCopy.book.title")
+    @Mapping(target = "thumbnailUrl", source = "bookCopy.book.thumbnailUrl")
     BorrowRecordResponse toBorrowRecordResponse(BorrowRecord record);
 
     @Mapping(target = "borrowerId", source = "borrower.id")
