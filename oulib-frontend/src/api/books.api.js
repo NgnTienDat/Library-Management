@@ -52,17 +52,18 @@ export async function getBookById(id) {
 }
 
 export async function createBook(data) {
+	const copyBarcodes = Array.isArray(data?.copyBarcodes)
+		? data.copyBarcodes.map((barcode) => barcode?.trim()).filter(Boolean)
+		: []
+
 	const metadata = {
 		isbn: data?.isbn?.trim(),
 		title: data?.title?.trim(),
 		publisher: data?.publisher?.trim(),
 		numberOfPages: Number(data?.numberOfPages || 0),
 		description: data?.description?.trim(),
-		totalCopies: Number(data?.totalCopies),
 		categoryId: data?.categoryId?.trim(),
-		copyBarcodes: Array.isArray(data?.copyBarcodes)
-			? data.copyBarcodes.map((barcode) => barcode?.trim()).filter(Boolean)
-			: [],
+		copyBarcodes,
 		authors: normalizeAuthors(data?.authors),
 	}
 

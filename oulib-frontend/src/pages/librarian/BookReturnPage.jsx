@@ -24,7 +24,7 @@ function BookReturnPage() {
 	})
 
 	const record = detailQuery.data
-	const canReturn = record?.status === 'BORROWING'
+	const canReturn = record?.status === 'BORROWING' || record?.status === 'OVERDUE'
 
 	const handleReturnBook = () => {
 		if (!record?.barcode) return
