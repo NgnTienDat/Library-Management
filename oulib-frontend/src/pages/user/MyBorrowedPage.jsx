@@ -1,32 +1,75 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { getBorrowHistory } from "../../api/borrow.api"
+import { formatDate } from "../../utils/datetime"
+
+const STATUS_FILTERS = [
+  { label: "All", value: "" },
+  { label: "Borrowing", value: "BORROWING" },
+  { label: "Returned", value: "RETURNED" },
+  { label: "Overdue", value: "OVERDUE" },
+]
+
+function resolveBorrowList(payload) {
+  if (Array.isArray(payload)) return payload
+  if (Array.isArray(payload?.content)) return payload.content
+  if (Array.isArray(payload?.result)) return payload.result
+  return []
+}
+
+function getStatusConfig(status) {
+  if (status === "RETURNED") {
+    return {
+      label: "Returned",
+      className: "text-green-600 font-medium",
+    }
+  }
+
+  if (status === "OVERDUE") {
+    return {
+      label: "Overdue",
+      className: "text-rose-600 font-medium",
+    }
+  }
+
+  return {
+    label: "Borrowing",
+    className: "text-orange-500 font-medium",
+  }
+}
 
 function MyBorrowedPage() {
   const [records, setRecords] = useState([])
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState("")
+  const latestRequestIdRef = useRef(0)
 
   useEffect(() => {
-    fetchData()
+    fetchData(status)
   }, [status])
 
-  const fetchData = async () => {
+  const fetchData = async (nextStatus) => {
+    const requestId = ++latestRequestIdRef.current
+
     try {
       setLoading(true)
 
       const params = {}
-      if (status) params.status = status
+      if (nextStatus) params.status = nextStatus
 
       const data = await getBorrowHistory(params)
 
-      // 🔥 tùy backend trả kiểu nào
-      const list = data?.content || data || []
+      // Keep only the latest response when users switch filters quickly.
+      if (requestId !== latestRequestIdRef.current) return
 
-      setRecords(list)
+      setRecords(resolveBorrowList(data))
     } catch (err) {
-      console.error("Borrow error:", err)
+      if (requestId === latestRequestIdRef.current) {
+        console.error("Borrow error:", err)
+      }
     } finally {
-      setLoading(false)
+      if (requestId === latestRequestIdRef.current) {
+        setLoading(false)
+      }
     }
   }
 
@@ -36,37 +79,18 @@ function MyBorrowedPage() {
       <h1 className="text-2xl font-bold mb-6">My Borrowed Books</h1>
 
       {/* FILTER */}
-      <div className="flex gap-3 mb-6">
-        <button
-          onClick={() => setStatus("")}
-          className={`px-4 py-2 rounded-md ${
-            status === "" ? "bg-blue-600 text-white" : "bg-white border"
-          }`}
-        >
-          All
-        </button>
-
-        <button
-          onClick={() => setStatus("BORROWING")}
-          className={`px-4 py-2 rounded-md ${
-            status === "BORROWING"
-              ? "bg-blue-600 text-white"
-              : "bg-white border"
-          }`}
-        >
-          Borrowing
-        </button>
-
-        <button
-          onClick={() => setStatus("RETURNED")}
-          className={`px-4 py-2 rounded-md ${
-            status === "RETURNED"
-              ? "bg-blue-600 text-white"
-              : "bg-white border"
-          }`}
-        >
-          Returned
-        </button>
+      <div className="flex flex-wrap gap-3 mb-6">
+        {STATUS_FILTERS.map((filter) => (
+          <button
+            key={filter.value || "ALL"}
+            onClick={() => setStatus(filter.value)}
+            className={`px-4 py-2 rounded-md ${
+              status === filter.value ? "bg-blue-600 text-white" : "bg-white border"
+            }`}
+          >
+            {filter.label}
+          </button>
+        ))}
       </div>
 
       {/* LOADING */}
@@ -80,7 +104,9 @@ function MyBorrowedPage() {
       {/* LIST */}
       <div className="grid gap-4">
         {records.map((r) => {
-          const isReturned = !!r.returnedDate
+          const statusConfig = getStatusConfig(r.status)
+          const bookTitle = r.bookTitle || r.title || "Unknown title"
+          const thumbnailUrl = r.thumbnailUrl || r.thumbnail || null
 
           return (
             <div
@@ -88,9 +114,10 @@ function MyBorrowedPage() {
               className="bg-white p-4 rounded-lg shadow flex items-center gap-4"
             >
               {/* IMAGE */}
-              {r.thumbnailUrl ? (
+              {thumbnailUrl ? (
                 <img
-                  src={r.thumbnailUrl}
+                  src={thumbnailUrl}
+                  alt={bookTitle}
                   className="w-16 h-20 object-cover rounded"
                 />
               ) : (
@@ -101,27 +128,19 @@ function MyBorrowedPage() {
 
               {/* INFO */}
               <div className="flex-1">
-                <h3 className="font-semibold">{r.bookTitle}</h3>
+                <h3 className="font-semibold">{bookTitle}</h3>
                 <p className="text-sm text-slate-500">
                   {r.authorNames?.join(", ")}
                 </p>
 
                 <p className="text-xs mt-1">
-                  Borrow: {r.borrowDate} | Due: {r.dueDate}
+                  Borrow: {formatDate(r.borrowDate) || "-"} | Due: {formatDate(r.dueDate) || "-"}
                 </p>
               </div>
 
               {/* STATUS */}
               <div>
-                {isReturned ? (
-                  <span className="text-green-600 font-medium">
-                    Returned
-                  </span>
-                ) : (
-                  <span className="text-orange-500 font-medium">
-                    Borrowing
-                  </span>
-                )}
+                <span className={statusConfig.className}>{statusConfig.label}</span>
               </div>
             </div>
           )

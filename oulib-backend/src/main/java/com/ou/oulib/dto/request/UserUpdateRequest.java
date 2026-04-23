@@ -18,11 +18,5 @@ public class UserUpdateRequest {
     @Schema(description = "Trường fullName", example = "Nguyen Van A")
     String fullName;
 
-    @Size(min = 2, max = 100, message = "username must be between 2 and 100 characters")
-    @Schema(description = "Trường username", example = "Nguyen Van A")
-    String username;
-
-    @Schema(description = "Trường avatar", example = "https://example.com/resource")
-    String avatar;
 
 }
