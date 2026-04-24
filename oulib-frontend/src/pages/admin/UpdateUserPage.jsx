@@ -19,7 +19,7 @@ function UpdateUserPage() {
 
 	if (!user) {
 		return (
-			<div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-800">
+			<div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800">
 				Không có dữ liệu người dùng. Hãy quay lại danh sách và mở trang Update từ nút Update.
 			</div>
 		)
@@ -40,46 +40,46 @@ function UpdateUserPage() {
 	}
 
 	return (
-		<div className="max-w-xl space-y-6">
-			<h1 className="text-2xl font-semibold">Update User</h1>
+		<div className="max-w-xl space-y-5">
+			<h1 className="text-2xl font-semibold text-slate-900">Update User</h1>
 
 			<form
 				onSubmit={handleSubmit}
-				className="space-y-4 rounded-xl border p-6"
+				className="space-y-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
 			>
 				<div>
-					<label className="text-sm font-medium">Full Name</label>
+					<label className="text-sm font-medium text-slate-700">Full Name</label>
 					<input
 						value={user.fullName ?? ''}
 						disabled
-						className="mt-1 w-full rounded border bg-gray-100 p-2"
+						className="mt-1 w-full rounded-md border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-600"
 					/>
 				</div>
 
 				<div>
-					<label className="text-sm font-medium">Email</label>
+					<label className="text-sm font-medium text-slate-700">Email</label>
 					<input
 						value={user.email ?? ''}
 						disabled
-						className="mt-1 w-full rounded border bg-gray-100 p-2"
+						className="mt-1 w-full rounded-md border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-600"
 					/>
 				</div>
 
 				<div>
-					<label className="text-sm font-medium">Role</label>
+					<label className="text-sm font-medium text-slate-700">Role</label>
 					<input
 						value={user.role ?? ''}
 						disabled
-						className="mt-1 w-full rounded border bg-gray-100 p-2"
+						className="mt-1 w-full rounded-md border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-600"
 					/>
 				</div>
 
 				<div>
-					<label className="text-sm font-medium">Status</label>
+					<label className="text-sm font-medium text-slate-700">Status</label>
 					<select
 						value={status}
 						onChange={(e) => setStatus(e.target.value)}
-						className="mt-1 w-full rounded border p-2"
+						className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none ring-blue-500 focus:ring-2"
 					>
 						<option value="ACTIVE">ACTIVE</option>
 						<option value="SUSPENDED">SUSPENDED</option>
@@ -91,7 +91,7 @@ function UpdateUserPage() {
 				<div className="flex gap-3">
 					<button
 						type="submit"
-						className="rounded bg-blue-600 px-4 py-2 text-white"
+						className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500"
 					>
 						Update
 					</button>
@@ -99,7 +99,7 @@ function UpdateUserPage() {
 					<button
 						type="button"
 						onClick={() => navigate('/admin/users')}
-						className="rounded bg-gray-400 px-4 py-2 text-white"
+						className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
 					>
 						Cancel
 					</button>

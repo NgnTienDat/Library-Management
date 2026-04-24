@@ -50,7 +50,7 @@ public class RecommendationService {
 
     @Transactional(readOnly = true)
     public List<BookResponse> getTrendingBooks() {
-        LocalDate since = LocalDate.now().minusDays(1);
+        LocalDate since = LocalDate.now().minusDays(7);
         List<String> rankedIds = recommendationRepository.findTrendingBookIds(since, TOP_10);
         return loadBooksInRankOrder(rankedIds)
                 .stream()
@@ -86,17 +86,6 @@ public class RecommendationService {
 
         }
 
-
-        // Fill remaining slots with author-based recommendations
-//        if (recommendations.size() < RECOMMENDATION_LIMIT) {
-//            List<String> topAuthorIds = recommendationRepository.findTopAuthorIdsByUserEmail(email, TOP_1);
-//            if (!topAuthorIds.isEmpty()) {
-//                int remaining = RECOMMENDATION_LIMIT - recommendations.size();
-//                recommendationRepository.findByAuthorExcludingBookIds(topAuthorIds.get(0), borrowedBookIds,
-//                                PageRequest.of(0, remaining))
-//                        .forEach(book -> recommendations.putIfAbsent(book.getId(), book));
-//            }
-//        }
 
         // If no personalized signal yields results, fallback to global popular books.
         if (recommendations.isEmpty()) {

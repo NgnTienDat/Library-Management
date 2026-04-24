@@ -127,6 +127,8 @@ public class UserController {
                         @AuthenticationPrincipal Jwt jwt,
                         @Parameter(description = "Dữ liệu hồ sơ người dùng cần cập nhật") @RequestPart("data") @Valid UserUpdateRequest request,
                         @Parameter(description = "Tệp ảnh đại diện tải lên, có thể bỏ trống") @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
+                                System.out.println("Received profile update request: " + request);
+                                System.out.println("Received avatar file: " + (avatar != null ? avatar.getOriginalFilename() : "No file"));
                 return ResponseEntity.ok(ResponseUtils.ok(userService.updateMyProfile(jwt, request, avatar)));
         }
 
