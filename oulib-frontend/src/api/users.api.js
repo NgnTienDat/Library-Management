@@ -36,3 +36,19 @@ export async function getMyProfile() {
 	const response = await axiosInstance.get(`${USERS_BASE_PATH}/me`)
 	return unwrapResponse(response)
 }
+
+// update profile (multipart/form-data)
+export async function updateProfile(formData) {
+  const res = await axiosInstance.patch("/api/v1/users/me", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  })
+  return res?.data
+}
+
+// đổi password
+export async function changePassword(payload) {
+  const res = await axiosInstance.patch("/api/v1/users/me/password", payload)
+  return res?.data
+}
