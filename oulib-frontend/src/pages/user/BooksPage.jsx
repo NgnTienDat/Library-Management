@@ -13,11 +13,11 @@ function BooksPage() {
   const [categoryId, setCategoryId] = useState("")
   const [loading, setLoading] = useState(false)
 
-  // PAGINATION
+  // PHAN TRANG
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
 
-  // RECOMMEND
+  // GOI Y
   const [trending, setTrending] = useState([])
   const [popular, setPopular] = useState([])
 
@@ -79,39 +79,37 @@ function BooksPage() {
       const t = await getTrending()
       const p = await getPopular()
 
-      setTrending(t?.result || [])
-      setPopular(p?.result || [])
+      setTrending(t || [])
+      setPopular(p || [])
     } catch (err) {
       console.error(err)
     }
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-100">
+    <div className="flex min-h-screen bg-slate-100 text-slate-900">
 
-      {/* SIDEBAR */}
-      <div className="w-64 bg-white border-r p-5">
-        <h2 className="text-lg font-bold mb-4">Categories</h2>
+      {/* THANH BEN TRAI */}
+      <div className="w-64 shrink-0 border-r border-slate-200 bg-white p-5">
+        <h2 className="mb-4 text-lg font-semibold text-slate-900">Thể loại</h2>
 
         <div className="space-y-2">
           <button
             onClick={() => setCategoryId("")}
-            className={`w-full text-left px-3 py-2 rounded-md ${
-              categoryId === "" ? "bg-blue-600 text-white" : "hover:bg-slate-100"
-            }`}
+            className={`w-full rounded-md px-3 py-2 text-left text-sm font-medium transition ${categoryId === "" ? "bg-blue-600 text-white" : "text-slate-700 hover:bg-slate-100"
+              }`}
           >
-            All Books
+            Tất cả sách
           </button>
 
           {categories.map((c) => (
             <button
               key={c.id}
               onClick={() => setCategoryId(c.id)}
-              className={`w-full text-left px-3 py-2 rounded-md ${
-                categoryId === c.id
-                  ? "bg-blue-600 text-white"
-                  : "hover:bg-slate-100"
-              }`}
+              className={`w-full rounded-md px-3 py-2 text-left text-sm font-medium transition ${categoryId === c.id
+                ? "bg-blue-600 text-white"
+                : "text-slate-700 hover:bg-slate-100"
+                }`}
             >
               {c.name}
             </button>
@@ -119,19 +117,21 @@ function BooksPage() {
         </div>
       </div>
 
-      {/* MAIN */}
-      <div className="flex-1 p-6">
+      {/* NOI DUNG CHINH */}
+      <div className="flex-1 space-y-5 p-6">
 
-        <h1 className="text-2xl font-bold mb-4">Books Library</h1>
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">Thư viện sách</h1>
+        </div>
 
-        {/* SEARCH */}
-        <div className="flex gap-2 mb-6">
+        {/* TIM KIEM */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <input
             type="text"
-            placeholder="Search books..."
+            placeholder="Tìm kiếm sách..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 border px-4 py-2 rounded-md"
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none ring-blue-500 placeholder:text-slate-400 focus:ring-2 sm:flex-1"
           />
 
           <button
@@ -139,103 +139,115 @@ function BooksPage() {
               setPage(0)
               fetchBooks()
             }}
-            className="bg-blue-600 text-white px-5 py-2 rounded-md"
+            className="inline-flex items-center justify-center rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-blue-500"
           >
-            Search
+            Tìm kiếm
           </button>
         </div>
 
-        {/* TRENDING */}
-        <h2 className="text-lg font-bold mb-2"> Sách trending</h2>
-        <div className="flex gap-4 overflow-x-auto mb-6">
-          {trending.map((b) => (
-            <div
-              key={b.id}
-              onClick={() => navigate(`/books/${b.id}`)}
-              className="min-w-[150px] cursor-pointer"
-            >
-              {b.thumbnailUrl ? (
-                <img src={b.thumbnailUrl} className="h-32 w-full object-cover rounded" />
-              ) : (
-                <div className="h-32 bg-slate-200 flex items-center justify-center text-xs">
-                  No Image
+        {/* THINH HANH */}
+        {trending.length > 0 && (
+          <div className="overflow-hidden rounded-lg border border-slate-200 bg-white p-4">
+            <h2 className="mb-3 text-lg font-semibold text-slate-900">Sách thịnh hành</h2>
+            <div className="flex gap-4 overflow-x-auto pb-1">
+              {trending.map((b) => (
+                <div
+                  key={b.id}
+                  onClick={() => navigate(`/books/${b.id}`)}
+                  className="min-w-52 cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow"
+                >
+                  {b.thumbnailUrl ? (
+                    <img src={b.thumbnailUrl} className="h-40 w-full object-cover" />
+                  ) : (
+                    <div className="flex h-40 items-center justify-center bg-slate-100 text-sm text-slate-500">
+                      Không có ảnh
+                    </div>
+                  )}
+                  <div className="p-3">
+                    <p className="line-clamp-2 text-sm font-semibold text-slate-900">{b.title}</p>
+                  </div>
                 </div>
-              )}
-              <p className="text-sm mt-1 line-clamp-2">{b.title}</p>
+              ))}
             </div>
-          ))}
+          </div>
+        )}
+
+        {/* PHO BIEN */}
+        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white p-4">
+          <h2 className="mb-3 text-lg font-semibold text-slate-900">Sách phổ biến</h2>
+          <div className="flex gap-4 overflow-x-auto pb-1">
+            {popular.map((b) => (
+              <div
+                key={b.id}
+                onClick={() => navigate(`/books/${b.id}`)}
+                className="min-w-52 cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow"
+              >
+                {b.thumbnailUrl ? (
+                  <img src={b.thumbnailUrl} className="h-40 w-full object-cover" />
+                ) : (
+                  <div className="flex h-40 items-center justify-center bg-slate-100 text-sm text-slate-500">
+                    Không có ảnh
+                  </div>
+                )}
+                <div className="p-3">
+                  <p className="line-clamp-2 text-sm font-semibold text-slate-900">{b.title}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* POPULAR */}
-        <h2 className="text-lg font-bold mb-2"> Sách phổ biến</h2>
-        <div className="flex gap-4 overflow-x-auto mb-6">
-          {popular.map((b) => (
-            <div
-              key={b.id}
-              onClick={() => navigate(`/books/${b.id}`)}
-              className="min-w-[150px] cursor-pointer"
-            >
-              {b.thumbnailUrl ? (
-                <img src={b.thumbnailUrl} className="h-32 w-full object-cover rounded" />
-              ) : (
-                <div className="h-32 bg-slate-200 flex items-center justify-center text-xs">
-                  No Image
-                </div>
-              )}
-              <p className="text-sm mt-1 line-clamp-2">{b.title}</p>
-            </div>
-          ))}
-        </div>
+        <h2 className="text-lg font-semibold text-slate-900">Sách</h2>
 
-        {/* LOADING */}
-        {loading && <p>Loading books...</p>}
+        {/* DANG TAI */}
+        {loading && <p className="text-sm text-slate-500">Đang tải sách...</p>}
 
-        {/* EMPTY */}
-        {!loading && books.length === 0 && <p>No books found</p>}
+        {/* RONG */}
+        {!loading && books.length === 0 && <p className="text-sm text-slate-500">Không tìm thấy sách</p>}
 
-        {/* LIST */}
+        {/* DANH SACH */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
           {books.map((b) => (
             <div
               key={b.id}
               onClick={() => navigate(`/books/${b.id}`)}
-              className="bg-white rounded-lg shadow cursor-pointer"
+              className="cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow"
             >
               {b.thumbnailUrl ? (
                 <img src={b.thumbnailUrl} className="h-40 w-full object-cover" />
               ) : (
-                <div className="h-40 bg-slate-200 flex items-center justify-center">
-                  No Image
+                <div className="flex h-40 items-center justify-center bg-slate-100 text-sm text-slate-500">
+                  Không có ảnh
                 </div>
               )}
 
               <div className="p-3">
-                <h3 className="text-sm font-semibold">{b.title}</h3>
-                <p className="text-xs text-gray-500">{b.categoryName}</p>
-                <p className="text-xs">Available: {b.availableCopies}</p>
+                <h3 className="line-clamp-2 text-sm font-semibold text-slate-900">{b.title}</h3>
+                <p className="mt-1 text-xs text-slate-500">{b.categoryName}</p>
+                <p className="mt-1 text-xs text-slate-600">Số lượng còn: {b.availableCopies}</p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* PAGINATION */}
+        {/* PHAN TRANG */}
         <div className="flex justify-center items-center gap-4 mt-6">
           <button
             disabled={page === 0}
             onClick={() => setPage(page - 1)}
-            className="px-4 py-2 bg-slate-200 rounded"
+            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Trang trước
           </button>
 
-          <span>
+          <span className="text-sm text-slate-600">
             Trang {page + 1} / {totalPages}
           </span>
 
           <button
             disabled={page >= totalPages - 1}
             onClick={() => setPage(page + 1)}
-            className="px-4 py-2 bg-slate-200 rounded"
+            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Trang sau
           </button>

@@ -146,12 +146,9 @@ public class BookController {
             required = true
         )
     public ResponseEntity<ApiResponse<BookResponse>> updateBook(
-            @Parameter(description = "ID của sách cần cập nhật")
-            @PathVariable String id,
-            @Parameter(description = "Thông tin metadata cần cập nhật")
-            @RequestPart("metadata") @Valid BookUpdateRequest request,
-            @Parameter(description = "Ảnh bìa mới, có thể bỏ trống")
-            @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail
+            @Parameter(description = "ID của sách cần cập nhật") @PathVariable String id,
+            @Parameter(description = "Thông tin metadata cần cập nhật") @RequestPart("metadata") @Valid BookUpdateRequest request,
+            @Parameter(description = "Ảnh bìa mới, có thể bỏ trống") @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail
     ) {
         return ResponseEntity.ok(ResponseUtils.ok(bookService.updateBook(id, request, thumbnail)));
     }

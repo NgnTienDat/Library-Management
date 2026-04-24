@@ -9,7 +9,11 @@ function UserManagementPage() {
 	const users = data?.content ?? []
 
 	if (isLoading) {
-		return <div>Loading users...</div>
+		return (
+			<div className="rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm">
+				Loading users...
+			</div>
+		)
 	}
 
 	function handleStatusChange(userId, newStatus) {
@@ -26,46 +30,47 @@ function UserManagementPage() {
   return (
     <div className="space-y-6">
 		<div className="flex items-center justify-between">
-			<h1 className="text-2xl font-semibold">User Management</h1>
+			<h1 className="text-2xl font-semibold text-slate-900">User Management</h1>
 
 			<Link
 				to="/admin/roles"
-				className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-500"
+				className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500"
 			>
 				Add Staff
 			</Link>
 		</div>
 		
-		<div className="overflow-x-auto rounded-xl border">
-			<table className="w-full text-left">
-				<thead className="bg-gray-50">
+		<div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+			<div className="overflow-x-auto">
+			<table className="min-w-full divide-y divide-slate-200">
+				<thead className="bg-slate-50">
 					<tr>
-						<th className="p-3">ID</th>
-						<th className="p-3">Full Name</th>
-						<th className="p-3">Email</th>
-						<th className="p-3">Role</th>
-						<th className="p-3">Status</th>
-						<th className="p-3">Created</th>
-						<th className="p-3">Action</th>
+						<th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">ID</th>
+						<th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Full Name</th>
+						<th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Email</th>
+						<th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Role</th>
+						<th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Status</th>
+						<th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Created</th>
+						<th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Action</th>
 					</tr>
 				</thead>
 
-				<tbody>
+				<tbody className="divide-y divide-slate-100">
 					{users.map((user) => (
-					<tr key={user.id} className="border-t">
-						<td className="p-3">{user.id}</td>
-						<td className="p-3">{user.fullName}</td>
-						<td className="p-3">{user.email}</td>
-						<td className="p-3">{user.role}</td>
-						<td className="p-3">{user.status}</td>
-						<td className="p-3">
+					<tr key={user.id} className="hover:bg-slate-50">
+						<td className="px-4 py-3 text-sm text-slate-700">{user.id}</td>
+						<td className="px-4 py-3 text-sm text-slate-800">{user.fullName}</td>
+						<td className="px-4 py-3 text-sm text-slate-700">{user.email}</td>
+						<td className="px-4 py-3 text-sm text-slate-700">{user.role}</td>
+						<td className="px-4 py-3 text-sm text-slate-700">{user.status}</td>
+						<td className="px-4 py-3 text-sm text-slate-700">
 						{new Date(user.createdAt).toLocaleDateString()}
 						</td>
-						<td className="p-3">
+						<td className="px-4 py-3 text-sm">
 							<Link
 								to={`/admin/users/${user.id}`}
 								state={{ user }}
-								className="text-blue-600 hover:underline"
+								className="inline-flex rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
 							>
 								Update
 							</Link>
@@ -74,6 +79,7 @@ function UserManagementPage() {
 					))}
 				</tbody>
 			</table>
+			</div>
 		</div>
 	</div>
   )
