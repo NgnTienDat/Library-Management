@@ -53,7 +53,7 @@ function AuditLogsPage() {
 						<select
 							value={size}
 							onChange={handleSizeChange}
-							className='ml-2 rounded-md border border-slate-300 px-2 py-1 text-sm'
+							className='ml-2 rounded-md border border-slate-300 bg-white px-2 py-1 text-sm outline-none ring-blue-500 focus:ring-2'
 						>
 							<option value={10}>10</option>
 							<option value={20}>20</option>
@@ -64,16 +64,16 @@ function AuditLogsPage() {
 					<button
 						type='button'
 						onClick={() => refetch()}
-						className='rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100'
+						className='rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100'
 					>
 						Làm mới
 					</button>
 				</div>
 			</div>
 
-			<div className='rounded-xl border border-slate-200 bg-white shadow-sm'>
+			<div className='overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm'>
 				<div className='overflow-x-auto'>
-					<table className='min-w-full text-left text-sm'>
+					<table className='min-w-full divide-y divide-slate-200 text-left text-sm'>
 						<thead className='bg-slate-50 text-xs uppercase tracking-wide text-slate-600'>
 							<tr>
 								<th className='px-4 py-3'>Time</th>
@@ -85,7 +85,7 @@ function AuditLogsPage() {
 								<th className='px-4 py-3'>New Value</th>
 							</tr>
 						</thead>
-						<tbody>
+						<tbody className='divide-y divide-slate-100'>
 							{isLoading ? (
 								<tr>
 									<td colSpan={7} className='px-4 py-8 text-center text-slate-500'>
@@ -100,7 +100,7 @@ function AuditLogsPage() {
 								</tr>
 							) : (
 								logs.map((log) => (
-									<tr key={log.id} className='border-t border-slate-100 align-top'>
+									<tr key={log.id} className='align-top hover:bg-slate-50'>
 										<td className='px-4 py-3 text-slate-700'>{formatDateTime(log.createdAt)}</td>
 										<td className='px-4 py-3 font-medium text-slate-800'>{log.userId ?? '-'}</td>
 										<td className='px-4 py-3'>
@@ -124,7 +124,7 @@ function AuditLogsPage() {
 				</div>
 			</div>
 
-			<div className='flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between'>
+			<div className='flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between'>
 				<p className='text-sm text-slate-600'>
 					Tổng số bản ghi: <span className='font-semibold text-slate-900'>{totalElements}</span>
 				</p>
@@ -134,7 +134,7 @@ function AuditLogsPage() {
 						type='button'
 						onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
 						disabled={isFirst || isFetching}
-						className='rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 disabled:cursor-not-allowed disabled:opacity-50'
+						className='rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50'
 					>
 						Trước
 					</button>
@@ -147,7 +147,7 @@ function AuditLogsPage() {
 						type='button'
 						onClick={() => setPage((prev) => prev + 1)}
 						disabled={isLast || isFetching || totalPages === 0}
-						className='rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 disabled:cursor-not-allowed disabled:opacity-50'
+						className='rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50'
 					>
 						Sau
 					</button>

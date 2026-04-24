@@ -6,6 +6,24 @@ import PrimaryButton from '../components/common/PrimaryButton'
 import AuthLayout from '../components/layout/AuthLayout'
 import { useRegister } from '../hooks/useAuth'
 
+function extractFieldErrors(error, fieldMapping = {}) {
+  const validationResult = error?.response?.data?.result
+
+  if (!validationResult || typeof validationResult !== 'object' || Array.isArray(validationResult)) {
+    return {}
+  }
+
+  return Object.entries(validationResult).reduce((errors, [field, message]) => {
+    const mappedField = fieldMapping[field] ?? field
+
+    if (mappedField && typeof message === 'string' && message.trim()) {
+      errors[mappedField] = message
+    }
+
+    return errors
+  }, {})
+}
+
 function RegisterPage() {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
@@ -13,19 +31,38 @@ function RegisterPage() {
     email: '',
     password: '',
   })
+  const [fieldErrors, setFieldErrors] = useState({})
 
   const registerMutation = useRegister({
     onSuccess: () => {
       navigate('/login', { replace: true })
     },
+    onError: (error) => {
+      setFieldErrors(
+        extractFieldErrors(error, {
+          fullName: 'username',
+        }),
+      )
+    },
   })
 
   const handleChange = (event) => {
     const { name, value } = event.target
+
     setFormData((previous) => ({
       ...previous,
       [name]: value,
     }))
+
+    setFieldErrors((previous) => {
+      if (!previous[name]) {
+        return previous
+      }
+
+      const nextErrors = { ...previous }
+      delete nextErrors[name]
+      return nextErrors
+    })
   }
 
   const handleSubmit = (event) => {
@@ -49,9 +86,10 @@ function RegisterPage() {
         <FormInput
           id='username'
           name='username'
-          label='Username'
+          label='Full Name'
           value={formData.username}
           onChange={handleChange}
+          error={fieldErrors.username}
           placeholder='Enter your name'
           required
           autoComplete='name'
@@ -64,6 +102,7 @@ function RegisterPage() {
           label='Email'
           value={formData.email}
           onChange={handleChange}
+          error={fieldErrors.email}
           placeholder='you@example.com'
           required
           autoComplete='email'
@@ -76,6 +115,7 @@ function RegisterPage() {
           label='Password'
           value={formData.password}
           onChange={handleChange}
+          error={fieldErrors.password}
           placeholder='Minimum 6 characters'
           required
           minLength={6}

@@ -39,17 +39,22 @@ function RoleManagementPage() {
 	}
 
 	return (
-		<div className="max-w-xl space-y-6">
-			<h1 className="text-2xl font-semibold text-slate-900">
-				Add Staff
-			</h1>
+		<div className="max-w-xl space-y-5">
+			<div>
+				<h1 className="text-2xl font-semibold text-slate-900">
+					Add Staff
+				</h1>
+				<p className="mt-1 text-sm text-slate-600">
+					Create librarian or sysadmin account for internal operations.
+				</p>
+			</div>
 
 			<form
 				onSubmit={handleSubmit}
-				className="space-y-4 rounded-xl border border-slate-200 bg-white p-6"
+				className="space-y-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
 			>
 				<div>
-					<label className="block text-sm font-medium">
+					<label className="block text-sm font-medium text-slate-700">
 						Full Name
 					</label>
 					<input
@@ -58,12 +63,12 @@ function RoleManagementPage() {
 						value={form.fullName}
 						onChange={handleChange}
 						required
-						className="mt-1 w-full rounded border p-2"
+						className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none ring-blue-500 focus:ring-2"
 					/>
 				</div>
 
 				<div>
-					<label className="block text-sm font-medium">
+					<label className="block text-sm font-medium text-slate-700">
 						Email
 					</label>
 					<input
@@ -72,12 +77,12 @@ function RoleManagementPage() {
 						value={form.email}
 						onChange={handleChange}
 						required
-						className="mt-1 w-full rounded border p-2"
+						className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none ring-blue-500 focus:ring-2"
 					/>
 				</div>
 
 				<div>
-					<label className="block text-sm font-medium">
+					<label className="block text-sm font-medium text-slate-700">
 						Password
 					</label>
 					<input
@@ -87,19 +92,19 @@ function RoleManagementPage() {
 					onChange={handleChange}
 					required
 					minLength={8}
-					className="mt-1 w-full rounded border p-2"
+					className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none ring-blue-500 focus:ring-2"
 					/>
 				</div>
 
 				<div>
-					<label className="block text-sm font-medium">
+					<label className="block text-sm font-medium text-slate-700">
 						Role
 					</label>
 					<select
 						name="role"
 						value={form.role}
 						onChange={handleChange}
-						className="mt-1 w-full rounded border p-2"
+						className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none ring-blue-500 focus:ring-2"
 					>
 						<option value={ROLES.LIBRARIAN}>
 							LIBRARIAN
@@ -110,15 +115,17 @@ function RoleManagementPage() {
 					</select>
 				</div>
 
-				<button
-					type="submit"
-					className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-500"
-					disabled={createStaffMutation.isLoading}
-				>
-					{createStaffMutation.isLoading
-						? 'Creating...'
-						: 'Create Staff'}
-				</button>
+				<div className="pt-2">
+					<button
+						type="submit"
+						className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500"
+						disabled={createStaffMutation.isLoading}
+					>
+						{createStaffMutation.isLoading
+							? 'Creating...'
+							: 'Create Staff'}
+					</button>
+				</div>
 			</form>
 		</div>
 	)

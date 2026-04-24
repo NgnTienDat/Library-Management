@@ -9,6 +9,22 @@ import { useAuthContext } from '../contexts/AuthContext'
 import { useLogin } from '../hooks/useAuth'
 import { getRoleRedirectPath } from '../utils/helpers'
 
+function extractFieldErrors(error) {
+	const validationResult = error?.response?.data?.result
+
+	if (!validationResult || typeof validationResult !== 'object' || Array.isArray(validationResult)) {
+		return {}
+	}
+
+	return Object.entries(validationResult).reduce((errors, [field, message]) => {
+		if (typeof message === 'string' && message.trim()) {
+			errors[field] = message
+		}
+
+		return errors
+	}, {})
+}
+
 function LoginPage() {
 	const navigate = useNavigate()
 	const { login } = useAuthContext()
@@ -16,6 +32,7 @@ function LoginPage() {
 		email: '',
 		password: '',
 	})
+	const [fieldErrors, setFieldErrors] = useState({})
 
 	const loginMutation = useLogin({
 		onSuccess: (response) => {
@@ -27,14 +44,28 @@ function LoginPage() {
 			login(response)
 			navigate(getRoleRedirectPath(response?.user?.role), { replace: true })
 		},
+		onError: (error) => {
+			setFieldErrors(extractFieldErrors(error))
+		},
 	})
 
 	const handleChange = (event) => {
 		const { name, value } = event.target
+
 		setFormData((previous) => ({
 			...previous,
 			[name]: value,
 		}))
+
+		setFieldErrors((previous) => {
+			if (!previous[name]) {
+				return previous
+			}
+
+			const nextErrors = { ...previous }
+			delete nextErrors[name]
+			return nextErrors
+		})
 	}
 
 	const handleSubmit = (event) => {
@@ -57,6 +88,7 @@ function LoginPage() {
 					label='Email'
 					value={formData.email}
 					onChange={handleChange}
+					error={fieldErrors.email}
 					placeholder='you@example.com'
 					required
 					autoComplete='email'
@@ -69,6 +101,7 @@ function LoginPage() {
 					label='Password'
 					value={formData.password}
 					onChange={handleChange}
+					error={fieldErrors.password}
 					placeholder='Enter your password'
 					required
 					autoComplete='current-password'
