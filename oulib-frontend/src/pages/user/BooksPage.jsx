@@ -118,11 +118,9 @@ function BooksPage() {
       </div>
 
       {/* NOI DUNG CHINH */}
-      <div className="flex-1 space-y-5 p-6">
+      <div className="flex-1 space-y-5 px-5">
 
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Thư viện sách</h1>
-        </div>
+       
 
         {/* TIM KIEM */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -131,7 +129,8 @@ function BooksPage() {
             placeholder="Tìm kiếm sách..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none ring-blue-500 placeholder:text-slate-400 focus:ring-2 sm:flex-1"
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none ring-blue-500 placeholder:text-slate-400 
+            focus:ring-2 sm:flex-1"
           />
 
           <button
@@ -148,22 +147,22 @@ function BooksPage() {
         {/* THINH HANH */}
         {trending.length > 0 && (
           <div className="overflow-hidden rounded-lg border border-slate-200 bg-white p-4">
-            <h2 className="mb-3 text-lg font-semibold text-slate-900">Sách thịnh hành</h2>
+            <h2 className="mb-3 text-lg font-semibold text-slate-900">Sách thịnh hành 7 ngày qua</h2>
             <div className="flex gap-4 overflow-x-auto pb-1">
               {trending.map((b) => (
                 <div
                   key={b.id}
                   onClick={() => navigate(`/books/${b.id}`)}
-                  className="min-w-52 cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow"
+                  className="min-w-44 cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow"
                 >
                   {b.thumbnailUrl ? (
-                    <img src={b.thumbnailUrl} className="h-40 w-full object-cover" />
+                    <img src={b.thumbnailUrl} className="h-36 w-full object-cover" />
                   ) : (
-                    <div className="flex h-40 items-center justify-center bg-slate-100 text-sm text-slate-500">
+                    <div className="flex h-36 items-center justify-center bg-slate-100 text-sm text-slate-500">
                       Không có ảnh
                     </div>
                   )}
-                  <div className="p-3">
+                  <div className="p-2.5">
                     <p className="line-clamp-2 text-sm font-semibold text-slate-900">{b.title}</p>
                   </div>
                 </div>
@@ -180,16 +179,16 @@ function BooksPage() {
               <div
                 key={b.id}
                 onClick={() => navigate(`/books/${b.id}`)}
-                className="min-w-52 cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow"
+                className="min-w-44 cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow"
               >
                 {b.thumbnailUrl ? (
-                  <img src={b.thumbnailUrl} className="h-40 w-full object-cover" />
+                  <img src={b.thumbnailUrl} className="h-36 w-full object-cover" />
                 ) : (
-                  <div className="flex h-40 items-center justify-center bg-slate-100 text-sm text-slate-500">
+                  <div className="flex h-36 items-center justify-center bg-slate-100 text-sm text-slate-500">
                     Không có ảnh
                   </div>
                 )}
-                <div className="p-3">
+                <div className="p-2.5">
                   <p className="line-clamp-2 text-sm font-semibold text-slate-900">{b.title}</p>
                 </div>
               </div>
@@ -206,22 +205,22 @@ function BooksPage() {
         {!loading && books.length === 0 && <p className="text-sm text-slate-500">Không tìm thấy sách</p>}
 
         {/* DANH SACH */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 justify-items-center">
           {books.map((b) => (
             <div
               key={b.id}
               onClick={() => navigate(`/books/${b.id}`)}
-              className="cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow"
+              className="w-full max-w-45 cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow"
             >
               {b.thumbnailUrl ? (
-                <img src={b.thumbnailUrl} className="h-40 w-full object-cover" />
+                <img src={b.thumbnailUrl} className="h-36 w-full object-cover" />
               ) : (
-                <div className="flex h-40 items-center justify-center bg-slate-100 text-sm text-slate-500">
+                <div className="flex h-36 items-center justify-center bg-slate-100 text-sm text-slate-500">
                   Không có ảnh
                 </div>
               )}
 
-              <div className="p-3">
+              <div className="p-2.5">
                 <h3 className="line-clamp-2 text-sm font-semibold text-slate-900">{b.title}</h3>
                 <p className="mt-1 text-xs text-slate-500">{b.categoryName}</p>
                 <p className="mt-1 text-xs text-slate-600">Số lượng còn: {b.availableCopies}</p>
