@@ -21,7 +21,7 @@
 | Backend API | Đang làm | 95% | 
 | Frontend UI | Đang làm | 90% | 
 | Docker | Đang làm | 80% | 
-| Testing | Chưa bắt đầu | 100% | 
+| Testing | Hoàn thành | 100% | 
 **Tổng tiến độ: ~80%** 
 --- 
 ## 3. Kế hoạch tuần tới
@@ -29,7 +29,7 @@
 |------------|-------------------| 
 | Nguyễn Tiến Đạt | Xây dựng CI pipeline, viết báo cáo | 
 | Phạm Minh Hạnh | Viết báo cáo | 
-| Phạm Tấn Thành | Viết báo cáo | 
+| Phạm Tấn Thành | Chỉnh sủa User UI, Viết báo cáo | 
 
 
 

@@ -42,6 +42,8 @@ public enum ErrorCode {
     CATEGORY_IN_USE(1045, "Category is assigned to one or more books", HttpStatus.CONFLICT),
     BOOK_INACTIVE(1046, "This book has been discontinued", HttpStatus.FORBIDDEN),
     OLD_PASSWORD_MISMATCH(1047, "Old password does not match", HttpStatus.BAD_REQUEST),
+    BARCODE_NOT_FOUND(1048, "Barcode not found", HttpStatus.NOT_FOUND),
+    BOOK_COPY_NOT_AVAILABLE(1049, "This book copy is not available", HttpStatus.BAD_REQUEST),
 
     // Validation: 2XXX
     INVALID_MESSAGE_KEY(2001, "Invalid Message Key", HttpStatus.BAD_REQUEST),
