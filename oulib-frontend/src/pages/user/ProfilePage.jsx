@@ -2,8 +2,10 @@ import { useEffect, useState } from "react"
 import { getMyProfile, updateProfile, changePassword } from "../../api/users.api"
 import { getPersonalizedRecommendations } from "../../api/recommendations.api"
 import { toast } from 'sonner'
+import { useNavigate } from "react-router-dom"
 
 function ProfilePage() {
+  const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
   const [recommendBooks, setRecommendBooks] = useState([])
 
@@ -163,8 +165,8 @@ function ProfilePage() {
                     onChange={(e) => setFullName(e.target.value)}
                     readOnly={!isEditingProfile}
                     className={`w-full text-sm transition-all duration-200 outline-none ${isEditingProfile
-                        ? "rounded-lg border border-gray-300 px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                        : "border-transparent bg-transparent px-0 py-2 text-gray-900 font-medium"
+                      ? "rounded-lg border border-gray-300 px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      : "border-transparent bg-transparent px-0 py-2 text-gray-900 font-medium"
                       }`}
                   />
                 </div>
@@ -302,7 +304,9 @@ function ProfilePage() {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {recommendBooks.map((b) => (
-                  <div key={b.id} className="border border-gray-300 rounded-lg overflow-hidden">
+                  <div key={b.id}
+                    onClick={() => navigate(`/books/${b.id}`)}
+                    className="border border-gray-300 rounded-lg overflow-hidden">
                     {b.thumbnailUrl ? (
                       <img src={b.thumbnailUrl} className="h-40 w-full object-cover" />
                     ) : (

@@ -5,6 +5,7 @@ import com.ou.oulib.dto.request.BookFilterRequest;
 import com.ou.oulib.dto.request.BookUpdateRequest;
 import com.ou.oulib.dto.response.BookDetailResponse;
 import com.ou.oulib.dto.response.BookResponse;
+import com.ou.oulib.dto.response.VerifyBarcodeResponse;
 import com.ou.oulib.service.BookService;
 import com.ou.oulib.utils.ApiResponse;
 import com.ou.oulib.utils.ResponseUtils;
@@ -127,6 +128,26 @@ public class BookController {
             @PathVariable String id) {
         return ResponseEntity.ok(ResponseUtils.ok(bookService.getBookById(id)));
     }
+
+        @GetMapping("/verify-barcode")
+            @Operation(
+                summary = "Xác thực barcode bản sao sách",
+                description = "Kiểm tra barcode thuộc book copy nào và xác nhận bản sao đang ở trạng thái AVAILABLE"
+            )
+            @ApiResponses(value = {
+                @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Barcode hợp lệ và bản sao đang khả dụng"),
+                @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Bản sao sách không ở trạng thái AVAILABLE"),
+                @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Chưa xác thực"),
+                @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Không có quyền thực hiện"),
+                @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Không tìm thấy barcode"),
+                @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
+            })
+        public ResponseEntity<ApiResponse<VerifyBarcodeResponse>> verifyBarcode(
+                @Parameter(description = "Barcode cần xác thực")
+                @RequestParam String barcode
+        ) {
+            return ResponseEntity.ok(ResponseUtils.ok(bookService.verifyBarcode(barcode)));
+        }
 
     @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
         @Operation(

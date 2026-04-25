@@ -51,6 +51,13 @@ export async function getBookById(id) {
 	return unwrapResponse(response)
 }
 
+export async function verifyBarcode(barcode) {
+	const response = await axiosInstance.get(`${BOOKS_BASE_PATH}/verify-barcode`, {
+		params: cleanParams({ barcode }),
+	})
+	return unwrapResponse(response)
+}
+
 export async function createBook(data) {
 	const copyBarcodes = Array.isArray(data?.copyBarcodes)
 		? data.copyBarcodes.map((barcode) => barcode?.trim()).filter(Boolean)

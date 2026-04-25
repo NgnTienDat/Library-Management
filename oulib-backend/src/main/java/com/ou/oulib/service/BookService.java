@@ -6,6 +6,7 @@ import com.ou.oulib.dto.request.BookFilterRequest;
 import com.ou.oulib.dto.request.BookUpdateRequest;
 import com.ou.oulib.dto.response.BookDetailResponse;
 import com.ou.oulib.dto.response.BookResponse;
+import com.ou.oulib.dto.response.VerifyBarcodeResponse;
 import com.ou.oulib.entity.Author;
 import com.ou.oulib.entity.Book;
 import com.ou.oulib.entity.BookCopy;
@@ -194,6 +195,24 @@ public class BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
         return bookMapper.toBookDetailResponse(book);
+    }
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('LIBRARIAN')")
+    public VerifyBarcodeResponse verifyBarcode(String barcode) {
+        String normalizedBarcode = barcode == null ? null : barcode.trim();
+
+        BookCopy bookCopy = bookCopyRepository.findByBarcode(normalizedBarcode)
+                .orElseThrow(() -> new AppException(ErrorCode.BARCODE_NOT_FOUND));
+
+        if (bookCopy.getStatus() != BookCopyStatus.AVAILABLE) {
+            throw new AppException(ErrorCode.BOOK_COPY_NOT_AVAILABLE);
+        }
+
+        return VerifyBarcodeResponse.builder()
+                .barcode(bookCopy.getBarcode())
+                .bookTitle(bookCopy.getBook().getTitle())
+                .build();
     }
 
     @Transactional
