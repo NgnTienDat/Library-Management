@@ -4,11 +4,13 @@ import com.ou.oulib.dto.response.statistics.ActiveUsersStatisticsResponse;
 import com.ou.oulib.dto.response.statistics.BorrowingActivityResponse;
 import com.ou.oulib.dto.response.statistics.InventorySummaryResponse;
 import com.ou.oulib.dto.response.statistics.InventoryStatusResponse;
+import com.ou.oulib.dto.response.statistics.OverdueUserResponse;
 import com.ou.oulib.dto.response.statistics.SystemTotalsResponse;
 import com.ou.oulib.dto.response.statistics.TopBorrowedBookResponse;
 import com.ou.oulib.dto.response.statistics.TopBorrowedCategoryResponse;
 import com.ou.oulib.service.StatisticsService;
 import com.ou.oulib.utils.ApiResponse;
+import com.ou.oulib.utils.PageResponse;
 import com.ou.oulib.utils.ResponseUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -81,7 +83,7 @@ public class StatisticsController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Không có quyền thực hiện"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
         })
-    public ResponseEntity<ApiResponse<?>> getOverdueRecords(
+    public ResponseEntity<ApiResponse<PageResponse<OverdueUserResponse>>> getOverdueRecords(
             @Parameter(description = "Số trang, bắt đầu từ 0")
             @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Số phần tử mỗi trang")

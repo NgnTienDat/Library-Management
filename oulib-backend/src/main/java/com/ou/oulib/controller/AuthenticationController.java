@@ -46,12 +46,12 @@ public class AuthenticationController {
         )
         @ApiResponses(value = {
                 @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Đăng nhập thành công"),
-                @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Dữ liệu đăng nhập không hợp lệ"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Dữ liệu đăng nhập không hợp lệ hoặc tài khoản bị khóa"),
                 @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Sai thông tin xác thực"),
                 @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Không tìm thấy người dùng"),
                 @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
         })
-    public ResponseEntity<ApiResponse<?>> authenticate(
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> authenticate(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 description = "Thông tin đăng nhập gồm email và mật khẩu",
                 required = true
@@ -94,7 +94,7 @@ public class AuthenticationController {
         )
         @ApiResponses(value = {
                 @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Kiểm tra token thành công"),
-                @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Dữ liệu token không hợp lệ"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Dữ liệu yêu cầu không hợp lệ"),
                 @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
         })
     public ResponseEntity<ApiResponse<IntrospectResponse>> introspect(
