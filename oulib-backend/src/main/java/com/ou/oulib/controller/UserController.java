@@ -45,7 +45,7 @@ public class UserController {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Người dùng đã tồn tại"),
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
         })
-        public ResponseEntity<ApiResponse<?>> createUser(
+        public ResponseEntity<ApiResponse<UserResponse>> createUser(
                         @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Thông tin đăng ký tài khoản người dùng", required = true) @RequestBody @Valid UserCreationRequest userRequest) {
 
                 return ResponseEntity.status(HttpStatus.CREATED)
@@ -63,7 +63,7 @@ public class UserController {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Email đã được sử dụng"),
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
         })
-        public ResponseEntity<ApiResponse<?>> createStaff(
+        public ResponseEntity<ApiResponse<UserResponse>> createStaff(
                         @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Thông tin tài khoản nhân sự cần tạo", required = true) @RequestBody @Valid StaffCreationRequest request) {
                 return ResponseEntity.status(HttpStatus.CREATED)
                                 .body(ResponseUtils.created(userService.createStaff(request)));
@@ -136,8 +136,8 @@ public class UserController {
         @Operation(summary = "Đổi mật khẩu tài khoản hiện tại", description = "Người dùng đã đăng nhập đổi mật khẩu bằng cách cung cấp mật khẩu cũ và mật khẩu mới")
         @ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Đổi mật khẩu thành công"),
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Dữ liệu mật khẩu không hợp lệ"),
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Chưa xác thực hoặc mật khẩu cũ không đúng"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Dữ liệu mật khẩu không hợp lệ hoặc mật khẩu cũ không đúng"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Chưa xác thực"),
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Không tìm thấy người dùng"),
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
         })

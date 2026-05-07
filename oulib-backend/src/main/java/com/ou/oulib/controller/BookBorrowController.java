@@ -24,6 +24,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/borrowing")
 @Tag(name = "Borrowing", description = "Nhóm API quản lý nghiệp vụ mượn trả sách và tra cứu lịch sử mượn")
@@ -48,7 +50,7 @@ public class BookBorrowController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Barcode bị trùng hoặc đã có bản ghi mượn"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
         })
-    public ResponseEntity<ApiResponse<?>> borrowBook(
+    public ResponseEntity<ApiResponse<List<BorrowRecordResponse>>> borrowBook(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 description = "Thông tin mượn sách gồm người mượn, thời hạn và danh sách barcode",
                 required = true
@@ -73,7 +75,7 @@ public class BookBorrowController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Không tìm thấy sách hoặc bản ghi mượn"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
         })
-    public ResponseEntity<ApiResponse<?>> returnBook(
+    public ResponseEntity<ApiResponse<List<BorrowRecordResponse>>> returnBook(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 description = "Danh sách barcode bản sao sách cần trả",
                 required = true
@@ -95,7 +97,7 @@ public class BookBorrowController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Không tìm thấy người dùng"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
         })
-    public ResponseEntity<ApiResponse<?>> getMyBorrowingHistory(
+    public ResponseEntity<ApiResponse<List<BorrowRecordResponse>>> getMyBorrowingHistory(
             @Parameter(description = "Trạng thái lọc: borrowing, return/returned, overdue")
             @RequestParam(required = false) String status,
             @AuthenticationPrincipal Jwt jwt) {
@@ -116,7 +118,7 @@ public class BookBorrowController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Không tìm thấy người dùng"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
         })
-    public ResponseEntity<ApiResponse<?>> getUserBorrowingHistory(
+    public ResponseEntity<ApiResponse<List<BorrowRecordResponse>>> getUserBorrowingHistory(
             @Parameter(description = "ID của người dùng cần xem lịch sử")
             @PathVariable String userId,
             @Parameter(description = "Trạng thái lọc: borrowing, return/returned, overdue")

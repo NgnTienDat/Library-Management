@@ -40,7 +40,7 @@ public class ApplicationInitConfig {
     static final int REQUIRED_BOOKS = 10;
     static final int COPIES_PER_BOOK = 5;
 
-    PasswordEncoder passwordEncoder;
+    PasswordEncoder passwordEncoder; // TEST CI
 
     @NonFinal
     @Value("${app.admin.password}")

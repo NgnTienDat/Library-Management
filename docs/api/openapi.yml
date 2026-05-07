@@ -1,0 +1,4379 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Oulib API Documentation",
+    "description": "API documentation for Oulib - the library management system",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Nhóm API xác thực người dùng: đăng nhập, đăng xuất, kiểm tra token và làm mới token"
+    },
+    {
+      "name": "Audit Logs",
+      "description": "Nhóm API tra cứu nhật ký audit"
+    },
+    {
+      "name": "Statistics",
+      "description": "Nhóm API thống kê tồn kho, quá hạn, hoạt động mượn và chỉ số tổng quan hệ thống"
+    },
+    {
+      "name": "Health",
+      "description": "Nhóm API kiểm tra tình trạng hoạt động của dịch vụ và kết nối RabbitMQ"
+    },
+    {
+      "name": "Books",
+      "description": "Nhóm API quản lý sách: tạo mới, cập nhật, tra cứu, vô hiệu hóa và kích hoạt lại"
+    },
+    {
+      "name": "Categories",
+      "description": "Nhóm API quản lý danh mục sách"
+    },
+    {
+      "name": "Recommendations",
+      "description": "Nhóm API gợi ý sách phổ biến, xu hướng và cá nhân hóa"
+    },
+    {
+      "name": "Borrowing",
+      "description": "Nhóm API quản lý nghiệp vụ mượn trả sách và tra cứu lịch sử mượn"
+    },
+    {
+      "name": "Users",
+      "description": "Nhóm API quản lý tài khoản người dùng, hồ sơ cá nhân và tài khoản nhân sự"
+    }
+  ],
+  "paths": {
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Làm mới access token",
+        "description": "Cấp token mới dựa trên token hiện tại còn trong cửa sổ làm mới",
+        "operationId": "refreshToken",
+        "requestBody": {
+          "description": "Token hiện tại dùng để làm mới phiên",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Làm mới token thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAuthenticationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token không hợp lệ hoặc đã hết hạn",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAuthenticationResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAuthenticationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Đăng xuất phiên hiện tại",
+        "description": "Thu hồi token hiện tại bằng cách đưa token vào danh sách đã vô hiệu hóa",
+        "operationId": "logout",
+        "requestBody": {
+          "description": "Token cần đưa vào danh sách vô hiệu hóa khi đăng xuất",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Đăng xuất thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực hoặc token không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền truy cập",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Đăng nhập người dùng",
+        "description": "Xác thực email và mật khẩu để trả về thông tin tài khoản cùng JWT truy cập",
+        "operationId": "authenticate",
+        "requestBody": {
+          "description": "Thông tin đăng nhập gồm email và mật khẩu",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Đăng nhập thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu đăng nhập không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sai thông tin xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy người dùng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/introspect": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Kiểm tra tính hợp lệ của token",
+        "description": "Xác minh token còn hiệu lực hay đã hết hạn/không hợp lệ",
+        "operationId": "introspect",
+        "requestBody": {
+          "description": "Token cần kiểm tra trạng thái hợp lệ",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntrospectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Kiểm tra token thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseIntrospectResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu token không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseIntrospectResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseIntrospectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Lấy danh sách người dùng",
+        "description": "Trả về danh sách người dùng có phân trang cho SYSADMIN hoặc LIBRARIAN",
+        "operationId": "getUsers",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Số trang, bắt đầu từ 0",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Số phần tử mỗi trang",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách người dùng thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseUserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseUserResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseUserResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseUserResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Đăng ký tài khoản người dùng",
+        "description": "Tạo mới tài khoản người dùng với vai trò USER từ thông tin đăng ký cơ bản",
+        "operationId": "createUser",
+        "requestBody": {
+          "description": "Thông tin đăng ký tài khoản người dùng",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Tạo người dùng thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu đăng ký không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Người dùng đã tồn tại",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/staff": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Tạo tài khoản nhân sự",
+        "description": "Cho phép SYSADMIN tạo tài khoản LIBRARIAN hoặc SYSADMIN mới",
+        "operationId": "createStaff",
+        "requestBody": {
+          "description": "Thông tin tài khoản nhân sự cần tạo",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StaffCreationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Tạo tài khoản nhân sự thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu đầu vào không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email đã được sử dụng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/categories": {
+      "get": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Lấy toàn bộ danh mục",
+        "description": "Trả về danh sách tất cả danh mục đang có trong hệ thống",
+        "operationId": "getAllCategories",
+        "responses": {
+          "200": {
+            "description": "Lấy danh mục thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListCategoryResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Tạo danh mục",
+        "description": "Tạo mới danh mục sách và kiểm tra trùng tên theo quy tắc nghiệp vụ",
+        "operationId": "createCategory",
+        "requestBody": {
+          "description": "Thông tin danh mục cần tạo",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryCreationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Tạo danh mục thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCategoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu danh mục không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCategoryResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCategoryResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCategoryResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Danh mục đã tồn tại",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCategoryResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/borrowing": {
+      "post": {
+        "tags": [
+          "Borrowing"
+        ],
+        "summary": "Tạo phiếu mượn sách",
+        "description": "Thủ thư tạo bản ghi mượn cho người dùng theo danh sách barcode và thời hạn mượn",
+        "operationId": "borrowBook",
+        "requestBody": {
+          "description": "Thông tin mượn sách gồm người mượn, thời hạn và danh sách barcode",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BorrowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Tạo phiếu mượn thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Yêu cầu mượn không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền hoặc vi phạm điều kiện mượn",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy người dùng hoặc sách",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Barcode bị trùng hoặc đã có bản ghi mượn",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/borrowing/return": {
+      "post": {
+        "tags": [
+          "Borrowing"
+        ],
+        "summary": "Trả sách",
+        "description": "Thủ thư thực hiện trả sách theo danh sách barcode của bản sao cần trả",
+        "operationId": "returnBook",
+        "requestBody": {
+          "description": "Danh sách barcode bản sao sách cần trả",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Trả sách thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Yêu cầu trả sách không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy sách hoặc bản ghi mượn",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/books": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "summary": "Lấy danh sách sách",
+        "description": "Trả về danh sách sách có lọc theo từ khóa, danh mục, tác giả và phân trang",
+        "operationId": "getBooks",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "description": "Từ khóa tìm kiếm theo tiêu đề, danh mục hoặc tác giả",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "description": "ID danh mục dùng để lọc",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorIds",
+            "in": "query",
+            "description": "Danh sách authorId phân tách bằng dấu phẩy",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Số trang, bắt đầu từ 0",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Số phần tử mỗi trang",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách sách thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Books"
+        ],
+        "summary": "Tạo sách mới",
+        "description": "Tạo mới đầu sách cùng danh sách bản sao và ảnh bìa tùy chọn",
+        "operationId": "addNewBook",
+        "requestBody": {
+          "description": "Dữ liệu multipart gồm metadata sách và tệp thumbnail tùy chọn",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "metadata": {
+                    "$ref": "#/components/schemas/BookCreationRequest"
+                  },
+                  "thumbnail": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Ảnh bìa sách, có thể bỏ trống"
+                  }
+                },
+                "required": [
+                  "metadata"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Tạo sách thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu tạo sách không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy danh mục hoặc tác giả",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ISBN hoặc barcode đã tồn tại",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Tệp tải lên vượt quá dung lượng cho phép",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/status": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Cập nhật trạng thái người dùng",
+        "description": "Cập nhật trạng thái tài khoản theo userId cho SYSADMIN hoặc LIBRARIAN",
+        "operationId": "updateUserStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID của người dùng cần cập nhật trạng thái",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Trạng thái mới của tài khoản người dùng",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserStatusUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật trạng thái thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu trạng thái không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy người dùng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/me": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Lấy hồ sơ người dùng hiện tại",
+        "description": "Lấy thông tin hồ sơ của tài khoản đang đăng nhập dựa trên JWT",
+        "operationId": "getCurrentUser",
+        "responses": {
+          "200": {
+            "description": "Lấy hồ sơ thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy người dùng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Cập nhật hồ sơ cá nhân",
+        "description": "Cập nhật thông tin hồ sơ của tài khoản hiện tại bằng dữ liệu multipart",
+        "operationId": "updateMyProfile",
+        "requestBody": {
+          "description": "Dữ liệu multipart gồm phần data chứa thông tin hồ sơ và phần avatar tùy chọn",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "$ref": "#/components/schemas/UserUpdateRequest"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Tệp ảnh đại diện tải lên, có thể bỏ trống"
+                  }
+                },
+                "required": [
+                  "data"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật hồ sơ thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu cập nhật không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy người dùng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/me/password": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Đổi mật khẩu tài khoản hiện tại",
+        "description": "Người dùng đã đăng nhập đổi mật khẩu bằng cách cung cấp mật khẩu cũ và mật khẩu mới",
+        "operationId": "changePassword",
+        "requestBody": {
+          "description": "Thông tin mật khẩu cũ và mật khẩu mới",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Đổi mật khẩu thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu mật khẩu không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực hoặc mật khẩu cũ không đúng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy người dùng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/books/{id}": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "summary": "Lấy chi tiết sách theo ID",
+        "description": "Trả về thông tin chi tiết của một đầu sách theo định danh",
+        "operationId": "getBookById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID của sách cần xem chi tiết",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy chi tiết sách thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBookDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy sách",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBookDetailResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBookDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Books"
+        ],
+        "summary": "Vô hiệu hóa sách",
+        "description": "Đánh dấu đầu sách là không hoạt động thay vì xóa cứng dữ liệu",
+        "operationId": "deleteBook",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID của sách cần vô hiệu hóa",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vô hiệu hóa sách thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy sách",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Books"
+        ],
+        "summary": "Cập nhật thông tin sách",
+        "description": "Cập nhật một phần thông tin sách và ảnh bìa theo bookId",
+        "operationId": "updateBook",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID của sách cần cập nhật",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Dữ liệu multipart gồm metadata cập nhật và ảnh thumbnail tùy chọn",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "metadata": {
+                    "$ref": "#/components/schemas/BookUpdateRequest"
+                  },
+                  "thumbnail": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Ảnh bìa mới, có thể bỏ trống"
+                  }
+                },
+                "required": [
+                  "metadata"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật sách thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBookResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu cập nhật không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBookResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBookResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBookResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy sách, danh mục hoặc tác giả",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBookResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBookResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/books/{id}/reactivate": {
+      "patch": {
+        "tags": [
+          "Books"
+        ],
+        "summary": "Kích hoạt lại sách",
+        "description": "Khôi phục trạng thái hoạt động cho đầu sách đã bị vô hiệu hóa",
+        "operationId": "reactivateBook",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID của sách cần kích hoạt lại",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Kích hoạt lại sách thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy sách",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/active-users": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Lấy thống kê người dùng hoạt động",
+        "description": "Trả về số lượng người dùng hoạt động và người dùng mới trong khoảng thời gian chỉ định",
+        "operationId": "getActiveUsersStatistics",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Ngày bắt đầu (yyyy-MM-dd)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "Ngày kết thúc (yyyy-MM-dd)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy thống kê người dùng thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseActiveUsersStatisticsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseActiveUsersStatisticsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseActiveUsersStatisticsResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseActiveUsersStatisticsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/statistics/top-categories": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Lấy top thể loại được mượn nhiều",
+        "description": "Trả về danh sách thể loại có số lượt mượn cao nhất theo khoảng thời gian",
+        "operationId": "getTopBorrowedCategories",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Ngày bắt đầu (yyyy-MM-dd)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "Ngày kết thúc (yyyy-MM-dd)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Số lượng thể loại tối đa cần trả về",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy top thể loại thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListTopBorrowedCategoryResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListTopBorrowedCategoryResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListTopBorrowedCategoryResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListTopBorrowedCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/statistics/top-books": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Lấy top sách được mượn nhiều",
+        "description": "Trả về danh sách sách có số lượt mượn cao nhất theo giới hạn yêu cầu",
+        "operationId": "getTopBorrowedBooks",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Số lượng sách tối đa cần trả về",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy top sách thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListTopBorrowedBookResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListTopBorrowedBookResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/statistics/system-totals": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Lấy số liệu tổng quan hệ thống",
+        "description": "Trả về các chỉ số tổng hợp như tổng user, tổng sách, tổng bản ghi mượn và số lượng quá hạn",
+        "operationId": "getSystemTotals",
+        "responses": {
+          "200": {
+            "description": "Lấy số liệu tổng quan thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSystemTotalsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSystemTotalsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSystemTotalsResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSystemTotalsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/statistics/overdue": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Lấy danh sách quá hạn",
+        "description": "Trả về danh sách người dùng và sách đang quá hạn có phân trang",
+        "operationId": "getOverdueRecords",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Số trang, bắt đầu từ 0",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Số phần tử mỗi trang",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách quá hạn thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/statistics/inventory-summary": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Lấy thống kê tồn kho",
+        "description": "Trả về số liệu tổng hợp sách, bản sao và phân bố theo danh mục",
+        "operationId": "getInventorySummary",
+        "responses": {
+          "200": {
+            "description": "Lấy thống kê tồn kho thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseInventorySummaryResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseInventorySummaryResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseInventorySummaryResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseInventorySummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/statistics/inventory-status": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Lấy trạng thái kho chi tiết",
+        "description": "Trả về số lượng bản sao theo từng trạng thái gồm available, borrowed, damaged và lost",
+        "operationId": "getInventoryStatus",
+        "responses": {
+          "200": {
+            "description": "Lấy trạng thái kho thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseInventoryStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseInventoryStatusResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseInventoryStatusResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseInventoryStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/statistics/borrowing-activity": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Lấy thống kê hoạt động mượn trả",
+        "description": "Trả về timeline số lượt mượn và trả theo khoảng ngày và đơn vị nhóm",
+        "operationId": "getBorrowingActivity",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Ngày bắt đầu (yyyy-MM-dd)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "Ngày kết thúc (yyyy-MM-dd)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "groupBy",
+            "in": "query",
+            "description": "Đơn vị nhóm dữ liệu: day, week hoặc month",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "day"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy thống kê hoạt động thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBorrowingActivityResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBorrowingActivityResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBorrowingActivityResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBorrowingActivityResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recommendations/trending": {
+      "get": {
+        "tags": [
+          "Recommendations"
+        ],
+        "summary": "Lấy sách gợi ý xu hướng",
+        "description": "Trả về danh sách sách có xu hướng mượn cao trong khoảng thời gian gần đây",
+        "operationId": "getTrendingBooks",
+        "responses": {
+          "200": {
+            "description": "Lấy gợi ý xu hướng thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBookResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBookResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recommendations/popular": {
+      "get": {
+        "tags": [
+          "Recommendations"
+        ],
+        "summary": "Lấy sách gợi ý phổ biến",
+        "description": "Trả về danh sách sách phổ biến dựa trên tần suất mượn toàn hệ thống",
+        "operationId": "getPopularBooks",
+        "responses": {
+          "200": {
+            "description": "Lấy gợi ý phổ biến thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBookResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBookResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recommendations/personalized": {
+      "get": {
+        "tags": [
+          "Recommendations"
+        ],
+        "summary": "Lấy sách gợi ý cá nhân hóa",
+        "description": "Trả về danh sách gợi ý theo lịch sử mượn của người dùng hiện tại, có fallback sang danh sách phổ biến",
+        "operationId": "getPersonalizedRecommendations",
+        "responses": {
+          "200": {
+            "description": "Lấy gợi ý cá nhân hóa thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBookResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBookResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBookResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Kiểm tra sức khỏe dịch vụ",
+        "description": "Xác nhận API backend đang hoạt động bình thường",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "description": "Dịch vụ hoạt động bình thường",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health/rabbitmq": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Kiểm tra kết nối RabbitMQ",
+        "description": "Gửi một thông điệp kiểm tra để xác nhận kết nối RabbitMQ khả dụng",
+        "operationId": "rabbitmqCheck",
+        "responses": {
+          "200": {
+            "description": "Gửi thông điệp kiểm tra RabbitMQ thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi kết nối RabbitMQ hoặc lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/borrowing/{userId}/history": {
+      "get": {
+        "tags": [
+          "Borrowing"
+        ],
+        "summary": "Lấy lịch sử mượn theo người dùng",
+        "description": "Thủ thư hoặc quản trị viên xem lịch sử mượn/trả của một người dùng cụ thể",
+        "operationId": "getUserBorrowingHistory",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "ID của người dùng cần xem lịch sử",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Trạng thái lọc: borrowing, return/returned, overdue",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy lịch sử mượn thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Giá trị trạng thái lọc không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy người dùng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/borrowing/records": {
+      "get": {
+        "tags": [
+          "Borrowing"
+        ],
+        "summary": "Lấy danh sách bản ghi mượn",
+        "description": "Trả về danh sách bản ghi mượn có phân trang và hỗ trợ lọc theo trạng thái, người mượn",
+        "operationId": "getBorrowRecords",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Trạng thái lọc: borrowing, return/returned, overdue",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "borrowerId",
+            "in": "query",
+            "description": "ID người mượn cần lọc",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Số trang, bắt đầu từ 0",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Số phần tử mỗi trang",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách bản ghi mượn thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseBorrowRecordResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Tham số lọc hoặc phân trang không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseBorrowRecordResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseBorrowRecordResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseBorrowRecordResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseBorrowRecordResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/borrowing/records/{recordId}": {
+      "get": {
+        "tags": [
+          "Borrowing"
+        ],
+        "summary": "Lấy chi tiết bản ghi mượn",
+        "description": "Trả về thông tin chi tiết của một bản ghi mượn theo recordId",
+        "operationId": "getBorrowRecordDetail",
+        "parameters": [
+          {
+            "name": "recordId",
+            "in": "path",
+            "description": "ID của bản ghi mượn cần xem",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy chi tiết bản ghi thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBorrowRecordDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBorrowRecordDetailResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBorrowRecordDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy bản ghi mượn",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBorrowRecordDetailResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBorrowRecordDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/borrowing/history": {
+      "get": {
+        "tags": [
+          "Borrowing"
+        ],
+        "summary": "Lấy lịch sử mượn của tôi",
+        "description": "Người dùng hiện tại xem lịch sử mượn/trả của chính mình, có thể lọc theo trạng thái",
+        "operationId": "getMyBorrowingHistory",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Trạng thái lọc: borrowing, return/returned, overdue",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy lịch sử mượn thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Giá trị trạng thái lọc không hợp lệ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy người dùng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/books/verify-barcode": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "summary": "Xác thực barcode bản sao sách",
+        "description": "Kiểm tra barcode thuộc book copy nào và xác nhận bản sao đang ở trạng thái AVAILABLE",
+        "operationId": "verifyBarcode",
+        "parameters": [
+          {
+            "name": "barcode",
+            "in": "query",
+            "description": "Barcode cần xác thực",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Barcode hợp lệ và bản sao đang khả dụng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVerifyBarcodeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bản sao sách không ở trạng thái AVAILABLE",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVerifyBarcodeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVerifyBarcodeResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVerifyBarcodeResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy barcode",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVerifyBarcodeResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVerifyBarcodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audit-logs": {
+      "get": {
+        "tags": [
+          "Audit Logs"
+        ],
+        "summary": "Lấy danh sách audit log",
+        "description": "Chỉ SYSADMIN được phép xem danh sách audit log có phân trang",
+        "operationId": "getAuditLogs",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Số trang, bắt đầu từ 0",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Số phần tử mỗi trang",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách audit log thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseAuditLogResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseAuditLogResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseAuditLogResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseAuditLogResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/categories/{id}": {
+      "delete": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Xóa danh mục",
+        "description": "Xóa danh mục theo ID khi danh mục không còn được gán cho sách",
+        "operationId": "deleteCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID danh mục cần xóa",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Xóa danh mục thành công",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chưa xác thực",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền thực hiện",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy danh mục",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Danh mục đang được sử dụng",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi hệ thống",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RefreshRequest": {
+        "type": "object",
+        "description": "DTO yêu cầu RefreshRequest",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Trường token",
+            "example": "\u003CJWT_TOKEN\u003E"
+          }
+        }
+      },
+      "ApiResponseAuthenticationResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/AuthenticationResponse"
+          }
+        }
+      },
+      "AuthenticationResponse": {
+        "type": "object",
+        "description": "DTO phản hồi AuthenticationResponse",
+        "properties": {
+          "authenticated": {
+            "type": "boolean",
+            "description": "Trường authenticated",
+            "example": true
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserResponse",
+            "description": "Trường user",
+            "example": "sample"
+          },
+          "token": {
+            "type": "string",
+            "description": "Trường token",
+            "example": "\u003CJWT_TOKEN\u003E"
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "description": "DTO phản hồi UserResponse",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Trường id",
+            "example": "id-001"
+          },
+          "username": {
+            "type": "string",
+            "description": "Trường username",
+            "example": "Nguyen Van A"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Trường fullName",
+            "example": "Nguyen Van A"
+          },
+          "email": {
+            "type": "string",
+            "description": "Trường email",
+            "example": "user@example.com"
+          },
+          "role": {
+            "type": "string",
+            "description": "Trường role",
+            "example": "LIBRARIAN"
+          },
+          "avatar": {
+            "type": "string",
+            "description": "Trường avatar",
+            "example": "https://example.com/resource"
+          },
+          "status": {
+            "type": "string",
+            "description": "Trường status",
+            "example": "ACTIVE"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Trường active",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Trường createdAt",
+            "example": "sample"
+          }
+        }
+      },
+      "LogoutRequest": {
+        "type": "object",
+        "description": "DTO yêu cầu LogoutRequest",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Trường token",
+            "example": "\u003CJWT_TOKEN\u003E"
+          }
+        }
+      },
+      "ApiResponseVoid": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "type": "object"
+          }
+        }
+      },
+      "AuthenticationRequest": {
+        "type": "object",
+        "description": "DTO yêu cầu AuthenticationRequest",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password",
+            "example": "Password@123"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "ApiResponseObject": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "type": "object"
+          }
+        }
+      },
+      "IntrospectRequest": {
+        "type": "object",
+        "description": "DTO yêu cầu IntrospectRequest",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Trường token",
+            "example": "\u003CJWT_TOKEN\u003E"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "ApiResponseIntrospectResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/IntrospectResponse"
+          }
+        }
+      },
+      "IntrospectResponse": {
+        "type": "object",
+        "description": "DTO phản hồi IntrospectResponse",
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "description": "Trường valid",
+            "example": true
+          }
+        }
+      },
+      "UserCreationRequest": {
+        "type": "object",
+        "description": "DTO yêu cầu UserCreationRequest",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Trường email",
+            "example": "user@example.com"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Trường fullName",
+            "example": "Nguyen Van A",
+            "maxLength": 50,
+            "minLength": 1
+          },
+          "password": {
+            "type": "string",
+            "description": "Trường password",
+            "example": "Password@123",
+            "maxLength": 2147483647,
+            "minLength": 6
+          }
+        },
+        "required": [
+          "email",
+          "fullName",
+          "password"
+        ]
+      },
+      "StaffCreationRequest": {
+        "type": "object",
+        "description": "DTO yêu cầu StaffCreationRequest",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Trường email",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "Trường password",
+            "example": "Password@123",
+            "maxLength": 2147483647,
+            "minLength": 6
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Trường fullName",
+            "example": "Nguyen Van A",
+            "maxLength": 50,
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "description": "Trường role",
+            "enum": [
+              "SYSADMIN",
+              "LIBRARIAN",
+              "USER"
+            ],
+            "example": "LIBRARIAN"
+          }
+        },
+        "required": [
+          "email",
+          "fullName",
+          "password",
+          "role"
+        ]
+      },
+      "CategoryCreationRequest": {
+        "type": "object",
+        "description": "DTO yêu cầu CategoryCreationRequest",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Trường name",
+            "example": "sample"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "ApiResponseCategoryResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/CategoryResponse"
+          }
+        }
+      },
+      "CategoryResponse": {
+        "type": "object",
+        "description": "DTO phản hồi CategoryResponse",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Trường id",
+            "example": "id-001"
+          },
+          "name": {
+            "type": "string",
+            "description": "Trường name",
+            "example": "sample"
+          }
+        }
+      },
+      "BorrowRequest": {
+        "type": "object",
+        "description": "DTO yêu cầu BorrowRequest",
+        "properties": {
+          "borrowerId": {
+            "type": "string",
+            "description": "Trường borrowerId",
+            "example": "id-001"
+          },
+          "borrowDuration": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Trường borrowDuration",
+            "example": 1,
+            "minimum": 0
+          },
+          "barcodes": {
+            "type": "array",
+            "description": "Trường barcodes",
+            "example": [],
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "borrowDuration"
+        ]
+      },
+      "ReturnRequest": {
+        "type": "object",
+        "description": "DTO yêu cầu ReturnRequest",
+        "properties": {
+          "barcodes": {
+            "type": "array",
+            "description": "Trường barcodes",
+            "example": [],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "AuthorRefRequest": {
+        "type": "object",
+        "description": "DTO yêu cầu AuthorRefRequest",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Trường id",
+            "example": "id-001"
+          },
+          "name": {
+            "type": "string",
+            "description": "Trường name",
+            "example": "sample"
+          }
+        }
+      },
+      "BookCreationRequest": {
+        "type": "object",
+        "description": "Metadata mô tả thông tin sách cần tạo",
+        "properties": {
+          "isbn": {
+            "type": "string",
+            "description": "Trường isbn",
+            "example": 9786041234567
+          },
+          "title": {
+            "type": "string",
+            "description": "Trường title",
+            "example": "Clean Code"
+          },
+          "publisher": {
+            "type": "string",
+            "description": "Trường publisher",
+            "example": "Prentice Hall"
+          },
+          "numberOfPages": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Trường numberOfPages",
+            "example": 1
+          },
+          "description": {
+            "type": "string",
+            "description": "Trường description",
+            "example": "Mo ta du lieu"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "Trường categoryId",
+            "example": "id-001"
+          },
+          "copyBarcodes": {
+            "type": "array",
+            "description": "Trường copyBarcodes",
+            "example": [],
+            "items": {
+              "type": "string"
+            }
+          },
+          "authors": {
+            "type": "array",
+            "description": "Trường authors",
+            "example": [],
+            "items": {
+              "$ref": "#/components/schemas/AuthorRefRequest"
+            }
+          }
+        }
+      },
+      "UserStatusUpdateRequest": {
+        "type": "object",
+        "description": "DTO yêu cầu UserStatusUpdateRequest",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Trường status",
+            "enum": [
+              "ACTIVE",
+              "SUSPENDED",
+              "DELETED",
+              "PRIVATE"
+            ],
+            "example": "ACTIVE"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "ApiResponseUserResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/UserResponse"
+          }
+        }
+      },
+      "UserUpdateRequest": {
+        "type": "object",
+        "description": "Dữ liệu hồ sơ người dùng cần cập nhật",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "description": "Trường fullName",
+            "example": "Nguyen Van A",
+            "maxLength": 50,
+            "minLength": 1
+          }
+        }
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "description": "DTO yêu cầu ChangePasswordRequest",
+        "properties": {
+          "oldPassword": {
+            "type": "string",
+            "description": "Trường oldPassword",
+            "example": "Password@123"
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "Trường newPassword",
+            "example": "Password@123",
+            "maxLength": 2147483647,
+            "minLength": 6
+          }
+        },
+        "required": [
+          "newPassword",
+          "oldPassword"
+        ]
+      },
+      "BookUpdateRequest": {
+        "type": "object",
+        "description": "Thông tin metadata cần cập nhật",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Trường title",
+            "example": "Clean Code"
+          },
+          "publisher": {
+            "type": "string",
+            "description": "Trường publisher",
+            "example": "Prentice Hall"
+          },
+          "numberOfPages": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Trường numberOfPages",
+            "example": 1
+          },
+          "description": {
+            "type": "string",
+            "description": "Trường description",
+            "example": "Mo ta du lieu"
+          },
+          "totalCopies": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Trường totalCopies",
+            "example": 1
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "Trường categoryId",
+            "example": "id-001"
+          },
+          "authors": {
+            "type": "array",
+            "description": "Trường authors",
+            "example": [],
+            "items": {
+              "$ref": "#/components/schemas/AuthorRefRequest"
+            }
+          }
+        }
+      },
+      "ApiResponseBookResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/BookResponse"
+          }
+        }
+      },
+      "BookResponse": {
+        "type": "object",
+        "description": "DTO phản hồi BookResponse",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Trường id",
+            "example": "id-001"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Trường active",
+            "example": true
+          },
+          "title": {
+            "type": "string",
+            "description": "Trường title",
+            "example": "Clean Code"
+          },
+          "isbn": {
+            "type": "string",
+            "description": "Trường isbn",
+            "example": 9786041234567
+          },
+          "publisher": {
+            "type": "string",
+            "description": "Trường publisher",
+            "example": "Prentice Hall"
+          },
+          "numberOfPages": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Trường numberOfPages",
+            "example": 1
+          },
+          "description": {
+            "type": "string",
+            "description": "Trường description",
+            "example": "Mo ta du lieu"
+          },
+          "totalCopies": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Trường totalCopies",
+            "example": 1
+          },
+          "availableCopies": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Trường availableCopies",
+            "example": 1
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "description": "Trường thumbnailUrl",
+            "example": "https://example.com/resource"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "Trường categoryName",
+            "example": "sample"
+          },
+          "authorNames": {
+            "type": "array",
+            "description": "Trường authorNames",
+            "example": [],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponseString": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponsePageResponseUserResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/PageResponseUserResponse"
+          }
+        }
+      },
+      "PageResponseUserResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserResponse"
+            }
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ActiveUsersStatisticsResponse": {
+        "type": "object",
+        "description": "DTO phản hồi ActiveUsersStatisticsResponse",
+        "properties": {
+          "activeUsers": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường activeUsers",
+            "example": 1
+          },
+          "newUsers": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường newUsers",
+            "example": 1
+          }
+        }
+      },
+      "ApiResponseActiveUsersStatisticsResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ActiveUsersStatisticsResponse"
+          }
+        }
+      },
+      "ApiResponseListTopBorrowedCategoryResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TopBorrowedCategoryResponse"
+            }
+          }
+        }
+      },
+      "TopBorrowedCategoryResponse": {
+        "type": "object",
+        "description": "DTO phản hồi TopBorrowedCategoryResponse",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "description": "Trường categoryId",
+            "example": "id-001"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "Trường categoryName",
+            "example": "Công nghệ thông tin"
+          },
+          "borrowCount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường borrowCount",
+            "example": 1
+          }
+        }
+      },
+      "ApiResponseListTopBorrowedBookResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TopBorrowedBookResponse"
+            }
+          }
+        }
+      },
+      "TopBorrowedBookResponse": {
+        "type": "object",
+        "description": "DTO phản hồi TopBorrowedBookResponse",
+        "properties": {
+          "bookId": {
+            "type": "string",
+            "description": "Trường bookId",
+            "example": "id-001"
+          },
+          "title": {
+            "type": "string",
+            "description": "Trường title",
+            "example": "Clean Code"
+          },
+          "borrowCount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường borrowCount",
+            "example": 1
+          }
+        }
+      },
+      "ApiResponseSystemTotalsResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/SystemTotalsResponse"
+          }
+        }
+      },
+      "SystemTotalsResponse": {
+        "type": "object",
+        "description": "DTO phản hồi SystemTotalsResponse",
+        "properties": {
+          "totalUsers": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường totalUsers",
+            "example": 1
+          },
+          "totalBooks": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường totalBooks",
+            "example": 1
+          },
+          "totalCopies": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường totalCopies",
+            "example": 1
+          },
+          "totalBorrowRecords": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường totalBorrowRecords",
+            "example": 1
+          },
+          "totalCurrentlyBorrowed": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường totalCurrentlyBorrowed",
+            "example": 1
+          },
+          "totalOverdue": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường totalOverdue",
+            "example": 1
+          }
+        }
+      },
+      "ApiResponseInventorySummaryResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/InventorySummaryResponse"
+          }
+        }
+      },
+      "CategoryDistributionResponse": {
+        "type": "object",
+        "description": "DTO phản hồi CategoryDistributionResponse",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "description": "Trường categoryId",
+            "example": "id-001"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "Trường categoryName",
+            "example": "sample"
+          },
+          "bookCount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường bookCount",
+            "example": 1
+          }
+        }
+      },
+      "InventorySummaryResponse": {
+        "type": "object",
+        "description": "DTO phản hồi InventorySummaryResponse",
+        "properties": {
+          "totalBooks": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường totalBooks",
+            "example": 1
+          },
+          "totalBookCopies": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường totalBookCopies",
+            "example": 1
+          },
+          "availableCopies": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường availableCopies",
+            "example": 1
+          },
+          "borrowedCopies": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường borrowedCopies",
+            "example": 1
+          },
+          "availabilityRate": {
+            "type": "number",
+            "format": "double",
+            "description": "Trường availabilityRate",
+            "example": 1
+          },
+          "categoryDistribution": {
+            "type": "array",
+            "description": "Trường categoryDistribution",
+            "example": [],
+            "items": {
+              "$ref": "#/components/schemas/CategoryDistributionResponse"
+            }
+          }
+        }
+      },
+      "ApiResponseInventoryStatusResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/InventoryStatusResponse"
+          }
+        }
+      },
+      "InventoryStatusResponse": {
+        "type": "object",
+        "description": "DTO phản hồi InventoryStatusResponse",
+        "properties": {
+          "totalBooks": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường totalBooks",
+            "example": 1
+          },
+          "totalBookCopies": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường totalBookCopies",
+            "example": 1
+          },
+          "availableCopies": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường availableCopies",
+            "example": 1
+          },
+          "borrowedCopies": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường borrowedCopies",
+            "example": 1
+          },
+          "damagedCopies": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường damagedCopies",
+            "example": 1
+          },
+          "lostCopies": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường lostCopies",
+            "example": 1
+          },
+          "damagedOrLostCopies": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường damagedOrLostCopies",
+            "example": 1
+          }
+        }
+      },
+      "ApiResponseListBorrowingActivityResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BorrowingActivityResponse"
+            }
+          }
+        }
+      },
+      "BorrowingActivityResponse": {
+        "type": "object",
+        "description": "DTO phản hồi BorrowingActivityResponse",
+        "properties": {
+          "time": {
+            "type": "string",
+            "description": "Trường time",
+            "example": "sample"
+          },
+          "borrowCount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường borrowCount",
+            "example": 1
+          },
+          "returnCount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Trường returnCount",
+            "example": 1
+          }
+        }
+      },
+      "ApiResponseListBookResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookResponse"
+            }
+          }
+        }
+      },
+      "ApiResponseListCategoryResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryResponse"
+            }
+          }
+        }
+      },
+      "ApiResponsePageResponseBorrowRecordResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/PageResponseBorrowRecordResponse"
+          }
+        }
+      },
+      "BorrowRecordResponse": {
+        "type": "object",
+        "description": "DTO phản hồi BorrowRecordResponse",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Trường id",
+            "example": "id-001"
+          },
+          "borrowerId": {
+            "type": "string",
+            "description": "Trường borrowerId",
+            "example": "id-001"
+          },
+          "barcode": {
+            "type": "string",
+            "description": "Trường barcode",
+            "example": "BC-0001"
+          },
+          "bookTitle": {
+            "type": "string",
+            "description": "Trường bookTitle",
+            "example": "Clean Code"
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "description": "Trường thumbnailUrl",
+            "example": "https://example.com/resource"
+          },
+          "borrowDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Trường borrowDate",
+            "example": "2026-04-08"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Trường dueDate",
+            "example": "2026-04-08T10:00:00"
+          },
+          "returnDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Trường returnDate",
+            "example": "2026-04-08"
+          },
+          "status": {
+            "type": "string",
+            "description": "Trường status",
+            "enum": [
+              "BORROWING",
+              "RETURNED",
+              "OVERDUE"
+            ],
+            "example": "BORROWING"
+          }
+        }
+      },
+      "PageResponseBorrowRecordResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BorrowRecordResponse"
+            }
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ApiResponseBorrowRecordDetailResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/BorrowRecordDetailResponse"
+          }
+        }
+      },
+      "BorrowRecordDetailResponse": {
+        "type": "object",
+        "description": "DTO phản hồi BorrowRecordDetailResponse",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Trường id",
+            "example": "id-001"
+          },
+          "borrowerId": {
+            "type": "string",
+            "description": "Trường borrowerId",
+            "example": "id-001"
+          },
+          "borrowerFullName": {
+            "type": "string",
+            "description": "Trường borrowerFullName",
+            "example": "Nguyen Van A"
+          },
+          "borrowerEmail": {
+            "type": "string",
+            "description": "Trường borrowerEmail",
+            "example": "user@example.com"
+          },
+          "barcode": {
+            "type": "string",
+            "description": "Trường barcode",
+            "example": "BC-0001"
+          },
+          "borrowDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Trường borrowDate",
+            "example": "2026-04-08T10:00:00Z"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Trường dueDate",
+            "example": "2026-04-08"
+          },
+          "status": {
+            "type": "string",
+            "description": "Trường status",
+            "enum": [
+              "BORROWING",
+              "RETURNED",
+              "OVERDUE"
+            ],
+            "example": "BORROWING"
+          }
+        }
+      },
+      "ApiResponseBookDetailResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/BookDetailResponse"
+          }
+        }
+      },
+      "BookDetailResponse": {
+        "type": "object",
+        "description": "DTO phản hồi BookDetailResponse",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Trường id",
+            "example": "id-001"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Trường active",
+            "example": true
+          },
+          "title": {
+            "type": "string",
+            "description": "Trường title",
+            "example": "Clean Code"
+          },
+          "isbn": {
+            "type": "string",
+            "description": "Trường isbn",
+            "example": 9786041234567
+          },
+          "publisher": {
+            "type": "string",
+            "description": "Trường publisher",
+            "example": "Prentice Hall"
+          },
+          "numberOfPages": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Trường numberOfPages",
+            "example": 1
+          },
+          "description": {
+            "type": "string",
+            "description": "Trường description",
+            "example": "Mo ta du lieu"
+          },
+          "copies": {
+            "type": "array",
+            "description": "Trường copoies",
+            "example": [],
+            "items": {
+              "type": "string"
+            }
+          },
+          "availableCopies": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Trường availableCopies",
+            "example": 1
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "description": "Trường thumbnailUrl",
+            "example": "https://example.com/resource"
+          },
+          "categoryName": {
+            "type": "string",
+            "description": "Trường categoryName",
+            "example": "sample"
+          },
+          "authorNames": {
+            "type": "array",
+            "description": "Trường authorNames",
+            "example": [],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponseVerifyBarcodeResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/VerifyBarcodeResponse"
+          }
+        }
+      },
+      "VerifyBarcodeResponse": {
+        "type": "object",
+        "description": "DTO phản hồi VerifyBarcodeResponse",
+        "properties": {
+          "barcode": {
+            "type": "string",
+            "description": "Barcode bản sao sách",
+            "example": "BC-0001"
+          },
+          "bookTitle": {
+            "type": "string",
+            "description": "Nhan đề sách tương ứng với barcode",
+            "example": "Clean Code"
+          }
+        }
+      },
+      "ApiResponsePageResponseAuditLogResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/PageResponseAuditLogResponse"
+          }
+        }
+      },
+      "AuditLogResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "CREATE",
+              "UPDATE",
+              "DELETE",
+              "LOGIN",
+              "LOGOUT"
+            ]
+          },
+          "resourceType": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "BOOK",
+              "BORROW_RECORD",
+              "CATEGORY"
+            ]
+          },
+          "resourceId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "oldValue": {
+            "type": "string"
+          },
+          "newValue": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PageResponseAuditLogResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditLogResponse"
+            }
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
