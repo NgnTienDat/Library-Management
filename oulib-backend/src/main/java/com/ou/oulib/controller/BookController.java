@@ -8,6 +8,7 @@ import com.ou.oulib.dto.response.BookResponse;
 import com.ou.oulib.dto.response.VerifyBarcodeResponse;
 import com.ou.oulib.service.BookService;
 import com.ou.oulib.utils.ApiResponse;
+import com.ou.oulib.utils.PageResponse;
 import com.ou.oulib.utils.ResponseUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -67,7 +68,7 @@ public class BookController {
             description = "Dữ liệu multipart gồm metadata sách và tệp thumbnail tùy chọn",
             required = true
         )
-    public ResponseEntity<ApiResponse<?>> addNewBook(
+    public ResponseEntity<ApiResponse<BookResponse>> addNewBook(
             @Parameter(description = "Metadata mô tả thông tin sách cần tạo")
             @RequestPart("metadata") @Valid BookCreationRequest bookCreationRequest,
             @Parameter(description = "Ảnh bìa sách, có thể bỏ trống")
@@ -86,7 +87,7 @@ public class BookController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Lấy danh sách sách thành công"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
         })
-    public ResponseEntity<?> getBooks(
+    public ResponseEntity<ApiResponse<PageResponse<BookResponse>>> getBooks(
             @Parameter(description = "Từ khóa tìm kiếm theo tiêu đề, danh mục hoặc tác giả")
             @RequestParam(required = false) String keyword,
             @Parameter(description = "ID danh mục dùng để lọc")

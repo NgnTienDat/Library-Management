@@ -32,7 +32,7 @@ public class HealthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Dịch vụ hoạt động bình thường"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi hệ thống")
         })
-    public ResponseEntity<ApiResponse<?>> healthCheck() {
+    public ResponseEntity<ApiResponse<String>> healthCheck() {
         return ResponseEntity.ok(ResponseUtils.ok("Service is healthy"));
     }
 
@@ -45,7 +45,7 @@ public class HealthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Gửi thông điệp kiểm tra RabbitMQ thành công"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Lỗi kết nối RabbitMQ hoặc lỗi hệ thống")
         })
-    public ResponseEntity<ApiResponse<?>> rabbitmqCheck() {
+    public ResponseEntity<ApiResponse<String>> rabbitmqCheck() {
         borrowService.rabbitmqConnectionCheck();
         return ResponseEntity.ok(ResponseUtils.ok("RabbitMQ connection test message sent"));
     }
